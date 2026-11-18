@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+host=${1:?usage: stage-roots <ssh host> [build folder on host]}
+folder=${2:-9L30}
+root=$(cd "$(dirname "$0")/.." && pwd)
+used="$root/manifest/9L30-roots-used.tsv"
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
+
+while IFS=$'\t' read -r name _ _ rootbuild _ hdrsbuild; do
+   [[ $rootbuild != - ]] && ln -s "$root/roots/$rootbuild/$name.root.tar.gz" "$stage/$name.root.tar.gz"
+   [[ $hdrsbuild != - ]] && ln -s "$root/roots/$hdrsbuild/$name.hdrs.tar.gz" "$stage/$name.hdrs.tar.gz"
+done < "$used"
+
+find -L "$stage" -type l -exec sh -c 'echo "missing: $(readlink "$1")" >&2' _ {} \;
+COPYFILE_DISABLE=1 tar -chf - -C "$stage" . | ssh "$host" "mkdir -p $folder/Roots/.DownloadCache && tar -xf - -C $folder/Roots/.DownloadCache"
+ssh "$host" "ls $folder/Roots/.DownloadCache | wc -l"

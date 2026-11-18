@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+host=${1:?usage: stage-sources <ssh host> <project>...}
+shift
+folder=9L30
+root=$(cd "$(dirname "$0")/.." && pwd)
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
+
+for project in "$@"; do
+   version=$(awk -F'\t' -v p="$project" '$1 == p { print $2 }' "$root/manifest/9L30.tsv")
+   [[ -n $version ]] || { echo "not in manifest: $project" >&2; exit 1; }
+   tarball="$root/sources/$project-$version.tar.gz"
+   [[ -f $tarball ]] || { echo "no source tarball: $tarball" >&2; exit 1; }
+   tar -xzf "$tarball" -C "$stage" -s "|^$project-$project-$version|$project-$version|"
+   echo "$project-$version"
+done
+
+COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $folder/Sources"
