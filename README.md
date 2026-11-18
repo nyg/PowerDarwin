@@ -31,7 +31,13 @@ A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub
 1. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md)).
 2. `scripts/stage-sources <host> <project>...` unpacks the GitHub tarballs as `<project>-<version>` into `~/9L30/Sources` ([D1](DEVIATIONS.md)).
 3. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
+4. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>` (Leopard's sudo has no `/usr/local/bin` in its path). Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
+5. A failure is fixed by rule 3 and listed in DEVIATIONS.md.
+
+The build environment (`~/9L30/BuildRoot`, a sparse disk image) holds workarounds put there by hand: [D4](DEVIATIONS.md) and [D6](DEVIATIONS.md). Re-apply them if it is recreated.
 
 ## Status
+
+Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds` and launchd's headers.
 
 The reference system is an iMac G5 running Sorbet Leopard, a community-modified Leopard that reports 10.5.9 build `9L31b` on Apple's 10.5.8 kernel. Results gathered on it stay provisional until they are checked against a Leopard installed from a retail disc.
