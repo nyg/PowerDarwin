@@ -23,6 +23,7 @@ A disk image whose files all come from this repo's builds boots to a single-user
 - `scripts/fetch-sources`: downloads the `github` sources into `sources/` (not committed), records their hashes on the first run and checks them on later runs.
 - `scripts/resolve-buildlist`, `scripts/fetch-roots`, `scripts/stage-sources`, `scripts/stage-roots`: work out each project's version and build, fetch darwinbuild's Roots from the Wayback Machine, and copy sources and Roots to the build machine.
 - `reference/`: what the reference system runs, and a description of Andrew-R's darwinbuild patch.
+- [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
 
 ## Building
 
