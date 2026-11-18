@@ -1,0 +1,33 @@
+#!/bin/bash
+set -uo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+manifest="$root/manifest/9L30.tsv"
+sums="$root/manifest/9L30.sha256"
+export dest="$root/sources"
+mkdir -p "$dest"
+
+fetch() {
+   local project=$1 version=$2
+   local file="$dest/$project-$version.tar.gz"
+   [[ -s $file ]] && return 0
+   if curl -fsSL --retry 3 -o "$file.part" \
+      "https://github.com/apple-oss-distributions/$project/archive/refs/tags/$project-$version.tar.gz"; then
+      mv "$file.part" "$file"
+   else
+      rm -f "$file.part"
+      echo "failed: $project-$version" >&2
+   fi
+}
+export -f fetch
+
+awk -F'\t' 'NR > 1 && $3 == "github" { print $1, $2 }' "$manifest" \
+   | xargs -P 6 -n 2 bash -c 'fetch "$0" "$1"'
+
+cd "$dest"
+if [[ -f $sums ]]; then
+   shasum -a 256 -c --quiet "$sums"
+else
+   shasum -a 256 ./*.tar.gz | sed 's| \./| |' > "$sums"
+   echo "recorded $(wc -l < "$sums" | tr -d ' ') hashes in manifest/9L30.sha256"
+fi

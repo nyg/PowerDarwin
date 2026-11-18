@@ -17,5 +17,7 @@ A disk image whose files all come from this repo's builds boots to a single-user
 
 ## Layout
 
+- `manifest/`: project versions, their source, and the hashes of the fetched tarballs.
 - `patches/<project>-<version>/`: one patch file per fix.
 - `env/`: build-environment workarounds, each with the error it fixes.
+- `scripts/fetch-sources`: downloads the `github` sources into `sources/` (not committed), records their hashes on the first run and checks them on later runs.
