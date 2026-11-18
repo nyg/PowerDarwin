@@ -21,3 +21,4 @@ A disk image whose files all come from this repo's builds boots to a single-user
 - `patches/<project>-<version>/`: one patch file per fix.
 - `env/`: build-environment workarounds, each with the error it fixes.
 - `scripts/fetch-sources`: downloads the `github` sources into `sources/` (not committed), records their hashes on the first run and checks them on later runs.
+- `scripts/resolve-buildlist`, `scripts/fetch-roots`: work out each project's version and build, and fetch darwinbuild's Roots from the Wayback Machine.

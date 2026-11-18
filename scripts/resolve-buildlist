@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+import re
+import sys
+from pathlib import Path
+
+TOKEN = re.compile(r'\s*(?://[^\n]*|/\*.*?\*/|"((?:[^"\\]|\\.)*)"|([{}();=,])|([^\s{}();=,"]+))', re.S)
+
+
+def tokenize(text):
+    pos = 0
+    while pos < len(text):
+        match = TOKEN.match(text, pos)
+        if not match or match.end() == pos:
+            return
+        pos = match.end()
+        quoted, symbol, bare = match.groups()
+        if quoted is not None:
+            yield ('str', quoted)
+        elif symbol:
+            yield ('sym', symbol)
+        elif bare:
+            yield ('str', bare)
+
+
+def parse_value(first, tokens):
+    if first == ('sym', '{'):
+        result = {}
+        while True:
+            key = next(tokens)
+            if key == ('sym', '}'):
+                return result
+            next(tokens)
+            result[key[1]] = parse_value(next(tokens), tokens)
+            if next(tokens) == ('sym', '}'):
+                return result
+    if first == ('sym', '('):
+        result = []
+        while True:
+            item = next(tokens)
+            if item == ('sym', ')'):
+                return result
+            result.append(parse_value(item, tokens))
+            if next(tokens) == ('sym', ')'):
+                return result
+    return first[1]
+
+
+def load(directory, build):
+    tokens = tokenize(Path(directory, f'{build}.plist').read_text(errors='replace'))
+    return parse_value(next(tokens), tokens)
+
+
+def resolve(directory, build):
+    plist = load(directory, build)
+    projects = resolve(directory, plist['inherits']) if 'inherits' in plist else {}
+    for name, info in plist.get('projects', {}).items():
+        entry = dict(projects.get(name, {}))
+        entry.update(info)
+        if 'version' in info:
+            entry['build'] = build
+        projects[name] = entry
+    return projects
+
+
+def main(directory, build):
+    projects = resolve(directory, build)
+    for name in sorted(projects, key=str.lower):
+        entry = projects[name]
+        source = projects.get(entry.get('original'), entry)
+        version = entry.get('version', source.get('version', ''))
+        origin = entry.get('build', source.get('build', ''))
+        print(f"{name}\t{version}\t{origin}\t{entry.get('original', '')}")
+
+
+if __name__ == '__main__':
+    main(*sys.argv[1:3])
