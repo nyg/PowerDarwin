@@ -1,2 +1,4 @@
 /sources/
 /roots/
+/reference/*/ioreg-l.txt
+/reference/*/nvram.txt

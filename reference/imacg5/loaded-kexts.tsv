@@ -1,0 +1,93 @@
+ALF.kext	com.apple.nke.applicationfirewall	1.8.77	
+AppleFlashNVRAM.kext	com.apple.driver.AppleFlashNVRAM	1.0.5	AppleFlashNVRAM version 1.0.5, Copyright 2002-2005 Apple Computer, Inc.
+AppleGPIO.kext	com.apple.driver.AppleGPIO	1.3.0d0	AppleGPIO version 1.3.0, Copyright 2002-2007 Apple Inc.
+AppleHWSensor.kext	com.apple.driver.AppleHWSensor	1.9d0	AppleHWSensor version 1.9, Copyright 2002-2008 Apple Inc.
+AppleI2C.kext	com.apple.driver.AppleI2C	4.0.0d2	AppleI2C version 4.0.0, Copyright 2003-2005 Apple Computer, Inc.
+AppleI2S.kext	com.apple.driver.AppleI2S	1.0.1f1	AppleI2S version 1.0.1, Copyright 2003-2007 Apple Computer, Inc.
+AppleIRController.kext	com.apple.driver.AppleIRController	113	
+AppleK2.kext	com.apple.driver.AppleK2	1.7.2f1	AppleK2 version 1.7.2, Copyright 2003-2007 Apple Inc.
+AppleK2Driver.kext	com.apple.driver.AppleK2Driver	1.7.2f1	AppleK2Driver version 1.7.2, Copyright 2003-2007 Apple Inc.
+AppleK2SATA.kext	com.apple.driver.AppleK2SATA	1.0.4f2	Apple K2SATA ATA Driver
+AppleK2SATARoot.kext	com.apple.driver.AppleK2SATARoot	1.0.5b1	Apple K2SATARoot SATA Root Driver
+AppleKauaiATA.kext	com.apple.driver.AppleKauaiATA	1.2.1f4	Apple Kauai U2 ATA driver
+AppleMacRISC4PE.kext	com.apple.driver.AppleMacRISC4PE	2.0.4d9	AppleMacRISC4PE version 2.0.4, Copyright 2003-2008 Apple Inc.
+AppleMacRiscPCI.kext	com.apple.driver.AppleMacRiscPCI	3.4.0	
+AppleMPIC.kext	com.apple.driver.AppleMPIC	1.5.3	AppleMPIC version 1.5.3, Copyright 1999-2007 Apple Inc.
+AppleOnboardAudio.kext	com.apple.driver.AppleOnboardAudio	2.5.8f1	AppleOnboardAudio version 2.5.8, Copyright 2000-2009 Apple Computer, Inc.
+AppleOnboardDisplay.kext	com.apple.AppleOnboardDisplay	1.15.1	AppleOnboardDisplay 1.15.1, Copyright 2000-2009 Apple Computer, Inc.
+AppleSMU.kext	com.apple.driver.AppleSMU	1.2.1d1	AppleSMU version 1.2.1, Copyright 2003-2005 Apple Computer, Inc.
+AppleSMUMonitor.kext	com.apple.driver.AppleSMUMonitor	1.9d0	AppleSMUMonitor version 1.9, Copyright 2002-2008 Apple Inc.
+AppleXsanFilter.kext	com.apple.driver.XsanFilter	2.7.91	
+ATIRadeon9700.kext	com.apple.ATIRadeon9700	5.4.8	ATIRadeon9700 1.5.48.6 (6967)
+autofs.kext	com.apple.filesystems.autofs	2.0.2	
+BootCache.kext	com.apple.BootCache	30.4	
+IO80211Family.kext	com.apple.iokit.IO80211Family	216.1	2.1.6, Copyright \251 2005\u20132008 Apple Inc. All Rights Reserved.
+IOATAFamily.kext	com.apple.iokit.IOATAFamily	2.0.1	2.0.1, Copyright Apple Inc. 2000-2008
+IOAudioFamily.kext	com.apple.iokit.IOAudioFamily	1.6.9fc5	Version: 1.6.9, Copyright Apple, Inc. 2000-2009
+IOBDStorageFamily.kext	com.apple.iokit.IOBDStorageFamily	1.5	1.5, Copyright \251 2006-2007 Apple Inc.
+IOBluetoothFamily.kext	com.apple.iokit.IOBluetoothFamily	2.1.10f2	2.1.10, Copyright (c) 2009 Apple Inc. All rights reserved.
+IOCDStorageFamily.kext	com.apple.iokit.IOCDStorageFamily	1.5	1.5, Copyright \251 1998-2007 Apple Inc.
+IODVDStorageFamily.kext	com.apple.iokit.IODVDStorageFamily	1.5	1.5, Copyright \251 1998-2007 Apple Inc.
+IOFireWireFamily.kext	com.apple.iokit.IOFireWireFamily	3.4.9	IOFireWireFamily version 3.4.9, Copyright \251 2009 Apple Inc. All rights reserved.
+IOFireWireIP.kext	com.apple.iokit.IOFireWireIP	1.7.7	IOFireWireIP version 1.7.7, Copyright 2008 Apple Computer, Inc.
+IOGraphicsFamily.kext			
+IOHDIXController.kext	com.apple.driver.DiskImages	199	10.5, Copyright 2000-2007 Apple Inc.
+IOHIDFamily.kext	com.apple.iokit.IOHIDFamily	1.5.7	1.5.7, Copyright Apple Computer, Inc. 2000-2007
+IOI2CControllerPPC.kext	com.apple.driver.IOI2CControllerPPC	1.1.1d2	IOI2CControllerPPC version 1.1.1, Copyright 2004-2007 Apple Computer, Inc.
+IOI2CControllerSMU.kext	com.apple.driver.IOI2CControllerSMU	1.1.1d2	IOI2CControllerSMU version 1.1.1, Copyright 2004-2007 Apple Computer, Inc.
+IOI2CFamily.kext	com.apple.driver.IOI2CFamily	1.1.1d2	IOI2CFamily version 1.1.1, Copyright 2004-2007 Apple Computer, Inc.
+IOI2CLM7x.kext	com.apple.driver.IOI2CLM7x	1.9d0	IOI2CLM7x version 1.9, Copyright 2002-2008 Apple Inc.
+IOI2CMaxim6690.kext	com.apple.driver.IOI2CMaxim6690	1.9d0	IOI2CMaxim6690 version 1.9, Copyright 2002-2008 Apple Inc.
+IOI2CPulsar.kext	com.apple.driver.IOI2CPulsar	1.5.2d0	IOI2CPulsar version 1.5.2
+IOKeyLargo.kext	com.apple.iokit.IOKeyLargo	1.7.2f1	IOKeyLargo version 1.7.2, Copyright 2002-2007 Apple Inc.
+IONDRVSupport.kext			
+IONetworkingFamily.kext	com.apple.iokit.IONetworkingFamily	1.6.1	Version 1.6.1, Copyright 2000-2008 Apple, Inc.
+IOPCIFamily.kext			
+IOPlatformFunction.kext	com.apple.driver.IOPlatformFunction	1.8.7d5	IOPlatformVersion version 1.8.7, Copyright 2003-2008 Apple Inc.
+IOPlatformPluginFamily.kext	com.apple.driver.IOPlatformPluginFamily	3.4.0a17	
+IOSCSIArchitectureModelFamily.kext	com.apple.iokit.IOSCSIArchitectureModelFamily	2.1.1	2.1.1, Copyright Apple Inc. 1999-2009
+IOSerialFamily.kext	com.apple.iokit.IOSerialFamily	9.4	Apple Computer, Inc 2005-01-12 IOKit Serial Port Family
+IOStorageFamily.kext	com.apple.iokit.IOStorageFamily	1.5.6	1.5.6, Copyright \251 1998-2008 Apple Inc.
+IOUSBFamily.kext	com.apple.iokit.IOUSBFamily	3.5.2	3.5.2, Copyright \251 2000-2009 Apple Inc. All Rights Reserved.
+MacIOGPIO.kext	com.apple.driver.MacIOGPIO	1.3.0d0	MacIOGPIO version 1.3.0, Copyright 2002-2007 Apple Inc.
+OSvKernDSPLib.kext	com.apple.kext.OSvKernDSPLib	1.1	
+seatbelt.kext	com.apple.security.seatbelt	107.12	
+System.kext			
+TMSafetyNet.kext	com.apple.security.TMSafetyNet	3	
+AppleOnboardAudio.kext/Contents/PlugIns/AppleDBDMAAudio.kext	com.apple.driver.AppleDBDMAAudio	2.5.8f1	AppleDBDMAAudio version 2.5.8, Copyright 2000-2009 Apple Computer, Inc.
+AppleOnboardAudio.kext/Contents/PlugIns/AppleOnyxAudio.kext	com.apple.driver.AppleOnyxAudio	2.5.8f1	AppleOnyxAudio version 2.5.8, Copyright 2000-2009 Apple Computer, Inc.
+IO80211Family.kext/Contents/PlugIns/AppleAirPortBrcm4311.kext	com.apple.driver.AirPortBrcm43xx	367.91.22	3.6.7, Copyright \251 2006\u20132009 Apple Inc. All rights reserved.
+IOATAFamily.kext/Contents/PlugIns/IOATABlockStorage.kext	com.apple.iokit.IOATABlockStorage	2.0.6	2.0.6, Copyright Apple Inc. 2005-2009
+IOATAFamily.kext/Contents/PlugIns/IOATAPIProtocolTransport.kext	com.apple.iokit.IOATAPIProtocolTransport	1.5.3	1.5.3, Copyright Apple Inc. 2000-2009
+IOBluetoothFamily.kext/Contents/PlugIns/AppleUSBBluetoothHCIController.kext	com.apple.driver.AppleUSBBluetoothHCIController	2.1.10f2	2.1.10, Copyright (c) 2009 Apple Inc. All rights reserved.
+IOBluetoothFamily.kext/Contents/PlugIns/CSRUSBBluetoothHCIController.kext	com.apple.driver.CSRUSBBluetoothHCIController	2.1.10f2	2.1.10, Copyright (c) 2009 Apple Inc. All rights reserved.
+IOBluetoothFamily.kext/Contents/PlugIns/IOBluetoothSerialManager.kext	com.apple.iokit.IOBluetoothSerialManager	2.1.10f2	2.1.10, Copyright (c) 2009 Apple Inc. All rights reserved.
+IOFireWireFamily.kext/Contents/PlugIns/AppleFWOHCI.kext	com.apple.driver.AppleFWOHCI	3.9.7	AppleFWOHCI version 3.9.7, Copyright \251 2009 Apple Inc. All rights reserved.
+IONetworkingFamily.kext/Contents/PlugIns/AppleGMACEthernet.kext	com.apple.iokit.AppleGMACEthernet	1.5.9f1	
+IOPlatformPluginFamily.kext/Contents/PlugIns/PowerMac12_1_PlatformPlugin.kext	com.apple.driver.PowerMac12_1_PlatformPlugin	3.4.0d0	
+IOPlatformPluginFamily.kext/Contents/PlugIns/SMU_Neo2_PlatformPlugin.kext	com.apple.driver.SMU_Neo2_PlatformPlugin	3.4.0d0	
+IOSCSIArchitectureModelFamily.kext/Contents/PlugIns/IOSCSIBlockCommandsDevice.kext	com.apple.iokit.IOSCSIBlockCommandsDevice	2.1.1	2.1.1, Copyright Apple Inc. 1999-2009
+IOSCSIArchitectureModelFamily.kext/Contents/PlugIns/IOSCSIMultimediaCommandsDevice.kext	com.apple.iokit.IOSCSIMultimediaCommandsDevice	2.1.1	2.1.1, Copyright Apple Inc. 1999-2009
+IOSCSIArchitectureModelFamily.kext/Contents/PlugIns/SCSITaskUserClient.kext	com.apple.iokit.SCSITaskUserClient	2.1.1	2.1.1, Copyright Apple Inc. 1999-2009
+IOUSBFamily.kext/Contents/PlugIns/AppleUSBEHCI.kext	com.apple.driver.AppleUSBEHCI	3.4.6	3.4.6, Copyright \251 2000-2008 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/AppleUSBHub.kext	com.apple.driver.AppleUSBHub	3.4.9	3.4.9, Copyright \251 2000-2009 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/AppleUSBMergeNub.kext	com.apple.driver.AppleUSBMergeNub	3.5.2	3.5.2, Copyright \251 2000-2009 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/AppleUSBOHCI.kext	com.apple.driver.AppleUSBOHCI	3.4.6	3.4.6, Copyright \251 2000-2007 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/IOUSBCompositeDriver.kext	com.apple.driver.AppleUSBComposite	3.2.0	3.2.0, Copyright \251 2000-2007 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/IOUSBHIDDriver.kext	com.apple.iokit.IOUSBHIDDriver	3.4.6	3.4.6, Copyright \251 2000-2008 Apple Inc. All Rights Reserved.
+IOUSBFamily.kext/Contents/PlugIns/IOUSBUserClient.kext	com.apple.iokit.IOUSBUserClient	3.5.2	3.5.2, Copyright \251 2000-2009 Apple Inc. All Rights Reserved.
+System.kext/PlugIns/AppleNMI.kext			
+System.kext/PlugIns/ApplePlatformFamily.kext			
+System.kext/PlugIns/BSDKernel.kext			
+System.kext/PlugIns/BSDKernel6.0.kext			
+System.kext/PlugIns/IOKit.kext			
+System.kext/PlugIns/IOKit6.0.kext			
+System.kext/PlugIns/IONVRAMFamily.kext			
+System.kext/PlugIns/IOSystemManagement.kext			
+System.kext/PlugIns/Libkern.kext			
+System.kext/PlugIns/Libkern6.0.kext			
+System.kext/PlugIns/MACFramework.kext			
+System.kext/PlugIns/Mach.kext			
+System.kext/PlugIns/Mach6.0.kext			
+System.kext/PlugIns/System6.0.kext			
+System.kext/PlugIns/Unsupported.kext			

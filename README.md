@@ -22,3 +22,8 @@ A disk image whose files all come from this repo's builds boots to a single-user
 - `env/`: build-environment workarounds, each with the error it fixes.
 - `scripts/fetch-sources`: downloads the `github` sources into `sources/` (not committed), records their hashes on the first run and checks them on later runs.
 - `scripts/resolve-buildlist`, `scripts/fetch-roots`: work out each project's version and build, and fetch darwinbuild's Roots from the Wayback Machine.
+- `reference/`: what the reference system runs.
+
+## Status
+
+The reference system is an iMac G5 running Sorbet Leopard, a community-modified Leopard that reports 10.5.9 build `9L31b` on Apple's 10.5.8 kernel. Results gathered on it stay provisional until they are checked against a Leopard installed from a retail disc.

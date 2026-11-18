@@ -1,0 +1,7 @@
+ProductName:	Mac OS X
+ProductVersion:	10.5.9
+BuildVersion:	9L31b
+Darwin imacg5 9.8.0 Darwin Kernel Version 9.8.0: Wed Jul 15 16:57:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_PPC Power Macintosh
+hw.model: PowerMac12,1
+hw.memsize: 4831838208
+hw.cpusubtype: 100
