@@ -1,0 +1,12 @@
+PowerDarwin D12, 2026-11-19: changes to Libc 498.1.7, under the licence of the files changed.
+--- a/Platforms/MacOSX/Makefile.inc
++++ b/Platforms/MacOSX/Makefile.inc
+@@ -52,7 +52,7 @@
+ FEATURE_PATCH_5243343 = 1
+ 
+ # plockstat dtrace support
+-FEATURE_PLOCKSTAT = 1
++#FEATURE_PLOCKSTAT = 1
+ 
+ # Timezone change notification
+ FEATURE_TIMEZONE_CHANGE_NOTIFICATION = 1

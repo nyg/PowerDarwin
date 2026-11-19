@@ -11,7 +11,7 @@ A disk image whose files all come from this repo's builds boots to a single-user
 1. Project versions are exactly those in [manifest/9L30.tsv](manifest/9L30.tsv), taken from darwinbuild's 9L30 build list. A project moves to another version only to backport Apple's own fix.
 2. Sources stay as Apple published them: fetched by tag from [apple-oss-distributions](https://github.com/apple-oss-distributions), their SHA-256 recorded in [manifest/9L30.sha256](manifest/9L30.sha256), never edited in place. The 14 projects marked `archive` have no matching tag there and come from the archived opensource.apple.com tarballs.
 3. A fix changes the build environment first. Failing that, it backports Apple's fix from a later Apple release. Only then is it a new patch, as small as possible, with no reformatting or unrelated change.
-4. Every patch in [patches/](patches/) and every workaround in [env/](env/) is listed in [DEVIATIONS.md](DEVIATIONS.md).
+4. Every patch in [patches/](patches/), every workaround in [env/](env/) and every replacement in [replacements/](replacements/) is listed in [DEVIATIONS.md](DEVIATIONS.md).
 5. Builds use the toolchain of the release: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3, `ld64` 77.1.
 6. The final image contains no Apple binary: darwinbuild's Roots and the host's SDK only bootstrap the first build.
 
@@ -20,6 +20,7 @@ A disk image whose files all come from this repo's builds boots to a single-user
 - `manifest/`: project versions, their source, and the hashes of the fetched tarballs.
 - `patches/<project>-<version>/`: one patch file per fix.
 - `env/`: build-environment workarounds, each with the error it fixes.
+- `replacements/`: new code standing in for a closed Apple library, each listed in DEVIATIONS.md.
 - `scripts/fetch-sources`: downloads the `github` sources into `sources/` (not committed), records their hashes on the first run and checks them on later runs.
 - `scripts/resolve-buildlist`, `scripts/fetch-roots`, `scripts/stage-sources`, `scripts/stage-roots`: work out each project's version and build, fetch darwinbuild's Roots from the Wayback Machine, and copy sources and Roots to the build machine.
 - `reference/`: what the reference system runs, and a description of Andrew-R's darwinbuild patch.
@@ -35,10 +36,10 @@ A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub
 4. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>` (Leopard's sudo has no `/usr/local/bin` in its path). Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
 5. A failure is fixed by rule 3 and listed in DEVIATIONS.md.
 
-The build environment (`~/9L30/BuildRoot`, a sparse disk image) holds workarounds put there by hand: [D4](DEVIATIONS.md), [D6](DEVIATIONS.md), [D7](DEVIATIONS.md), and, for the unfinished IOKitUser attempt, the 9L30 `IOKitUser.hdrs` and `AppleDisplays` Roots. Re-apply them if it is recreated.
+The build environment (`~/9L30/BuildRoot`, a sparse disk image) holds workarounds put there by hand: [D4](DEVIATIONS.md), [D6](DEVIATIONS.md) to [D10](DEVIATIONS.md), [D13](DEVIATIONS.md), [D14](DEVIATIONS.md), and, for the unfinished IOKitUser attempt, the 9L30 `IOKitUser.hdrs` and `AppleDisplays` Roots. Re-apply them if it is recreated.
 
 ## Status
 
-Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds`, launchd's headers and the kernel, `xnu`. `kext_tools` waits on IOKitUser.
+Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds`, launchd's headers, the kernel (`xnu`, booted to a single-user shell on the iMac G5) and `libSystem` with all its parts. `kext_tools` waits on IOKitUser.
 
 The reference system is an iMac G5 running Sorbet Leopard, a community-modified Leopard that reports 10.5.9 build `9L31b` on Apple's 10.5.8 kernel. Results gathered on it stay provisional until they are checked against a Leopard installed from a retail disc.
