@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+image=${1:?usage: boot-qemu <raw disk image> [boot-args]}
+boot_args=${2:--v -s}
+monitor=${QEMU_MONITOR:-/tmp/darwin9-qemu.sock}
+
+exec qemu-system-ppc \
+   -M mac99,via=pmu \
+   -m 1024 \
+   -drive file="$image",format=raw,media=disk \
+   -boot c \
+   -prom-env "boot-args=$boot_args" \
+   -g 1024x768x32 \
+   -monitor unix:"$monitor",server,nowait \
+   -serial file:"${image%.*}.serial.log"

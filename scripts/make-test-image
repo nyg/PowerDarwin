@@ -1,0 +1,53 @@
+#!/bin/sh
+set -e
+
+roots=~/9L30/Roots
+userland=/private/var/tmp/step1-chroot
+image=/private/var/tmp/darwin9-step1
+mount=/Volumes/Darwin9
+
+latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
+
+rm -f $image.dmg $image.cdr $image.cdr.gz
+hdiutil create -size 1g -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
+hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
+
+sudo ditto $userland $mount
+sudo ditto "$(latest xnu)" $mount
+sudo rm -f $mount/mach_kernel.ctfsys
+
+for kext in /System/Library/Extensions/*.kext; do
+   name=$(basename "$kext")
+   [ -e "$mount/System/Library/Extensions/$name" ] || sudo ditto "$kext" "$mount/System/Library/Extensions/$name"
+done
+sudo mkdir -p $mount/System/Library/CoreServices
+sudo ditto /System/Library/CoreServices/BootX $mount/System/Library/CoreServices/BootX
+
+sudo mkdir -p $mount/private/etc $mount/private/tmp $mount/private/var/log $mount/private/var/run $mount/private/var/tmp $mount/dev $mount/Volumes $mount/Library/Preferences/SystemConfiguration
+sudo chmod 1777 $mount/private/tmp $mount/private/var/tmp
+sudo ln -s private/etc $mount/etc
+sudo ln -s private/tmp $mount/tmp
+sudo ln -s private/var $mount/var
+sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /dev/null <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Kernel</key>
+	<string>mach_kernel</string>
+	<key>Kernel Flags</key>
+	<string></string>
+</dict>
+</plist>
+EOF
+
+sudo kextcache -a ppc -l -m $mount/System/Library/Extensions.mkext $mount/System/Library/Extensions
+sudo bless --folder $mount/System/Library/CoreServices
+/Developer/Tools/GetFileInfo $mount/System/Library/CoreServices/BootX | grep -E 'type|creator'
+bless --info $mount | head -3
+df -h $mount | tail -1
+
+hdiutil detach $mount
+hdiutil convert $image.dmg -format UDTO -o $image
+gzip -1 -c $image.cdr > $image.cdr.gz
+ls -l $image.cdr $image.cdr.gz

@@ -23,6 +23,7 @@ A disk image whose files all come from this repo's builds boots to a single-user
 - `replacements/`: new code standing in for a closed Apple library, each listed in DEVIATIONS.md.
 - `scripts/fetch-sources [project...]`: downloads the `github` sources, or the named projects including `archive` ones from the Wayback Machine, into `sources/` (not committed), records the hash of each new tarball and checks them all.
 - `scripts/resolve-buildlist`, `scripts/fetch-roots`, `scripts/stage-sources`, `scripts/stage-roots`: work out each project's version and build, fetch darwinbuild's Roots from the Wayback Machine, and copy sources and Roots to the build machine.
+- `scripts/make-test-image` (run on the build machine) and `scripts/boot-qemu`: make an Apple-partitioned HFS+ test image and boot it in QEMU `mac99`.
 - `reference/`: what the reference system runs, and a description of Andrew-R's darwinbuild patch.
 - [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
 
@@ -40,6 +41,6 @@ The build environment (`~/9L30/BuildRoot`, a sparse disk image) holds workaround
 
 ## Status
 
-Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds`, the kernel (`xnu`, booted to a single-user shell on the iMac G5), `libSystem` with all its parts, `dyld`, `launchd`, `bash`, `ncurses`, `libiconv`, `libgcc`, `bsm`, `libutil`, `libedit`, `diskdev_cmds`, `bzip2`, `IOKitUser`, `CF`, `ICU`, `objc4`, `autozone`, `libstdcxx` and `zlib`. In a chroot holding only our files, our shell, `ls`, `mount`, `fsck_hfs` and `launchctl` run; launchctl is built without Security for now ([D26](DEVIATIONS.md)).
+Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds`, the kernel (`xnu`, booted to a single-user shell on the iMac G5), `libSystem` with all its parts, `dyld`, `launchd`, `bash`, `ncurses`, `libiconv`, `libgcc`, `bsm`, `libutil`, `libedit`, `diskdev_cmds`, `bzip2`, `IOKitUser`, `CF`, `ICU`, `objc4`, `autozone`, `libstdcxx` and `zlib`. In a chroot holding only our files, our shell, `ls`, `mount`, `fsck_hfs` and `launchctl` run; launchctl is built without Security for now ([D26](DEVIATIONS.md)). A QEMU `mac99` image with this userland and our kernel boots to a single-user shell; its BootX and drivers are still the reference system's.
 
 The reference system is an iMac G5 running Sorbet Leopard, a community-modified Leopard that reports 10.5.9 build `9L31b` on Apple's 10.5.8 kernel. Results gathered on it stay provisional until they are checked against a Leopard installed from a retail disc.
