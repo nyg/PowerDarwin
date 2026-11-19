@@ -1,0 +1,11 @@
+PowerDarwin D27, 2026-11-19: changes to kext_tools 117.4, under the licence of the files changed.
+--- a/kext_tools.xcodeproj/project.pbxproj
++++ b/kext_tools.xcodeproj/project.pbxproj
+@@ -526,7 +526,6 @@
+ 				05097276094910D30034B52C /* CoreFoundation.framework in Frameworks */,
+ 				0C31717B0AB0EDBA00B8CA9A /* libbless.a in Frameworks */,
+ 				0CFB02460AB0FBAD003AC039 /* DiskArbitration.framework in Frameworks */,
+-				0CFB025C0AB0FC75003AC039 /* ApplicationServices.framework in Frameworks */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};

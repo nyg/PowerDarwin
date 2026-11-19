@@ -1,0 +1,21 @@
+PowerDarwin D16, 2026-11-19: changes to CF 476.19, under the licence of the files changed.
+--- a/CFBase.h
++++ b/CFBase.h
+@@ -62,9 +62,17 @@
+ #endif
+ #include <AvailabilityMacros.h>
+ 
++#ifndef CF_OPEN_SOURCE
++    #if defined(__CF_USE_FRAMEWORK_INCLUDES__) || (defined(__MACH__) && !defined(__MWERKS__)) 
++	#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/MacTypes.h>
++    #elif defined(__MWERKS__)
++	#include <MacTypes.h>
++    #endif
++#else // CF_OPEN_SOURCE
+     #if defined(__MACH__)
+         #include <libkern/OSTypes.h>
+     #endif
++#endif // CF_OPEN_SOURCE
+ 
+ #if !defined(__MACTYPES__)
+ #if !defined(_OS_OSTYPES_H)

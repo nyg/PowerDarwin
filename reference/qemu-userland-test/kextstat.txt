@@ -1,0 +1,55 @@
+Index Refs Address    Size       Wired      Name (Version) <Linked Against>
+    1    1 0x0        0x0        0x0        com.apple.kernel (9.8.0)
+    2   18 0x0        0x0        0x0        com.apple.kpi.bsd (9.8.0)
+    3    3 0x0        0x0        0x0        com.apple.kpi.dsep (9.8.0)
+    4   24 0x0        0x0        0x0        com.apple.kpi.iokit (9.8.0)
+    5   26 0x0        0x0        0x0        com.apple.kpi.libkern (9.8.0)
+    6   23 0x0        0x0        0x0        com.apple.kpi.mach (9.8.0)
+    7   12 0x0        0x0        0x0        com.apple.kpi.unsupported (9.8.0)
+    8    1 0x0        0x0        0x0        com.apple.iokit.IONVRAMFamily (9.8.0)
+    9    1 0x0        0x0        0x0        com.apple.driver.AppleNMI (9.8.0)
+   10    1 0x0        0x0        0x0        com.apple.iokit.IOSystemManagementFamily (9.8.0)
+   11    1 0x0        0x0        0x0        com.apple.iokit.ApplePlatformFamily (9.8.0)
+   12   16 0x0        0x0        0x0        com.apple.kernel.6.0 (7.9.9)
+   13    1 0x0        0x0        0x0        com.apple.kernel.bsd (7.9.9)
+   14    1 0x0        0x0        0x0        com.apple.kernel.iokit (7.9.9)
+   15    1 0x0        0x0        0x0        com.apple.kernel.libkern (7.9.9)
+   16    1 0x0        0x0        0x0        com.apple.kernel.mach (7.9.9)
+   17    5 0x1e62c000 0x14000    0x13000    com.apple.iokit.IOPCIFamily (2.6) <7 6 5 4>
+   18    3 0x1e646000 0x5000     0x4000     com.apple.driver.IOPlatformFunction (1.8.7d5) <12>
+   19    0 0x1e65d000 0x10000    0xf000     com.apple.driver.AppleMacRISC2PE (1.8.7d5) <18 17 12 7 5 4>
+   20    0 0x1e6e8000 0x6000     0x5000     com.apple.BootCache (30.4) <7 6 5 4 2>
+   21    2 0x1e7ee000 0x4c000    0x4b000    com.apple.iokit.IOHIDFamily (1.5.7) <7 6 5 4 2>
+   22    0 0x1e869000 0xb000     0xa000     com.apple.nke.applicationfirewall (1.8.77) <7 6 5 4 2>
+   23    0 0x1e880000 0x4000     0x3000     com.apple.security.TMSafetyNet (3) <7 6 5 3 2>
+   24    0 0x1e8d6000 0x1e000    0x1d000    com.apple.security.seatbelt (107.12) <7 6 5 3 2>
+   25    0 0x232ab000 0x3000     0x2000     com.apple.driver.AppleCore99NVRAM (1.1.1) <12>
+   26    0 0x23322000 0xa000     0x9000     com.apple.driver.AppleMacRiscPCI (3.4.0) <17 12>
+   27    1 0x233b0000 0x5000     0x4000     com.apple.iokit.IOKeyLargo (1.7.2f1) <12>
+   28    0 0x233c9000 0x7000     0x6000     com.apple.driver.AppleKeyLargo (1.7.2f1) <27 18 17 12>
+   29    5 0x23533000 0x37000    0x36000    com.apple.iokit.IOUSBFamily (3.5.2) <7 6 5 4 2>
+   30    0 0x2359b000 0xe000     0xd000     com.apple.driver.AppleUSBOHCI (3.4.6) <29 17 6 5 4>
+   31    0 0x2460f000 0x4000     0x3000     com.apple.driver.MacIOGPIO (1.3.0d0) <12>
+   32    0 0x24624000 0x4000     0x3000     com.apple.driver.AppleVIA (1.5.1d1) <12>
+   33    3 0x246a7000 0x12000    0x11000    com.apple.iokit.IOATAFamily (2.0.1) <6 5 4 2>
+   34    0 0x246bc000 0x3000     0x2000     com.apple.driver.KeyLargoATA (1.1.1f1) <33 12>
+   35    0 0x246ce000 0x4000     0x3000     com.apple.iokit.AppleMediaBay (1.0.2f1) <12>
+   36    0 0x24723000 0x4000     0x3000     com.apple.driver.AppleMPIC (1.5.3) <17 12>
+   37    0 0x2473a000 0x4000     0x3000     com.apple.driver.AppleGPIO (1.3.0d0) <18 12>
+   38    0 0x24821000 0x16000    0x15000    com.apple.driver.ApplePMU (2.5.6d2) <21 12 7 6 5 4>
+   39    9 0x248e1000 0x21000    0x20000    com.apple.iokit.IOStorageFamily (1.5.6) <7 6 5 4 2>
+   40    0 0x2493e000 0x13000    0x12000    com.apple.iokit.IOATABlockStorage (2.0.6) <39 33 6 5 4 2>
+   41    4 0x24a11000 0x22000    0x21000    com.apple.iokit.IOSCSIArchitectureModelFamily (2.1.1) <6 5 4 2>
+   42    0 0x24a5a000 0x6000     0x5000     com.apple.iokit.IOATAPIProtocolTransport (1.5.3) <41 33 12>
+   43    0 0x24abe000 0x3000     0x2000     com.apple.iokit.IOUSBUserClient (3.5.2) <29 7 6 5 4 2>
+   44    0 0x24b47000 0x10000    0xf000     com.apple.driver.AppleUSBHub (3.4.9) <29 6 5 4>
+   45    0 0x24bc6000 0x6000     0x5000     com.apple.driver.XsanFilter (2.7.91) <39 12>
+   46    3 0x24ce0000 0xb000     0xa000     com.apple.iokit.IOCDStorageFamily (1.5) <39 6 5 4 2>
+   47    2 0x24d2e000 0x7000     0x6000     com.apple.iokit.IODVDStorageFamily (1.5) <46 39 6 5 4 2>
+   48    1 0x24d5c000 0x1b000    0x1a000    com.apple.iokit.IOSCSIBlockCommandsDevice (2.1.1) <41 39 6 5 4 2>
+   49    1 0x24d86000 0x7000     0x6000     com.apple.iokit.IOBDStorageFamily (1.5) <47 46 39 6 5 4 2>
+   50    0 0x24dbb000 0x1d000    0x1c000    com.apple.iokit.IOSCSIMultimediaCommandsDevice (2.1.1) <49 48 47 46 41 39 6 5 4 2>
+   51    0 0x24e5e000 0x8000     0x7000     com.apple.iokit.SCSITaskUserClient (2.1.1) <41 39 6 5 4 2>
+   52    0 0x24f66000 0x3000     0x2000     com.apple.driver.AppleFileSystemDriver (1.1.0) <39 5 4>
+   53    0 0x24fe7000 0x4000     0x3000     com.apple.driver.AppleUSBComposite (3.2.0) <29 5 4>
+   54    0 0x250ba000 0x6000     0x5000     com.apple.iokit.IOUSBHIDDriver (3.4.6) <29 21 6 5 4>

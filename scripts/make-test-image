@@ -14,6 +14,7 @@ hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
 sudo ditto $userland $mount
 sudo ditto "$(latest xnu)" $mount
+sudo ditto "$(latest kext_tools)" $mount
 sudo rm -f $mount/mach_kernel.ctfsys
 
 for kext in /System/Library/Extensions/*.kext; do
@@ -41,7 +42,7 @@ sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /
 </plist>
 EOF
 
-sudo kextcache -a ppc -l -m $mount/System/Library/Extensions.mkext $mount/System/Library/Extensions
+sudo "$(latest kext_tools)/usr/sbin/kextcache" -a ppc -l -m $mount/System/Library/Extensions.mkext $mount/System/Library/Extensions
 sudo bless --folder $mount/System/Library/CoreServices
 /Developer/Tools/GetFileInfo $mount/System/Library/CoreServices/BootX | grep -E 'type|creator'
 bless --info $mount | head -3

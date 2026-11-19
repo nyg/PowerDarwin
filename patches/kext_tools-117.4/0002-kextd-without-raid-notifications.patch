@@ -1,0 +1,48 @@
+PowerDarwin D28, 2026-11-19: changes to kext_tools 117.4, under the licence of the files changed.
+--- a/watchvol.h
++++ b/watchvol.h
+@@ -35,9 +35,11 @@
+ int kextd_giveup_volwatch();
+ void kextd_stop_volwatch();
+ 
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ void updateRAIDSet(
+     CFNotificationCenterRef center,
+     void * observer,
+     CFStringRef name,
+     const void * object,
+     CFDictionaryRef userInfo);
++#endif
+--- a/watchvol.c
++++ b/watchvol.c
+@@ -1589,6 +1589,7 @@
+ #endif
+ }
+ 
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ /*******************************************************************************
+ * updateRAIDSet() -- Something on a RAID set has changed, so we may need to
+ * update its boot partition info.
+@@ -1678,3 +1679,4 @@
+     if (bsdName)           CFRelease(bsdName);
+     return;
+ }
++#endif
+--- a/kextd_main.c
++++ b/kextd_main.c
+@@ -1207,6 +1207,7 @@
+             kCFRunLoopDefaultMode);
+     }
+ 
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+    /* Watch for RAID changes so we can forcibly update their boot partitions.
+     */
+     CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(),
+@@ -1219,6 +1220,7 @@
+     if (kern_result != KERN_SUCCESS) {
+         kextd_error_log("couldn't register for RAID notifications");
+     }
++#endif
+ 
+ finish:
+     if (gStaleMkextMessageRunLoopTimer)  CFRelease(gStaleMkextMessageRunLoopTimer);
