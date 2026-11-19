@@ -25,8 +25,8 @@ done
 for kext in $reference_kexts; do
    sudo ditto /System/Library/Extensions/$kext $mount/System/Library/Extensions/$kext
 done
+sudo ditto "$(latest BootX)" $mount
 sudo mkdir -p $mount/System/Library/CoreServices
-sudo ditto /System/Library/CoreServices/BootX $mount/System/Library/CoreServices/BootX
 
 sudo mkdir -p $mount/private/etc $mount/private/tmp $mount/private/var/log $mount/private/var/run $mount/private/var/tmp $mount/dev $mount/Volumes $mount/Library/Preferences/SystemConfiguration
 sudo chmod 1777 $mount/private/tmp $mount/private/var/tmp
@@ -47,7 +47,7 @@ sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /
 EOF
 
 sudo "$(latest kext_tools)/usr/sbin/kextcache" -a ppc -l -m $mount/System/Library/Extensions.mkext $mount/System/Library/Extensions
-sudo bless --folder $mount/System/Library/CoreServices
+sudo bless --folder $mount/System/Library/CoreServices --bootinfo $mount/usr/standalone/ppc/bootx.bootinfo
 /Developer/Tools/GetFileInfo $mount/System/Library/CoreServices/BootX | grep -E 'type|creator'
 bless --info $mount | head -3
 df -h $mount | tail -1
