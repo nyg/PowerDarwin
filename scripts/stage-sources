@@ -15,6 +15,11 @@ for project in "$@"; do
    [[ -f $tarball ]] || { echo "no source tarball: $tarball" >&2; exit 1; }
    tar -xzf "$tarball" -C "$stage" -s "|^$project-$project-$version|$project-$version|"
    echo "$project-$version"
+   for patch in "$root/patches/$project-$version"/*.patch; do
+      [[ -e $patch ]] || continue
+      patch -s -p1 -d "$stage/$project-$version" < "$patch"
+      echo "   patched with $(basename "$patch")"
+   done
 done
 
 COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $folder/Sources"
