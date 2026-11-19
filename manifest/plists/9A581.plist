@@ -2626,6 +2626,7 @@
 				build = (
 					Libm,
 					Libsystem,
+					PowerManagement,
 					bash,
 					cctools,
 					distcc,

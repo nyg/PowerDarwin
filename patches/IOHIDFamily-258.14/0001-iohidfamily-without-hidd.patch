@@ -1,0 +1,11 @@
+PowerDarwin D32, 2026-11-19: changes to IOHIDFamily 258.14, under the licence of the files changed.
+--- a/IOHIDFamily.xcodeproj/project.pbxproj
++++ b/IOHIDFamily.xcodeproj/project.pbxproj
+@@ -1566,7 +1566,6 @@
+ 				848E57500CC55C7800D5BE22 /* PBXTargetDependency */,
+ 				848E57520CC55C7800D5BE22 /* PBXTargetDependency */,
+ 				848E57540CC55C7800D5BE22 /* PBXTargetDependency */,
+-				8484FCE20D060CBE007892F4 /* PBXTargetDependency */,
+ 			);
+ 			name = IOHIDFamily;
+ 			productInstallPath = "$(SYSTEM_LIBRARY_DIR)/Extensions";

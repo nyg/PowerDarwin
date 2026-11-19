@@ -1,0 +1,11 @@
+PowerDarwin D35, 2026-11-19: changes to IOUSBFamily 349.4.3, under the licence of the files changed.
+--- a/IOUSBFamily/Headers/IOUSBWorkLoop.h
++++ b/IOUSBFamily/Headers/IOUSBWorkLoop.h
+@@ -32,6 +32,7 @@
+     
+ protected:
+     void *			fSleepToken;
++	lck_grp_t *		fLockGroup;
+ 	bool init ( const char * controllerLocation );
+ 	void free ( void );
+ 	

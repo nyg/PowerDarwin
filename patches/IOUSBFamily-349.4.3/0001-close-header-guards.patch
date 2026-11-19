@@ -1,0 +1,26 @@
+PowerDarwin D33, 2026-11-19: changes to IOUSBFamily 349.4.3, under the licence of the files changed.
+--- a/AppleUSBOHCI/Headers/AppleUSBOHCIMemoryBlocks.h
++++ b/AppleUSBOHCI/Headers/AppleUSBOHCIMemoryBlocks.h
+@@ -118,4 +118,5 @@
+     OHCIIsochTransferDescriptorSharedPtr			GetSharedLogicalPtr(UInt32 index);
+     AppleOHCIIsochTransferDescriptorPtr				GetITD(UInt32 index);
+ };
++#endif
+ 
+--- a/AppleUSBUHCI/Headers/AppleUHCIqhMemoryBlock.h
++++ b/AppleUSBUHCI/Headers/AppleUHCIqhMemoryBlock.h
+@@ -53,5 +53,6 @@
+     IOPhysicalAddress							GetPhysicalPtr(UInt32 index);
+     UHCIQueueHeadSharedPtr						GetLogicalPtr(UInt32 index);
+ };
++#endif
+ 
+ 
+--- a/AppleUSBUHCI/Headers/AppleUHCItdMemoryBlock.h
++++ b/AppleUSBUHCI/Headers/AppleUHCItdMemoryBlock.h
+@@ -57,4 +57,5 @@
+     UHCITransferDescriptorSharedPtr				GetLogicalPtr(UInt32 index);
+     
+ };
++#endif
+ 

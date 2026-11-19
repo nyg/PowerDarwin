@@ -1,0 +1,11 @@
+PowerDarwin D34, 2026-11-19: changes to IOUSBFamily 349.4.3, under the licence of the files changed.
+--- a/IOUSBFamily.xcodeproj/project.pbxproj
++++ b/IOUSBFamily.xcodeproj/project.pbxproj
+@@ -2066,7 +2066,6 @@
+ 				3EAF8B830B5D42870029974F /* PBXTargetDependency */,
+ 				3EAF8B850B5D42870029974F /* PBXTargetDependency */,
+ 				3EAF8B870B5D42870029974F /* PBXTargetDependency */,
+-				3EAF8B890B5D42870029974F /* PBXTargetDependency */,
+ 				3EAF8B8B0B5D42870029974F /* PBXTargetDependency */,
+ 			);
+ 			name = IOUSBFamily;
