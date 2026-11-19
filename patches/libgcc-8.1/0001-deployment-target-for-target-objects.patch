@@ -1,0 +1,12 @@
+PowerDarwin D17, 2026-11-19: changes to libgcc 8.1, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -32,7 +32,7 @@
+ 
+ # Speed the build, a lot.
+ CC_Optimize = -O0
+-Environment += CFLAGS_FOR_TARGET="-O2 -gdwarf-2"
++Environment += CFLAGS_FOR_TARGET="-O2 -gdwarf-2 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)"
+ Environment += LIBGCC2_DEBUG_CFLAGS="-gdwarf-2 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)"
+ 
+ # Automatic Extract & Patch

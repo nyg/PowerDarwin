@@ -1,0 +1,36 @@
+PowerDarwin D23, 2026-11-19: changes to IOKitUser 388.53.30, under the licence of the files changed.
+--- a/IOKitUser.xcodeproj/project.pbxproj
++++ b/IOKitUser.xcodeproj/project.pbxproj
+@@ -2296,14 +2296,14 @@
+ 			files = (
+ 			);
+ 			inputPaths = (
+-				"$(DERIVED_FILE_DIR)/kextmanager_mig.h",
++				"$(DERIVED_FILE_DIR)/$(CURRENT_ARCH)/kextmanager_mig.h",
+ 			);
+ 			outputPaths = (
+ 				"$(TARGET_BUILD_DIR)/$(PRIVATE_HEADERS_FOLDER_PATH)/kext/kextmanager_mig.h",
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 			shellPath = /bin/sh;
+-			shellScript = "# 345678901234567890123456789012345678901234567890123456789012345678901234567890\n\n# only way I could figure out how to get the generated header describing the\n# routines compiled into the framemwork to be installed in PrivateHeaders/kext\n\necho \"Can the generated kextmanager_mig.h be in a Copy Files build phase?\"\nset -x\ncp ${SCRIPT_INPUT_FILE_0} ${SCRIPT_OUTPUT_FILE_0}\n\n# see definitions for SCRIPT_INPUT_FILE_0 & SCRIPT_OUTPUT_FILE_0\n# there also appears to be a DERIVED_SOURCES_DIR but DERIVED_FILE_DIR is documented\n# (looking at all of the setenv calls at the start of the build is very informative)\n";
++			shellScript = "# 345678901234567890123456789012345678901234567890123456789012345678901234567890\n\n# only way I could figure out how to get the generated header describing the\n# routines compiled into the framemwork to be installed in PrivateHeaders/kext\n\necho \"Can the generated kextmanager_mig.h be in a Copy Files build phase?\"\nset -x\n\n# HACK to get around current MIG problems; get the first arch we're building with\nfor try_arch in ${RC_ARCHS} ; do\n    break\ndone\n\necho \"Checking ${try_arch} for derived MIG header\"\n\nif [ -e \"${DERIVED_FILE_DIR}/${try_arch}/kextmanager_mig.h\" ] ; then\n    cp \"${DERIVED_FILE_DIR}/${try_arch}/kextmanager_mig.h\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelif [ -e \"${DERIVED_FILE_DIR}/kextmanager_mig.h\" ] ; then\n    cp \"${DERIVED_FILE_DIR}/kextmanager_mig.h\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n    echo \"Can't find derived MIG header\"\n    exit 1\nfi\n\n\n# see definitions for SCRIPT_INPUT_FILE_0 & SCRIPT_OUTPUT_FILE_0\n# there also appears to be a DERIVED_SOURCES_DIR but DERIVED_FILE_DIR is documented\n# (looking at all of the setenv calls at the start of the build is very informative)\n";
+ 		};
+ 		2D76BD2308DD0F83009A41B5 /* ShellScript */ = {
+ 			isa = PBXShellScriptBuildPhase;
+@@ -2347,14 +2347,13 @@
+ 			files = (
+ 			);
+ 			inputPaths = (
+-				"$(DERIVED_FILE_DIR)/kextmanager_mig.h",
+ 			);
+ 			outputPaths = (
+ 				"$(TARGET_BUILD_DIR)/$(PRIVATE_HEADERS_FOLDER_PATH)/kext/kextmanager_mig.h",
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 			shellPath = /bin/sh;
+-			shellScript = "# 345678901234567890123456789012345678901234567890123456789012345678901234567890\n\n# only way I could figure out how to get the generated header describing the\n# routines compiled into the framemwork to be installed in PrivateHeaders/kext\n\necho \"Can the generated kextmanager_mig.h be in a Copy Files build phase?\"\nset -x\ncp ${SCRIPT_INPUT_FILE_0} ${SCRIPT_OUTPUT_FILE_0}\n\n# see definitions for SCRIPT_INPUT_FILE_0 & SCRIPT_OUTPUT_FILE_0\n# there also appears to be a DERIVED_SOURCES_DIR but DERIVED_FILE_DIR is documented\n# (looking at all of the setenv calls at the start of the build is very informative)\n";
++			shellScript = "# 345678901234567890123456789012345678901234567890123456789012345678901234567890\n\n# only way I could figure out how to get the generated header describing the\n# routines compiled into the framemwork to be installed in PrivateHeaders/kext\n\necho \"Can the generated kextmanager_mig.h be in a Copy Files build phase?\"\nset -x\n\n# HACK to get around current MIG problems; get the first arch we're building with\nfor try_arch in ${RC_ARCHS} ; do\n    break\ndone\n\necho \"Checking ${try_arch} for derived MIG header\"\n\nif [ -e \"${DERIVED_FILE_DIR}/${try_arch}/kextmanager_mig.h\" ] ; then\n    cp \"${DERIVED_FILE_DIR}/${try_arch}/kextmanager_mig.h\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelif [ -e \"${DERIVED_FILE_DIR}/kextmanager_mig.h\" ] ; then\n    cp \"${DERIVED_FILE_DIR}/kextmanager_mig.h\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n    echo \"Can't find derived MIG header\"\n    exit 1\nfi\n\n\n# see definitions for SCRIPT_INPUT_FILE_0 & SCRIPT_OUTPUT_FILE_0\n# there also appears to be a DERIVED_SOURCES_DIR but DERIVED_FILE_DIR is documented\n# (looking at all of the setenv calls at the start of the build is very informative)\n";
+ 		};
+ 		8472D52B0CFA100A003111DE /* ShellScript */ = {
+ 			isa = PBXShellScriptBuildPhase;

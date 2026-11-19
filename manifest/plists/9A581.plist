@@ -17,6 +17,7 @@
 		RC_RELEASE = Leopard;
 		RC_XBS = YES;
 		SEPARATE_STRIP = YES;
+		SYSTEM_LIBRARY_DIR = /System/Library;
 		UNAME_RELEASE = 9.0;
 		UNAME_SYSNAME = Darwin;
 	};

@@ -1,0 +1,19 @@
+PowerDarwin D22, 2026-11-19: changes to IOKitUser 388.53.30, under the licence of the files changed.
+--- a/IOKitUser.xcodeproj/project.pbxproj
++++ b/IOKitUser.xcodeproj/project.pbxproj
+@@ -2449,7 +2449,6 @@
+ 				8472D5140CFA100A003111DE /* IOHIDTransaction.c in Sources */,
+ 				8472D5150CFA100A003111DE /* IOHIDEvent.c in Sources */,
+ 				8472D5160CFA100A003111DE /* IOHIDEventSystem.c in Sources */,
+-				8472D5170CFA100A003111DE /* IOHIDEventSystem.defs in Sources */,
+ 				8472D5180CFA100A003111DE /* IOHIDEventSystemClient.c in Sources */,
+ 				8472D5190CFA100A003111DE /* IOHIDNotification.c in Sources */,
+ 				8472D51A0CFA100A003111DE /* IOHIDService.c in Sources */,
+@@ -2519,7 +2518,6 @@
+ 				844A55E60A54A92E00FAE0BC /* IOHIDTransaction.c in Sources */,
+ 				843C1FEF0C0790410009057F /* IOHIDEvent.c in Sources */,
+ 				847A125C0C07C3A400F3CCDB /* IOHIDEventSystem.c in Sources */,
+-				847A125D0C07C3A400F3CCDB /* IOHIDEventSystem.defs in Sources */,
+ 				847A125F0C07C3A400F3CCDB /* IOHIDEventSystemClient.c in Sources */,
+ 				847A12630C07C3A400F3CCDB /* IOHIDNotification.c in Sources */,
+ 				847A12650C07C3A400F3CCDB /* IOHIDService.c in Sources */,
