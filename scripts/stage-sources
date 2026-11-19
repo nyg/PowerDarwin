@@ -20,6 +20,13 @@ for project in "$@"; do
       patch -s -p1 -d "$stage/$project-$version" < "$patch"
       echo "   patched with $(basename "$patch")"
    done
+   touch_list="$root/patches/$project-$version/touch"
+   if [[ -f $touch_list ]]; then
+      while read -r file; do
+         touch "$stage/$project-$version/$file"
+         echo "   touched $file"
+      done < "$touch_list"
+   fi
 done
 
 COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $folder/Sources"
