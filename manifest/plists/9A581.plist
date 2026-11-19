@@ -357,6 +357,7 @@
 		AppleGPIO = {
 			dependencies = {
 				build = (
+					IOI2CFamily,
 					bash,
 					distcc,
 					file_cmds,

@@ -5,6 +5,7 @@ roots=~/9L30/Roots
 userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9
+kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
@@ -17,9 +18,19 @@ sudo ditto "$(latest xnu)" $mount
 sudo ditto "$(latest kext_tools)" $mount
 sudo rm -f $mount/mach_kernel.ctfsys
 
+for project in $kext_projects; do
+   sudo ditto "$(latest $project)/System/Library/Extensions" $mount/System/Library/Extensions
+done
 for kext in /System/Library/Extensions/*.kext; do
-   name=$(basename "$kext")
-   [ -e "$mount/System/Library/Extensions/$name" ] || sudo ditto "$kext" "$mount/System/Library/Extensions/$name"
+   target=$mount/System/Library/Extensions/$(basename "$kext")
+   if [ ! -e "$target" ]; then
+      sudo ditto "$kext" "$target"
+      continue
+   fi
+   for plugin in "$kext"/Contents/PlugIns/*.kext; do
+      [ -e "$plugin" ] || continue
+      [ -e "$target/Contents/PlugIns/$(basename "$plugin")" ] || sudo ditto "$plugin" "$target/Contents/PlugIns/$(basename "$plugin")"
+   done
 done
 sudo mkdir -p $mount/System/Library/CoreServices
 sudo ditto /System/Library/CoreServices/BootX $mount/System/Library/CoreServices/BootX
