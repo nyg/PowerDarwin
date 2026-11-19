@@ -1,0 +1,22 @@
+#!/bin/sh
+/usr/bin/dsymutil.real "$@" && exit 0
+out=
+arch=
+input=
+while [ $# -gt 0 ]; do
+   case $1 in
+      -o) out=$2; shift ;;
+      --out=*) out=${1#--out=} ;;
+      --arch=*) arch=${1#--arch=} ;;
+      -*) ;;
+      *) input=$1 ;;
+   esac
+   shift
+done
+[ -n "$out" ] || out=$input.dSYM
+dwarf=$out/Contents/Resources/DWARF
+mkdir -p "$dwarf"
+copy=$dwarf/$(basename "$input")
+{ [ -n "$arch" ] && lipo "$input" -thin "$arch" -output "$copy" 2>/dev/null; } || cp "$input" "$copy"
+echo "dsymutil: failed in the build environment, put a copy of $input in $out instead" >&2
+exit 0
