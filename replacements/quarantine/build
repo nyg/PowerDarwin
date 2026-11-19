@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+src=$(cd "$(dirname "$0")" && pwd)
+out=${1:?usage: build <output folder>}
+arches="-arch ppc -arch ppc64 -arch i386 -arch x86_64"
+
+mkdir -p "$out/usr/local/lib/system"
+
+for variant in "" _debug _profile; do
+   case $variant in
+      "") flags="-Os" ;;
+      _debug) flags="-g" ;;
+      _profile) flags="-Os -pg" ;;
+   esac
+   cc -c $arches $flags -Wall -Werror -o "$out/quarantine$variant.o" "$src/quarantine.c"
+   libtool -static -o "$out/usr/local/lib/system/libquarantine$variant.a" "$out/quarantine$variant.o"
+   rm "$out/quarantine$variant.o"
+done
