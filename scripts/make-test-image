@@ -5,7 +5,7 @@ roots=~/9L30/Roots
 userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9
-kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA"
+kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE"
 reference_kexts="IOATAFamily.kext/Contents/PlugIns/IOATABlockStorage.kext"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }

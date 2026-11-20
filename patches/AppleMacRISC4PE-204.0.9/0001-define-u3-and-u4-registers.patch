@@ -1,0 +1,98 @@
+PowerDarwin D39, 2026-11-20: changes to AppleMacRISC4PE 204.0.9, under the licence of the files changed.
+--- a/U3.h
++++ b/U3.h
+@@ -38,6 +38,84 @@
+ #include "IOPlatformFunction.h"
+ 
+ 
++#define kUniNVersion				(0x0000)
++#define kUniNVersion3				(0x0030)
++#define kUniNRevision3_2_1			(0x0032)
++#define IS_U3_HEAVY(v)				(((v) & 0xFC) == 0x34)
++#define IS_U4(v)					(((v) & 0xF0) == 0x40)
++
++#define kUniNVSPSoftReset			(0x0010)
++
++#define kUniNNormal					(0x00)
++#define kUniNIdle2					(0x01)
++#define kUniNSleep					(0x02)
++#define kUniNSave					(0x03)
++
++#define kUniNHWInitState			(0x0070)
++#define kUniNHWInitStateSleeping	(0x01)
++#define kUniNHWInitStateRunning		(0x02)
++
++#define kU3ToggleRegister			(0x00E0)
++#define kU3MPICReset				(0x00000002)
++#define kU3MPICEnableOutputs		(0x00000004)
++
++#define kU3PMClockControl			(0x0F00)
++#define kU3APIPhyConfigRegister1	(0x23030)
++#define kU3HTLinkConfigRegister		(0x70110)
++#define kU3HTLinkFreqRegister		(0x70120)
++
++#define kU3MemCheckCtrlRegister		(0x2440)
++#define kU3MCCR_ECC_EN				(0x80000000)
++#define kU3MCCR_ECC_UE_MASK_H		(0x08000000)
++#define kU3MCCR_ECC_CE_MASK_H		(0x04000000)
++#define kU3MCCR_ECC_UE_MASK_L		(0x02000000)
++#define kU3MCCR_ECC_CE_MASK_L		(0x01000000)
++#define kU3MemErrorAddressRegister	(0x2460)
++#define kU3MEAR_RNK_A_mask			(0x38000000)
++#define kU3MEAR_RNK_A_shift			(27)
++#define kU3MemErrorSyndromeRegister	(0x2470)
++#define kU3MESR_ECC_SYNDROMES_mask	(0x0000FFFF)
++#define kU3MESR_ECC_SYNDROME_mask	(0x000000FF)
++
++#define kU4MemCheckCtrlRegister		(0x2440)
++#define kU4MCCR_ECC_UE_MASK			(0x02000000)
++#define kU4MCCR_ECC_CE_MASK			(0x01000000)
++#define kU4MemErrorAddressRegister1	(0x2460)
++#define kU4MemErrorAddressRegister2	(0x2470)
++#define kU4MEAR_RK_mask				(0xE0000000)
++#define kU4MEAR_RK_shift			(29)
++#define kU4MemErrorSyndromeRegister	(0x2480)
++
++#define kU3APIExceptionRegister		(0x30060)
++#define kU3ChipFaultMaskRegister	(0x30100)
++#define kU3API_DARTExcp				(0x80000000)
++#define kU3API_ECC_UE_H				(0x00800000)
++#define kU3API_ECC_CE_H				(0x00400000)
++#define kU3API_ECC_UE_L				(0x00200000)
++#define kU3API_ECC_CE_L				(0x00100000)
++
++#define kU4APIExceptionRegister		(0x300A0)
++#define kU4APIMask1Register			(0x300C0)
++#define kU4API_DARTExcp				(0x80000000)
++#define kU4API_ECC_UEExcp			(0x00400000)
++#define kU4API_ECC_CEExcp			(0x00200000)
++
++#define kU3DARTCntlRegister			(0x33000)
++#define kU3DARTExceptionRegister	(0x33010)
++#define kU3DARTExcpLogAdrsMask		(0xFFFFF000)
++#define kU3DARTExcpLogAdrsShift		(12)
++#define kU3DARTExcpRQSRCMask		(0x00000008)
++#define kU3DARTExcpRQOPMask			(0x00000004)
++#define kU3DARTExcpXBEMask			(0x00000002)
++#define kU3DARTExcpXEEMask			(0x00000001)
++
++#define kU4DARTExceptionRegister	(0x33030)
++#define kU4DARTExcpRQSRCMask		(0x80000000)
++#define kU4DARTExcpLogAdrsMask		(0x7FFFFFF0)
++#define kU4DARTExcpLogAdrsShift		(4)
++#define kU4DARTExcpRQOPMask			(0x00000008)
++#define kU4DARTExcpXCDMask			(0x00000007)
++
+ #define kIOPCICacheLineSize 	"IOPCICacheLineSize"
+ #define kIOPCITimerLatency		"IOPCITimerLatency"
+ #define kAAPLSuspendablePorts	"AAPL,SuspendablePorts"
+--- a/U3.cpp
++++ b/U3.cpp
+@@ -915,6 +915,7 @@
+ 	if ( IS_U3_HEAVY(me->uniNVersion) && (apiexcp & (kU3API_ECC_UE_H | kU3API_ECC_UE_L | kU3API_ECC_CE_H | kU3API_ECC_CE_L)) )
+ 	{
+ 	UInt32	activeUEbits, activeCEbits, CEbitsToCheck = 0;
++	UInt32	syndromes, upperSyndrome, lowerSyndrome;
+ 
+ 		// interrogate U3 ECC registers
+ 		//
