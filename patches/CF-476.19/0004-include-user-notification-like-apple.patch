@@ -1,0 +1,11 @@
+PowerDarwin D57, 2026-11-20: changes to CF 476.19, under the licence of the files changed.
+--- a/CoreFoundation.h
++++ b/CoreFoundation.h
+@@ -91,6 +91,7 @@
+ #include <CoreFoundation/CFURL.h>
+ #include <CoreFoundation/CFURLAccess.h>
+ #include <CoreFoundation/CFUUID.h>
++#include <CoreFoundation/CFUserNotification.h>
+ #include <CoreFoundation/CFXMLNode.h>
+ #include <CoreFoundation/CFXMLParser.h>
+ 

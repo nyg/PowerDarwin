@@ -1,0 +1,21 @@
+PowerDarwin D44, 2026-11-20: changes to system_cmds 433.8, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -7,7 +7,7 @@
+         dmesg.tproj\
+         getconf.tproj getty.tproj hostinfo.tproj iostat.tproj\
+         login.tproj makekey.tproj\
+-        mkfile.tproj newgrp.tproj nvram.tproj passwd.tproj pwd_mkdb.tproj\
++        mkfile.tproj newgrp.tproj nvram.tproj pwd_mkdb.tproj\
+         reboot.tproj sync.tproj sysctl.tproj\
+         update.tproj vipw.tproj vifs.tproj zic.tproj zdump.tproj vm_stat.tproj\
+         zprint.tproj latency.tproj sc_usage.tproj fs_usage.tproj\
+@@ -17,7 +17,7 @@
+ ifeq "$(Embedded)" "NO"
+ SubProjects += at.tproj atrun.tproj\
+ 	auditd.tproj audit.tproj\
+-	chkpasswd.tproj chpass.tproj\
++	chkpasswd.tproj\
+ 	dirhelper.tproj\
+ 	shutdown.tproj
+ endif

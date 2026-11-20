@@ -1,0 +1,12 @@
+PowerDarwin D46, 2026-11-20: changes to Libinfo 278.0.3, under the licence of the files changed.
+--- a/lookup.subproj/lu_group.c
++++ b/lookup.subproj/lu_group.c
+@@ -691,7 +691,7 @@
+ 	*gid_list = (gid_t *)calloc(gid_count, sizeof(gid_t));
+ 	if (*gid_list == NULL) return -1;
+ 
+-	status = _old_getgrouplist(name, basegid, (int *)gid_list, (int *)&gid_count);
++	status = _old_getgrouplist(name, basegid, (int *)*gid_list, (int *)&gid_count);
+ 	if (status < 0) return -1;
+ 	return gid_count;
+ }

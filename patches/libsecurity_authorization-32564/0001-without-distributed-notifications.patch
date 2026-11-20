@@ -1,0 +1,59 @@
+PowerDarwin D50, 2026-11-20: changes to libsecurity_authorization 32564, under the licence of the files changed.
+--- a/lib/Authorization.cpp
++++ b/lib/Authorization.cpp
+@@ -42,7 +42,6 @@
+ #include <security_cdsa_utilities/AuthorizationWalkers.h>
+ #include <securityd_client/ssclient.h>
+ #include <CoreFoundation/CFPreferences.h>
+-#include <Carbon/../Frameworks/HIToolbox.framework/Headers/TextInputSources.h>
+ 
+ #include <security_utilities/logging.h>
+ 
+@@ -259,10 +258,12 @@
+ 
+ OSStatus _SessionSetUserPreferences(SecuritySessionId session);
+ 
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ void SessionUserPreferencesChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+ {
+ 	_SessionSetUserPreferences(uintptr_t(observer));
+ }
++#endif
+ 
+ OSStatus _SessionSetUserPreferences(SecuritySessionId session)
+ {
+@@ -272,7 +273,9 @@
+ 	CFStringRef keyboardUIModeStr = CFSTR("AppleKeyboardUIMode");
+ 	CFStringRef hitoolboxAppIDStr = CFSTR("com.apple.HIToolbox");
+     CFStringRef displayScaleFactorStr = CFSTR("AppleDisplayScaleFactor");
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ 	CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
++#endif
+ 
+ 	CFRef<CFMutableDictionaryRef> userPrefsDict(CFDictionaryCreateMutable(NULL, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
+ 	CFRef<CFMutableDictionaryRef> globalPrefsDict(CFDictionaryCreateMutable(NULL, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
+@@ -300,7 +303,9 @@
+ 	CFRef<CFDictionaryRef> hitoolboxPrefsDict(static_cast<CFDictionaryRef>(CFPreferencesCopyMultiple(NULL, hitoolboxAppIDStr, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)));
+ 	if (hitoolboxPrefsDict) {
+ 		CFDictionarySetValue(userPrefsDict, hitoolboxAppIDStr, hitoolboxPrefsDict);
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ 		CFNotificationCenterPostNotification(center, CFSTR("com.apple.securityagent.InputPrefsChanged"), CFSTR("com.apple.loginwindow"), hitoolboxPrefsDict, true);
++#endif
+ 	}
+ 	
+ 	CFRef<CFNumberRef> displayScaleFactor(static_cast<CFNumberRef>(CFPreferencesCopyAppValue(displayScaleFactorStr, kCFPreferencesCurrentApplication)));
+@@ -318,12 +323,14 @@
+ OSStatus SessionSetUserPreferences(SecuritySessionId session)
+ {
+ 	OSStatus status = _SessionSetUserPreferences(session);
++#ifdef __COREFOUNDATION_CFNOTIFICATIONCENTER__
+ 	if (noErr == status) {
+ 		CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter();
+ 		// We've succeeded in setting up a static set of prefs, now set up 
+ 		CFNotificationCenterAddObserver(center, (void*)session, SessionUserPreferencesChanged, CFSTR("com.apple.Carbon.TISNotifySelectedKeyboardInputSourceChanged"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+ 		CFNotificationCenterAddObserver(center, (void*)session, SessionUserPreferencesChanged, CFSTR("com.apple.Carbon.TISNotifyEnabledKeyboardInputSourcesChanged"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+ 	}
++#endif
+ 	return status;
+ }
+ 

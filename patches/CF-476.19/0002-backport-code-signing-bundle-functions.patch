@@ -1,0 +1,139 @@
+PowerDarwin D54, 2026-11-20: changes to CF 476.19, under the licence of the files changed.
+--- a/CFBundle.c
++++ b/CFBundle.c
+@@ -122,6 +122,7 @@
+ CONST_STRING_DECL(_kCFBundleResourcesFileMappedKey, "CSResourcesFileMapped")
+ CONST_STRING_DECL(_kCFBundleCFMLoadAsBundleKey, "CFBundleCFMLoadAsBundle")
+ CONST_STRING_DECL(_kCFBundleAllowMixedLocalizationsKey, "CFBundleAllowMixedLocalizations")
++CONST_STRING_DECL(_kCFBundleResourceSpecificationKey, "CFBundleResourceSpecification")
+ 
+ // Keys used by NSBundle for loaded Info plists.
+ CONST_STRING_DECL(_kCFBundleInitialPathKey, "NSBundleInitialPath")
+@@ -482,8 +483,96 @@
+     if (bundleURL) CFRelease(bundleURL);
+     if (resolvedURL) CFRelease(resolvedURL);
+     return bundle;
++}
++
++static uint8_t _CFBundleEffectiveLayoutVersion(CFBundleRef bundle) {
++    uint8_t localVersion = bundle->_version;
++    // exclude type 0 bundles with no binary (or CFM binary) and no Info.plist, since they give too many false positives
++    if (0 == localVersion) {
++        CFDictionaryRef infoDict = CFBundleGetInfoDictionary(bundle);
++        if (!infoDict || 0 == CFDictionaryGetCount(infoDict)) {
++#if defined(BINARY_SUPPORT_CFM) && defined(BINARY_SUPPORT_DYLD)
++            CFURLRef executableURL = CFBundleCopyExecutableURL(bundle);
++            if (executableURL) {
++                if (bundle->_binaryType == __CFBundleUnknownBinary) bundle->_binaryType = _CFBundleGrokBinaryType(executableURL);
++                if (bundle->_binaryType == __CFBundleCFMBinary || bundle->_binaryType == __CFBundleUnreadableBinary) {
++                    localVersion = 4;
++                } else {
++                    bundle->_resourceData._executableLacksResourceFork = true;
++                }
++                CFRelease(executableURL);
++            } else {
++                localVersion = 4;
++            }
++#elif defined(BINARY_SUPPORT_CFM)
++            localVersion = 4;
++#else 
++            CFURLRef executableURL = CFBundleCopyExecutableURL(bundle);
++            if (executableURL) {
++                CFRelease(executableURL);
++            } else {
++                localVersion = 4;
++            }
++#endif /* BINARY_SUPPORT_CFM && BINARY_SUPPORT_DYLD */
++        }
++    }
++    return localVersion;
+ }
+ 
++CFBundleRef _CFBundleCreateIfMightBeBundle(CFAllocatorRef allocator, CFURLRef url) {
++    CFBundleRef bundle = CFBundleCreate(allocator, url);
++    if (bundle) {
++        Boolean mightBeBundle = true, isDir = false;
++        uint8_t localVersion = _CFBundleEffectiveLayoutVersion(bundle);
++        if (3 == localVersion) {
++            CFDictionaryRef infoDict = CFBundleGetInfoDictionary(bundle);
++            CFURLRef executableURL, supportFilesURL, resourceSpecificationFileURL;
++            CFStringRef resourceSpecificationFile;
++            
++            mightBeBundle = false;
++            if (infoDict && CFDictionaryGetValue(infoDict, kCFBundleExecutableKey) && (executableURL = _CFBundleCopyExecutableURLIgnoringCache(bundle))) {
++                resourceSpecificationFile = (CFStringRef)CFDictionaryGetValue(infoDict, _kCFBundleResourceSpecificationKey);
++                if (resourceSpecificationFile && CFGetTypeID(resourceSpecificationFile) == CFStringGetTypeID() && (supportFilesURL = CFBundleCopySupportFilesDirectoryURL(bundle))) {
++                    resourceSpecificationFileURL = CFURLCreateWithFileSystemPathRelativeToBase(allocator, resourceSpecificationFile, kCFURLPOSIXPathStyle, false, supportFilesURL);
++                    if (resourceSpecificationFileURL) {
++                        if (_CFIsResourceAtURL(resourceSpecificationFileURL, &isDir) && !isDir) mightBeBundle = true;
++                        CFRelease(resourceSpecificationFileURL);
++                    }
++                    CFRelease(supportFilesURL);
++                }
++                CFRelease(executableURL);
++            }
++        } else if (4 == localVersion) {
++            mightBeBundle = false;
++        }
++        if (!mightBeBundle) {
++            CFRelease(bundle);
++            bundle = NULL;
++        }
++    }
++    return bundle;
++}
++
++CFBundleRef _CFBundleCreateWithExecutableURLIfMightBeBundle(CFAllocatorRef allocator, CFURLRef url) {
++    CFBundleRef bundle = NULL;
++    CFURLRef bundleURL = _CFBundleCopyBundleURLForExecutableURL(url), resolvedURL = _CFBundleCopyResolvedURLForExecutableURL(url);
++    if (bundleURL && resolvedURL) {
++        bundle = _CFBundleCreateIfMightBeBundle(allocator, bundleURL);
++        if (bundle) {
++            CFURLRef executableURL = _CFBundleCopyExecutableURLIgnoringCache(bundle);
++            char buff1[CFMaxPathSize], buff2[CFMaxPathSize];
++            if (!executableURL || !CFURLGetFileSystemRepresentation(resolvedURL, true, (uint8_t *)buff1, CFMaxPathSize) || !CFURLGetFileSystemRepresentation(executableURL, true, (uint8_t *)buff2, CFMaxPathSize) || 0 != strcmp(buff1, buff2)) {
++                CFRelease(bundle);
++                bundle = NULL;
++            }
++            if (executableURL) CFRelease(executableURL);
++        }
++    }
++    if (bundleURL) CFRelease(bundleURL);
++    if (resolvedURL) CFRelease(resolvedURL);
++    return bundle;
++}
++
+ CFURLRef _CFBundleCopyMainBundleExecutableURL(Boolean *looksLikeBundle) {
+     // This function is for internal use only; _mainBundle is deliberately accessed outside of the lock to get around a reentrancy issue
+     const char *processPath;
+--- a/CFBundlePriv.h
++++ b/CFBundlePriv.h
+@@ -108,7 +108,11 @@
+ CF_EXPORT
+ const CFStringRef _kCFBundleOldTypeOSTypesKey;
+ 
++/* For Code Signing */
++CF_EXPORT
++const CFStringRef _kCFBundleResourceSpecificationKey;
+ 
++
+ /* Functions for examining directories that may "look like" bundles */
+ 
+ CF_EXPORT
+@@ -128,8 +132,16 @@
+ 
+ CF_EXPORT
+ CFBundleRef _CFBundleCreateWithExecutableURLIfLooksLikeBundle(CFAllocatorRef allocator, CFURLRef url);
++
++/* For Code Signing */
++
++CF_EXPORT
++CFBundleRef _CFBundleCreateIfMightBeBundle(CFAllocatorRef allocator, CFURLRef url);
+ 
+ CF_EXPORT
++CFBundleRef _CFBundleCreateWithExecutableURLIfMightBeBundle(CFAllocatorRef allocator, CFURLRef url);
++
++CF_EXPORT
+ CFURLRef _CFBundleCopyMainBundleExecutableURL(Boolean *looksLikeBundle);
+ 
+ CF_EXPORT

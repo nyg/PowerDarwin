@@ -1,0 +1,11 @@
+PowerDarwin D61, 2026-11-20: changes to configd 212.2, under the licence of the files changed.
+--- a/configd.xcodeproj/project.pbxproj
++++ b/configd.xcodeproj/project.pbxproj
+@@ -16,7 +16,6 @@
+ 				1558480607550D470046C2E9 /* PBXTargetDependency */,
+ 				1558480807550D470046C2E9 /* PBXTargetDependency */,
+ 				1558480A07550D470046C2E9 /* PBXTargetDependency */,
+-				150ECB3C0D0079280065E94D /* PBXTargetDependency */,
+ 			);
+ 			name = configd_executables;
+ 			productName = configd_executables;

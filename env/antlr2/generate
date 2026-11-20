@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+root=$(cd "$(dirname "$0")/../.." && pwd)
+out=${1:?usage: generate <output folder>}
+work=$(mktemp -d)
+java=${JAVA:-java}
+
+tar xzf "$root/sources/Security-55471.tar.gz" -C "$work" Security-Security-55471/libsecurity_codesigning/antlr2
+tar xzf "$root/sources/libsecurity_codesigning-36924.tar.gz" -C "$work" libsecurity_codesigning-libsecurity_codesigning-36924/requirements.grammar
+antlr2=$work/Security-Security-55471/libsecurity_codesigning/antlr2
+grammar=$work/libsecurity_codesigning-libsecurity_codesigning-36924/requirements.grammar
+sum=$(cksum < "$grammar" | awk '{print $1}')
+
+mkdir -p "$out/usr/local/share/antlr2/$sum" "$out/usr/local/include" "$out/src/antlr2"
+"$java" -cp "$antlr2/antlr.jar" antlr.Tool -o "$out/usr/local/share/antlr2/$sum" "$grammar"
+cp -R "$antlr2/antlr" "$out/usr/local/include/antlr"
+rm -f "$out/usr/local/include/antlr/Makefile.in"
+cp "$antlr2"/src/*.cpp "$out/src/antlr2/"
+rm "$out/src/antlr2/dll.cpp"
+cp "$(dirname "$0")/build" "$out/src/build-antlr2"
+rm -rf "$work"

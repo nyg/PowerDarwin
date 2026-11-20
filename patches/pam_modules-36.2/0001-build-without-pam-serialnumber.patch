@@ -1,0 +1,12 @@
+PowerDarwin D41, 2026-11-20: changes to pam_modules 36.2, under the licence of the files changed.
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -6,7 +6,7 @@
+ 
+ # Project info
+ Project               = pam_modules
+-SubProjects           = pam_unix pam_uwtmp pam_afpmount pam_serialnumber pam_launchd pam_sacl
++SubProjects           = pam_unix pam_uwtmp pam_afpmount pam_launchd pam_sacl
+ #SubProjects           = pam_unix pam_deny pam_permit pam_netinfo pam_rootok pam_wheel \
+ #			pam_tim pam_nis pam_directoryservice 
+ 

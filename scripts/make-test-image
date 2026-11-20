@@ -5,6 +5,8 @@ roots=~/9L30/Roots
 userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9-image
+root_hash=~/9L30/root-password.hash
+userland_projects="files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
@@ -14,9 +16,13 @@ hdiutil create -size 1g -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
 sudo ditto $userland $mount
+for project in $userland_projects; do
+   sudo ditto "$(latest $project)" $mount
+done
 sudo ditto "$(latest xnu)" $mount
 sudo ditto "$(latest kext_tools)" $mount
 sudo rm -f $mount/mach_kernel.ctfsys
+sudo rm -rf $mount/usr/local/lib/SystemConfiguration
 
 for project in $kext_projects; do
    sudo ditto "$(latest $project)/System/Library/Extensions" $mount/System/Library/Extensions
@@ -24,11 +30,11 @@ done
 sudo ditto "$(latest BootX)" $mount
 sudo mkdir -p $mount/System/Library/CoreServices
 
-sudo mkdir -p $mount/private/etc $mount/private/tmp $mount/private/var/log $mount/private/var/run $mount/private/var/tmp $mount/dev $mount/Volumes $mount/Library/Preferences/SystemConfiguration
-sudo chmod 1777 $mount/private/tmp $mount/private/var/tmp
-sudo ln -s private/etc $mount/etc
-sudo ln -s private/tmp $mount/tmp
-sudo ln -s private/var $mount/var
+sudo mkdir -p $mount/Volumes $mount/Library/Preferences/SystemConfiguration
+sudo install -m 644 ~/9L30/Sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
+if [ -f $root_hash ]; then
+   sudo sed -i '' "s|^root:\*:|root:$(cat $root_hash):|" $mount/private/etc/master.passwd
+fi
 sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

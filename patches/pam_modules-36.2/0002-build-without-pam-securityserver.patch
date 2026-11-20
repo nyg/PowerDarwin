@@ -1,0 +1,13 @@
+PowerDarwin D42, 2026-11-20: changes to pam_modules 36.2, under the licence of the files changed.
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -18,9 +18,6 @@
+ 
+ # Have we the SecurityServer API?
+ HaveSecServer          = $(shell if test -d /System/Library/Frameworks/Security.framework/Headers; then echo YES; fi)
+-ifeq ($(HaveSecServer),YES)
+-SubProjects           += pam_securityserver
+-endif
+ 
+ include $(MAKEFILEPATH)/CoreOS/ReleaseControl/Common.make
+ 

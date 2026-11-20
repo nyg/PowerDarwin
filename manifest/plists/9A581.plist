@@ -2052,7 +2052,10 @@
 		DiskArbitration = {
 			dependencies = {
 				build = (
+					CF,
+					IOKitUser,
 					Libm,
+					Security,
 					Libsystem,
 					bash,
 					cctools,
@@ -4155,9 +4158,60 @@
 			version = 45;
 		};
 		Security = {
+			configuration = Darwin;
+			dependencies = {
+				build = (
+					CF,
+					DirectoryServiceMIG,
+					libsecurity_apple_csp,
+					libsecurity_apple_cspdl,
+					libsecurity_apple_file_dl,
+					libsecurity_apple_x509_cl,
+					libsecurity_apple_x509_tp,
+					libsecurity_asn1,
+					libsecurity_authorization,
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_cdsa_utils,
+					libsecurity_checkpw,
+					libsecurity_cms,
+					libsecurity_codesigning,
+					libsecurity_cssm,
+					libsecurity_filedb,
+					libsecurity_keychain,
+					libsecurity_manifest,
+					libsecurity_mds,
+					libsecurity_ocspd,
+					libsecurity_pkcs12,
+					libsecurity_sd_cspdl,
+					libsecurity_smime,
+					libsecurity_ssl,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
+			environment = {
+				RC_ARCHS = "ppc ppc64 i386 x86_64";
+			};
 			version = 31122;
 		};
 		SecurityTokend = {
+			dependencies = {
+				build = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+				header = (
+					SmartCardServices,
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			version = 32363;
 		};
 		SecurityTool = {
@@ -5858,7 +5912,11 @@
 		configd = {
 			dependencies = {
 				build = (
+					CF,
+					IOKitUser,
+					IOSerialFamily,
 					Libm,
+					Security,
 					Libsystem,
 					bash,
 					cctools,
@@ -5911,17 +5969,22 @@
 		configd_executables = {
 			dependencies = {
 				build = (
+					CF,
+					IOKitUser,
 					Libm,
+					Security,
 					Libsystem,
 					bash,
 					bsm,
 					cctools,
 					configd,
+					configd_plugins,
 					distcc,
 					file_cmds,
 					gcc,
 					gcc_os,
 					gcc_select,
+					libedit,
 					libgcc,
 					shell_cmds,
 					system_cmds,
@@ -5959,9 +6022,55 @@
 			target = configd_executables;
 		};
 		configd_plugins = {
+			dependencies = {
+				build = (
+					CF,
+					IOKitUser,
+					Libm,
+					Security,
+					Libsystem,
+					bash,
+					cctools,
+					configd,
+					distcc,
+					file_cmds,
+					gcc,
+					gcc_os,
+					gcc_select,
+					libgcc,
+					shell_cmds,
+					system_cmds,
+					text_cmds,
+					xnu,
+				);
+				header = (
+					AppleTalk,
+					IONetworkingFamily,
+					Libc_headers,
+					Libinfo,
+					Libm,
+					Libnotify,
+					Libsyscall,
+					architecture,
+					gcc,
+					launchd,
+					libdyld,
+					xnu,
+				);
+				lib = (
+					Libsystem,
+					configd,
+					dyld,
+					libgcc,
+				);
+				staticlib = (
+					Csu,
+					SystemStubs,
+				);
+			};
 			original = configd;
 			target = configd_plugins;
-			version = 91;
+			version = 212.2;
 		};
 		copyfile = {
 			dependencies = {
@@ -8914,48 +9023,110 @@
 			version = 19;
 		};
 		libsecurity_agent = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32091.1;
 		};
 		libsecurity_apple_csp = {
+			configuration = Darwin;
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_cdsa_utils,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32567;
 		};
 		libsecurity_apple_cspdl = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_keychain,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32466;
 		};
 		libsecurity_apple_file_dl = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_plugin,
+					libsecurity_filedb,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29159;
 		};
 		libsecurity_apple_x509_cl = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29856;
 		};
 		libsecurity_apple_x509_tp = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_ocspd,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32578;
 		};
 		libsecurity_asn1 = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29908;
 		};
 		libsecurity_authorization = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -8963,6 +9134,11 @@
 		};
 		libsecurity_cdsa_client = {
 			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
 				build = (
 				      Libsyscall,
 				      Kerberos,
@@ -8974,18 +9150,35 @@
 			version = 32432;
 		};
 		libsecurity_cdsa_plugin = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29159;
 		};
 		libsecurity_cdsa_utilities = {
+			dependencies = {
+				header = (
+					libsecurity_codesigning,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32432;
 		};
 		libsecurity_cdsa_utils = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -9018,12 +9211,25 @@
 			version = 29159;
 		};
 		libsecurity_cms = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32521;
 		};
 		libsecurity_codesigning = {
+			dependencies = {
+				header = (
+					CF,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -9031,6 +9237,11 @@
 		};
 		libsecurity_cssm = {
 			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
 				build = (
 					CF,
 					CarbonHeaders,
@@ -9050,18 +9261,36 @@
 			version = 31536;
 		};
 		libsecurity_dotmacdl = {
+			dependencies = {
+				header = (
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29745;
 		};
 		libsecurity_filedb = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32510;
 		};
 		libsecurity_filevault = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -9069,6 +9298,17 @@
 		};
 		libsecurity_keychain = {
 			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_cdsa_utils,
+					libsecurity_ocspd,
+					libsecurity_pkcs12,
+					libsecurity_utilities,
+					libsecurityd,
+					security_dotmac_tp,
+				);
 				     build = (
 				     	   file_cmds,
 					   cctools,
@@ -9090,48 +9330,105 @@
 			version = 32623;
 		};
 		libsecurity_ldap_dl = {
+			dependencies = {
+				header = (
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 30174;
 		};
 		libsecurity_manifest = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29384;
 		};
 		libsecurity_mds = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_filedb,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32449;
 		};
 		libsecurity_ocspd = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29518;
 		};
 		libsecurity_pkcs12 = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_utilities,
+					libsecurity_cdsa_utils,
+					libsecurity_keychain,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 32085;
 		};
 		libsecurity_sd_cspdl = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29159;
 		};
 		libsecurity_smime = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			version = 29908;
 		};
 		libsecurity_ssl = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -9162,6 +9459,7 @@
 					Libm,
 					Libnotify,
 					Libsyscall,
+					SmartCardServices,
 					architecture,
 					bsm,
 					cctools_ofiles,
@@ -9178,6 +9476,13 @@
 			version = 32566;
 		};
 		libsecurityd = {
+			dependencies = {
+				header = (
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -11429,6 +11734,14 @@
 			version = 31832;
 		};
 		security_dotmac_tp = {
+			dependencies = {
+				header = (
+					libsecurity_asn1,
+					libsecurity_cdsa_plugin,
+					libsecurity_cdsa_utils,
+					libsecurity_utilities,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -11444,6 +11757,26 @@
 			version = 32626;
 		};
 		securityd = {
+			dependencies = {
+				build = (
+					Security,
+					SecurityTokend,
+					libsecurity_agent,
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+				header = (
+					SecurityTokend,
+					SmartCardServices,
+					libsecurity_agent,
+					libsecurity_cdsa_client,
+					libsecurity_cdsa_utilities,
+					libsecurity_utilities,
+					libsecurityd,
+				);
+			};
 			version = 32661;
 		};
 		shell_cmds = {

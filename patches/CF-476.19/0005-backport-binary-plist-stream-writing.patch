@@ -1,0 +1,37 @@
+PowerDarwin D62, 2026-11-20: changes to CF 476.19, under the licence of the files changed.
+--- a/CFBinaryPList.c
++++ b/CFBinaryPList.c
+@@ -40,6 +40,7 @@
+ #include <limits.h>
+ #include <string.h>
+ #include "CFInternal.h"
++#include <CoreFoundation/CFStream.h>
+ 
+ typedef struct {
+     int64_t high;
+@@ -167,7 +168,25 @@
+         CFDataAppendBytes((CFMutableDataRef)buf->stream, bytes, length);
+         buf->written += length;
+     } else {
++#if DEPLOYMENT_TARGET_MACOSX
++	while (0 < length) {
++	    CFIndex ret = CFWriteStreamWrite((CFWriteStreamRef)buf->stream, bytes, length);
++            if (ret == 0) {
++		buf->error = CFRetain(CFSTR("Binary property list writing could not be completed because stream is full."));
++                return;
++            }
++            if (ret < 0) {
++                CFErrorRef err = CFWriteStreamCopyError((CFWriteStreamRef)buf->stream);
++                buf->error = err ? (CFTypeRef)err : CFRetain(CFSTR("Binary property list writing could not be completed because the stream had an unknown error."));
++                return;
++            }
++	    buf->written += ret;
++	    length -= ret;
++	    bytes += ret;
++	}
++#else
+         CFAssert(false, __kCFLogAssertion, "Streams are not supported on this platform");
++#endif
+     }
+ }
+ 

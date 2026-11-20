@@ -1,0 +1,19 @@
+#!/bin/sh
+out=
+grammar=
+while [ $# -gt 0 ]; do
+   case $1 in
+      -cp|-classpath) shift ;;
+      -o) shift; out=$1 ;;
+      -*|antlr.Tool|"") ;;
+      *) grammar=$1 ;;
+   esac
+   shift
+done
+generated=/usr/local/share/antlr2/$(cksum < "$grammar" | awk '{print $1}')
+if [ -z "$out" ] || [ ! -d "$generated" ]; then
+   echo "java: no ANTLR output made beforehand for $grammar (see env/antlr2/generate)" >&2
+   exit 1
+fi
+mkdir -p "$out"
+cp "$generated"/* "$out"/

@@ -26,10 +26,12 @@ Earlier work, tools and sources for building Darwin on PowerPC, as found on 2026
 - [darwin-xtools](https://github.com/barracuda156/darwin-xtools): updated cctools and ld64 that still target ppc.
 - [VariantXYZ/gcc-powerpc-apple-darwin8](https://github.com/VariantXYZ/gcc-powerpc-apple-darwin8): Docker cross toolchain for Tiger on PowerPC.
 - [Scottcjn/darwin-ppc-gpu](https://github.com/Scottcjn/darwin-ppc-gpu) (2026): IOKit drivers for modern AMD GPUs on PowerPC Tiger and Leopard, mostly design documents so far.
+- NetBSD's macppc [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`pmu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/pmu.c) (BSD licence): the clock, power-off and restart commands of the SMU and the PMU, for a stand-in for Apple's closed AppleSMU and ApplePMU. Linux's `drivers/macintosh/smu.c` and `via-pmu.c` describe the same, under GPL-2.0-only.
 
 ## Apple's sources and binaries
 
 - [apple-oss-distributions](https://github.com/apple-oss-distributions) (since 4 October 2021): one repo per project, one tag per version; 372 of the 386 versioned 9L30 projects have their exact tag. Index: [opensource.apple.com/releases](https://opensource.apple.com/releases/) ("Mac OS X 10.5.8", 369 projects).
 - The old `opensource.apple.com/release/mac-os-x-1058/` pages and tarballs, now only on the Wayback Machine.
 - darwinbuild's Roots, `src.macosforge.org/Roots/<build>/`, only on the Wayback Machine, which refuses connections after a burst of requests; `scripts/fetch-roots` paces itself. [darwinbuild-dev, July 2010](https://lists.macosforge.org/pipermail/darwinbuild-dev/2010-July/000641.html) confirms where they were served from.
+- Later Apple releases that fixes are backported from: CF-550 and DirectoryService-621 (Mac OS X 10.6), CF-635 (Mac OS X 10.7), Security-55471 (OS X 10.9), whose `libsecurity_codesigning/antlr2` holds ANTLR 2.7.7, and [swiftlang/swift-corelibs-foundation](https://github.com/swiftlang/swift-corelibs-foundation), Apple's later open CoreFoundation, under Apache 2.0 with Runtime Library Exception.
 - Xcode 3.1.4 (`xcode314_2809_developerdvd.dmg`), from developer.apple.com/download/all with a free Apple account.

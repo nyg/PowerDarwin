@@ -1,0 +1,11 @@
+PowerDarwin D52, 2026-11-20: changes to libsecurity_keychain 36620, under the licence of the files changed.
+--- a/lib/KCEventNotifier.h
++++ b/lib/KCEventNotifier.h
+@@ -28,7 +28,6 @@
+ #ifndef _SECURITY_KCEVENTNOTIFIER_H_
+ #define _SECURITY_KCEVENTNOTIFIER_H_
+ 
+-#include <CoreFoundation/CFNotificationCenter.h>
+ #include <CoreFoundation/CFString.h>
+ #include <security_keychain/Item.h>
+ #include <securityd_client/dictionary.h>

@@ -1,0 +1,64 @@
+PowerDarwin D55, 2026-11-20: changes to Security 36371, under the licence of the files changed.
+--- a/lib/generateErrStrings.pl
++++ b/lib/generateErrStrings.pl
+@@ -235,7 +235,8 @@
+ #include <iostream>
+ #include <fstream>
+ #include <CoreFoundation/CoreFoundation.h>
+-#include <Foundation/Foundation.h>
++#include <string>
++#include <iterator>
+ 
+ using namespace std;
+ AdditionalIncludes
+@@ -275,32 +276,25 @@
+ 
+ void writeStrings(const char *stringsFileName)
+ {
+-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+-	NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:@"generateErrStrings.tmp"];
+-	NSData *rawstrings = [fh readDataToEndOfFile];
+-	UInt32 encoding = CFStringConvertEncodingToNSStringEncoding (kCFStringEncodingUTF8);
+-	NSString *instring = [[NSString alloc] initWithData:rawstrings encoding:(NSStringEncoding)encoding];
++	ifstream fh("generateErrStrings.tmp");
++	string rawstrings((istreambuf_iterator<char>(fh)), istreambuf_iterator<char>());
++	CFStringRef utf8 = CFStringCreateWithBytes(NULL, (const UInt8 *)rawstrings.data(), rawstrings.size(), kCFStringEncodingUTF8, false);
++	CFMutableStringRef instring = utf8 ? CFStringCreateMutableCopy(NULL, 0, utf8) : NULL;
+ 	
+ 	/* temporary fix to avoid relocalization of two specific strings which have already been fixed in header files */
+ 	if (instring)
+ 	{
+-		instring = [instring stringByReplacingOccurrencesOfString:@"\\\"-2147408896\\\" = \\\"Host name mismatch\\\"" withString:@"\\\"-2147408896\\\" = \\\"mismatch between Cert-s common name and app-specified host name\\\""];
+-		instring = [instring stringByReplacingOccurrencesOfString:@"\\\"-2147408883\\\" = \\\"Cannot find appropriate CRL\\\"" withString:@"\\\"-2147408883\\\" = \\\"Can-t find appropriate CRL\\\""];
++		CFStringFindAndReplace(instring, CFSTR("\\\"-2147408896\\\" = \\\"Host name mismatch\\\""), CFSTR("\\\"-2147408896\\\" = \\\"mismatch between Cert-s common name and app-specified host name\\\""), CFRangeMake(0, CFStringGetLength(instring)), 0);
++		CFStringFindAndReplace(instring, CFSTR("\\\"-2147408883\\\" = \\\"Cannot find appropriate CRL\\\""), CFSTR("\\\"-2147408883\\\" = \\\"Can-t find appropriate CRL\\\""), CFRangeMake(0, CFStringGetLength(instring)), 0);
+ 	}
+ 
+ 
+ 	if (instring)
+ 	{
+-		NSString *path = [NSString stringWithUTF8String:stringsFileName];
+-		NSFileManager *fm = [NSFileManager defaultManager];
+-		if ([fm fileExistsAtPath:path])
+-			[fm removeFileAtPath:path handler:nil];
+-		BOOL bx = [fm createFileAtPath:path contents:nil attributes:nil];
+-		NSFileHandle *fs = [NSFileHandle fileHandleForWritingAtPath:path];
+-		[fs writeData:[instring dataUsingEncoding:NSUnicodeStringEncoding]];
++		CFDataRef data = CFStringCreateExternalRepresentation(NULL, instring, kCFStringEncodingUnicode, 0);
++		ofstream fs(stringsFileName, ios::out | ios::trunc | ios::binary);
++		fs.write((const char *)CFDataGetBytePtr(data), CFDataGetLength(data));
+ 	}
+-
+-	[pool release];
+ }
+ 
+ void createStringsTemp()
+@@ -339,7 +333,7 @@
+ 	die "$compile exited funny: $?" unless $status == 0;
+ 
+ 	$status = system( <<"LINKERSTEP");
+-(cd ${TMPDIR} ; /usr/bin/g++ -o generateErrStrings generateErrStrings.o -framework Foundation )
++(cd ${TMPDIR} ; /usr/bin/g++ -o generateErrStrings generateErrStrings.o -framework CoreFoundation )
+ LINKERSTEP
+ 	die "$linker exited funny: $?" unless $status == 0;
+ 

@@ -1,0 +1,12 @@
+PowerDarwin D53, 2026-11-20: changes to DirectoryService 514.25, under the licence of the files changed.
+--- a/DirectoryService.xcodeproj/project.pbxproj
++++ b/DirectoryService.xcodeproj/project.pbxproj
+@@ -2728,7 +2728,7 @@
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 1;
+ 			shellPath = /bin/sh;
+-			shellScript = "if [ ! -e \"${DSTROOT}/usr/local/include\" ] ; then\n\t/bin/mkdir \"${DSTROOT}/usr/local/include\"\nfi\n\ncp \"$DERIVED_FILES_DIR/DirectoryServiceMIG.h\" \"$DSTROOT/usr/local/include/DirectoryServiceMIG.h\"\ncp \"$DERIVED_FILES_DIR/DSlibinfoMIG.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIG.h\"\ncp \"$DERIVED_FILES_DIR/DSlibinfoMIGAsyncReplyServer.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIGAsyncReplyServer.h\"\ncp \"$DERIVED_FILES_DIR/DSmemberdMIG.h\" \"$DSTROOT/usr/local/include/DSmemberdMIG.h\"";
++			shellScript = "if [ ! -e \"${DSTROOT}/usr/local/include\" ] ; then\n\t/bin/mkdir \"${DSTROOT}/usr/local/include\"\nfi\n\nif [ -e \"$DERIVED_FILES_DIR/i386\" ] ; then\n\tcp \"$DERIVED_FILES_DIR/i386/DirectoryServiceMIG.h\" \"$DSTROOT/usr/local/include/DirectoryServiceMIG.h\"\n\tcp \"$DERIVED_FILES_DIR/i386/DSlibinfoMIG.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIG.h\"\n\tcp \"$DERIVED_FILES_DIR/i386/DSlibinfoMIGAsyncReplyServer.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIGAsyncReplyServer.h\"\n\tcp \"$DERIVED_FILES_DIR/i386/DSmemberdMIG.h\" \"$DSTROOT/usr/local/include/DSmemberdMIG.h\"\nelse\n\tcp \"$DERIVED_FILES_DIR/DirectoryServiceMIG.h\" \"$DSTROOT/usr/local/include/DirectoryServiceMIG.h\"\n\tcp \"$DERIVED_FILES_DIR/DSlibinfoMIG.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIG.h\"\n\tcp \"$DERIVED_FILES_DIR/DSlibinfoMIGAsyncReplyServer.h\" \"$DSTROOT/usr/local/include/DSlibinfoMIGAsyncReplyServer.h\"\n\tcp \"$DERIVED_FILES_DIR/DSmemberdMIG.h\" \"$DSTROOT/usr/local/include/DSmemberdMIG.h\"\nfi";
+ 		};
+ 		6BC41A470BA992340076A5A3 /* ShellScript */ = {
+ 			isa = PBXShellScriptBuildPhase;

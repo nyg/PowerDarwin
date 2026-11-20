@@ -1,0 +1,12 @@
+PowerDarwin D43, 2026-11-20: changes to system_cmds 433.8, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -2,7 +2,7 @@
+ 
+ Embedded=$(shell tconf --test TARGET_OS_EMBEDDED)
+ 
+-SubProjects = dynamic_pager.tproj ac.tproj accton.tproj arch.tproj\
++SubProjects = dynamic_pager.tproj ac.tproj accton.tproj\
+ 	bootlog.tproj\
+         dmesg.tproj\
+         getconf.tproj getty.tproj hostinfo.tproj iostat.tproj\
