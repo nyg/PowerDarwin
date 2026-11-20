@@ -1,0 +1,271 @@
+#!/bin/bash
+set -euo pipefail
+
+all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60"
+usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]  (steps: all, $all_steps)"
+
+on_mac() {
+   local host=${1:?$usage}
+   shift
+   local check= folder='$HOME/9L30' steps=()
+   for arg in "$@"; do
+      case $arg in
+         --check) check=--check ;;
+         --folder=*) folder=${arg#--folder=} ;;
+         all) steps+=($all_steps) ;;
+         *)
+            [[ " $all_steps " == *" $arg "* ]] || { echo "$usage" >&2; exit 1; }
+            steps+=("$arg") ;;
+      esac
+   done
+   [[ ${#steps[@]} -gt 0 ]] || steps=($all_steps)
+
+   local root
+   root=$(cd "$(dirname "$0")/.." && pwd)
+   stage=$(mktemp -d)
+   trap 'rm -rf "$stage"' EXIT
+   mkdir -p "$stage/scripts" "$stage/inputs" "$stage/manifest/plists"
+   cp "$0" "$stage/scripts/prepare-buildroot"
+   cp -R "$root/env" "$root/replacements" "$stage/"
+   cp "$root/manifest/plists/9A581.plist" "$stage/manifest/plists/"
+
+   local step
+   for step in "${steps[@]}"; do
+      case $step in
+         D37)
+            local scsi=IOSCSIArchitectureModelFamily-139.0.2
+            tar -xzOf "$root/sources/$scsi.tar.gz" "IOSCSIArchitectureModelFamily-$scsi/IOSCSIArchitectureModel/SCSITaskDefinition.h" > "$stage/inputs/SCSITaskDefinition.h" ;;
+         D49)
+            JAVA=${JAVA:-$(/usr/libexec/java_home)/bin/java} "$root/env/antlr2/generate" "$stage/inputs/antlr2" ;;
+      esac
+   done
+
+   local remote
+   remote=$(ssh "$host" 'mktemp -d /tmp/prepare-buildroot.XXXXXX')
+   COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $remote"
+   ssh "$host" "sudo /bin/bash $remote/scripts/prepare-buildroot --here \"$folder\" $check ${steps[*]}; status=\$?; sudo rm -rf $remote; exit \$status"
+}
+
+say() { printf '%-6s %s\n' "$1" "$2"; }
+
+show() {
+   local path=${1#$here/inputs/}
+   path=${path#$folder/}
+   [[ $path == "$build" ]] && path=BuildRoot || path=${path/#$build\//BuildRoot/}
+   echo "$path"
+}
+
+file_state() {
+   if [[ ! -e $2 && ! -L $2 ]]; then echo missing
+   elif cmp -s "$1" "$2"; then echo same
+   else echo differs; fi
+}
+
+tree_state() {
+   local src=$1 dest=$2 total=0 changed=0 file
+   while IFS= read -r file; do
+      total=$((total + 1))
+      cmp -s "$src/$file" "$dest/$file" || changed=$((changed + 1))
+   done < <(cd "$src" && find . -type f)
+   [[ $changed -eq 0 ]] && echo same || echo "$changed of $total files differ or are missing"
+}
+
+put_file() {
+   local step=$1 src=$2 dest=$3 mode=$4 state
+   state=$(file_state "$src" "$dest")
+   if [[ $state == same ]]; then say "$step" "in place: $(show "$dest")"; return; fi
+   if [[ -n $check ]]; then say "$step" "$state: $(show "$dest")"; return; fi
+   install -d "$(dirname "$dest")"
+   install -o root -g wheel -m "$mode" "$src" "$dest"
+   say "$step" "installed $(show "$dest")"
+}
+
+put_tree() {
+   local step=$1 src=$2 dest=$3 state
+   state=$(tree_state "$src" "$dest")
+   if [[ $state == same ]]; then say "$step" "in place: $(show "$src") in $(show "$dest")"; return; fi
+   if [[ -n $check ]]; then say "$step" "$state: $(show "$src") in $(show "$dest")"; return; fi
+   ditto "$src" "$dest"
+   say "$step" "copied $(show "$src") into $(show "$dest")"
+}
+
+put_tarball() {
+   local step=$1 tarball=$2 work state
+   [[ -f $tarball ]] || { say "$step" "waiting: no $tarball (scripts/stage-roots)"; return; }
+   work=$(mktemp -d /tmp/prepare-buildroot.XXXXXX)
+   tar -xzpf "$tarball" -C "$work"
+   state=$(tree_state "$work" "$build")
+   rm -rf "$work"
+   if [[ $state == same ]]; then say "$step" "in place: $(basename "$tarball")"; return; fi
+   if [[ -n $check ]]; then say "$step" "$state: $(basename "$tarball")"; return; fi
+   tar -xzpf "$tarball" -C "$build"
+   say "$step" "unpacked $(basename "$tarball")"
+}
+
+latest() { ls -d "$folder/$1/$2/$2"-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1; }
+
+put_root() {
+   local step=$1 project=$2 found
+   found=$(latest Roots "$project")
+   [[ -n $found ]] || { say "$step" "waiting: no Root of $project (darwinbuild $project)"; return; }
+   put_tree "$step" "$found" "$build"
+}
+
+build_in_chroot() {
+   local step=$1 name=$2 src=$3
+   if [[ -n $check ]]; then say "$step" "missing: $name, built in the build environment"; return; fi
+   [[ -x $build/usr/bin/cc ]] || { say "$step" "waiting: no compiler in the build environment yet"; return; }
+   rm -rf "$build/private/tmp/prepare-$name" "$build/private/tmp/prepare-$name-root"
+   ditto "$src" "$build/private/tmp/prepare-$name"
+   chroot "$build" /bin/sh "/private/tmp/prepare-$name/build" "/private/tmp/prepare-$name-root"
+   ditto "$build/private/tmp/prepare-$name-root" "$build"
+   rm -rf "$build/private/tmp/prepare-$name" "$build/private/tmp/prepare-$name-root"
+   say "$step" "built $name in the build environment"
+}
+
+kernel=System/Library/Frameworks/Kernel.framework/Versions/A
+
+step_plist() {
+   local list=$folder/.build/9A581.plist
+   if [[ $(file_state "$here/manifest/plists/9A581.plist" "$list") == same ]]; then say plist "in place: .build/9A581.plist"; return; fi
+   if [[ -n $check ]]; then say plist "differs: .build/9A581.plist"; return; fi
+   cp "$here/manifest/plists/9A581.plist" "$list"
+   (cd "$folder" && /usr/local/bin/darwinxref loadIndex .build/9A581.plist)
+   say plist "copied and loaded .build/9A581.plist"
+}
+
+step_D4() { put_tarball D4 "$folder/Roots/.DownloadCache/OpenSSL.root.tar.gz"; }
+
+step_D5() {
+   local found
+   found=$(latest Headers launchd_libs)
+   [[ -n $found ]] || { say D5 "waiting: no launchd_libs headers (darwinbuild -headers -target=launchd_libs launchd_libs)"; return; }
+   put_tree D5 "$found" "$folder/Headers/launchd/launchd-258.25.hdrs~1"
+}
+
+step_D6() { put_file D6 "$here/env/arch" "$build/usr/bin/arch" 555; }
+
+step_D7() {
+   local wrapper=$build/usr/bin/dsymutil
+   if [[ $(file_state "$here/env/dsymutil" "$wrapper") == same && -x $wrapper.real ]]; then say D7 "in place: usr/bin/dsymutil, usr/bin/dsymutil.real"; return; fi
+   [[ -e $wrapper ]] || { say D7 "waiting: darwinbuild has not copied dsymutil into the build environment yet"; return; }
+   if [[ -n $check ]]; then say D7 "differs: usr/bin/dsymutil"; return; fi
+   [[ -e $wrapper.real ]] || mv "$wrapper" "$wrapper.real"
+   install -o root -g wheel -m 755 "$here/env/dsymutil" "$wrapper"
+   say D7 "installed usr/bin/dsymutil, the real one kept as usr/bin/dsymutil.real"
+}
+
+step_D8() { put_file D8 "$here/env/quarantine.h" "$build/usr/local/include/quarantine.h" 644; }
+
+step_D9() { put_root D9 project_makefiles; }
+
+step_D10() { put_tarball D10 "$folder/Roots/.DownloadCache/CarbonHeaders.root.tar.gz"; }
+
+step_D13() {
+   local lib=$build/usr/local/lib/system
+   if [[ -f $lib/libsandbox.a && -f $lib/libsandbox_debug.a && -f $lib/libsandbox_profile.a && $(file_state "$here/replacements/sandbox/sandbox.h" "$build/usr/include/sandbox.h") == same ]]; then
+      say D13 "in place: libsandbox.a, libsandbox_debug.a, libsandbox_profile.a, sandbox.h"
+   else
+      build_in_chroot D13 sandbox "$here/replacements/sandbox"
+   fi
+}
+
+step_D14() {
+   local project
+   for project in mDNSResponder launchd_libs Libc_debug Libc_profile; do put_root D14 "$project"; done
+}
+
+step_D15() {
+   local lib=$build/usr/local/lib/system
+   if [[ -f $lib/libquarantine.a && -f $lib/libquarantine_debug.a && -f $lib/libquarantine_profile.a ]]; then
+      say D15 "in place: libquarantine.a, libquarantine_debug.a, libquarantine_profile.a"
+   else
+      build_in_chroot D15 quarantine "$here/replacements/quarantine"
+   fi
+}
+
+step_D18() {
+   local found
+   found=$(latest Headers IOBDStorageFamily)
+   [[ -n $found ]] || { say D18 "waiting: no IOBDStorageFamily headers (darwinbuild -headers IOBDStorageFamily)"; return; }
+   put_tree D18 "$found/System/Library" "$build/System/Library"
+}
+
+step_D19() { put_root D19 bzip2; }
+
+step_D24() {
+   put_file D24 /usr/bin/ruby "$build/usr/bin/ruby" 755
+   put_tree D24 /System/Library/Frameworks/Ruby.framework "$build/System/Library/Frameworks/Ruby.framework"
+}
+
+step_D30() {
+   local link=$build/$kernel/Headers/TargetConditionals.h target=../../../../../../../usr/include/TargetConditionals.h
+   if [[ -L $link && $(readlink "$link") == "$target" ]]; then say D30 "in place: $(show "$link")"; return; fi
+   if [[ -n $check ]]; then say D30 "missing: $(show "$link")"; return; fi
+   install -d "$(dirname "$link")"
+   ln -sfn "$target" "$link"
+   say D30 "linked $(show "$link")"
+}
+
+step_D36() { put_tree D36 "/Developer/SDKs/MacOSX10.5.sdk/$kernel/Headers/IOKit/scsi" "$build/$kernel/Headers/IOKit/scsi"; }
+
+step_D37() { put_file D37 "$here/inputs/SCSITaskDefinition.h" "$build/$kernel/PrivateHeaders/IOKit/scsi/SCSITaskDefinition.h" 644; }
+
+step_D40() {
+   local found
+   found=$(latest Headers IOATABlockStorage)
+   [[ -n $found ]] || { say D40 "waiting: no IOATABlockStorage headers (darwinbuild -headers IOATABlockStorage 130.3.1)"; return; }
+   put_tree D40 "$found/System" "$build/System"
+}
+
+step_D49() {
+   local made=$here/inputs/antlr2
+   put_tree D49 "$made/usr/local/share/antlr2" "$build/usr/local/share/antlr2"
+   put_tree D49 "$made/usr/local/include/antlr" "$build/usr/local/include/antlr"
+   put_file D49 "$here/env/java" "$build/usr/bin/java" 755
+   if [[ -f $build/usr/local/lib/libantlr2c++.a ]]; then say D49 "in place: usr/local/lib/libantlr2c++.a"; return; fi
+   if [[ -n $check ]]; then say D49 "missing: usr/local/lib/libantlr2c++.a"; return; fi
+   [[ -x $build/usr/bin/cc ]] || { say D49 "waiting: no compiler in the build environment yet"; return; }
+   rm -rf "$build/private/tmp/prepare-antlr2"
+   ditto "$made" "$build/private/tmp/prepare-antlr2"
+   chroot "$build" /bin/sh /private/tmp/prepare-antlr2/src/build-antlr2 /private/tmp/prepare-antlr2
+   install -o root -g wheel -m 644 "$build/private/tmp/prepare-antlr2/usr/local/lib/libantlr2c++.a" "$build/usr/local/lib/libantlr2c++.a"
+   rm -rf "$build/private/tmp/prepare-antlr2"
+   say D49 "built usr/local/lib/libantlr2c++.a in the build environment"
+}
+
+step_D59() {
+   local header=$folder/Sources/samba-187.8/tools/prefsync/include/smb_server_prefs.h
+   [[ -f $header ]] || { say D59 "waiting: samba 187.8 not staged (scripts/stage-sources <host> samba)"; return; }
+   put_file D59 "$header" "$build/usr/local/include/smb_server_prefs.h" 644
+}
+
+step_D60() {
+   local src=$folder/Sources/IOSerialFamily-32.2/IOSerialFamily.kmodproj header
+   [[ -d $src ]] || { say D60 "waiting: IOSerialFamily 32.2 not staged (scripts/stage-sources <host> IOSerialFamily)"; return; }
+   for header in IOModemSerialStreamSync.h IORS232SerialStreamSync.h IOSerialDriverSync.h IOSerialKeys.h IOSerialStreamSync.h; do
+      put_file D60 "$src/$header" "$build/$kernel/Headers/IOKit/serial/$header" 644
+   done
+   for header in IOSerialKeys.h ioss.h; do
+      put_file D60 "$src/$header" "$build/System/Library/Frameworks/IOKit.framework/Versions/A/Headers/serial/$header" 644
+   done
+}
+
+on_build_machine() {
+   folder=$1
+   shift
+   check=
+   [[ ${1:-} == --check ]] && { check=1; shift; }
+   here=$(cd "$(dirname "$0")/.." && pwd)
+   build=$(cd "$folder/BuildRoot" 2>/dev/null && pwd -P) || { echo "no build environment at $folder/BuildRoot: run darwinbuild once to make and mount it" >&2; exit 1; }
+   [[ -d $build/usr ]] || { echo "$build is not mounted: run darwinbuild once to mount it" >&2; exit 1; }
+   local step
+   for step in "$@"; do "step_$step"; done
+}
+
+if [[ ${1:-} == --here ]]; then
+   shift
+   on_build_machine "$@"
+else
+   on_mac "$@"
+fi

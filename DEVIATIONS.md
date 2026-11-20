@@ -2,6 +2,8 @@
 
 Every difference from Apple's published sources and build environment, one row each.
 
+The `build-env` rows that put files into the build environment are applied by [scripts/prepare-buildroot](scripts/prepare-buildroot), one step per row.
+
 | ID | Project | Kind | Change | Error it fixes | Upstream |
 |---|---|---|---|---|---|
 | D1 | all | `build-env` | Each source tarball from Apple's GitHub is unpacked and its top folder renamed from `<project>-<project>-<version>` to `<project>-<version>`, then placed in the build folder's `Sources/`, where darwinbuild takes a plain folder. Contents unchanged. | darwinbuild looks for `Sources/<project>-<version>`; GitHub names the folder after repo and tag. | none |

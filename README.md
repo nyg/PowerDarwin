@@ -31,6 +31,7 @@ Booted on the iMac G5, the image brings up its Ethernet port and accepts SSH log
 - `replacements/`: new code standing in for a closed Apple library, each listed in DEVIATIONS.md.
 - `scripts/fetch-sources [project...]`: downloads the `github` sources, or the named projects including `archive` ones from the Wayback Machine, into `sources/` (not committed), records the hash of each new tarball and checks them all.
 - `scripts/resolve-buildlist`, `scripts/fetch-roots`, `scripts/stage-sources`, `scripts/stage-roots`: work out each project's version and build, fetch darwinbuild's Roots from the Wayback Machine, and copy sources and Roots to the build machine.
+- `scripts/prepare-buildroot <host>`: puts the build-environment workarounds of DEVIATIONS.md into the build machine's build environment, or with `--check` reports which are in place.
 - `scripts/make-test-image` (run on the build machine) and `scripts/boot-qemu`: make an Apple-partitioned HFS+ test image and boot it in QEMU `mac99`, optionally with a CD image. The image's root password is the DES hash in `~/9L30/root-password.hash` on the build machine (`openssl passwd -crypt -stdin`); without that file, root cannot log in.
 - `reference/`: what the reference system runs, and a description of Andrew-R's darwinbuild patch.
 - [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
@@ -42,10 +43,11 @@ A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub
 1. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md), [D25](DEVIATIONS.md)).
 2. `scripts/stage-sources <host> <project>...` unpacks the GitHub tarballs as `<project>-<version>` (`<project>=<version>` for a replacement at another version, [D40](DEVIATIONS.md)) into `~/9L30/Sources` ([D1](DEVIATIONS.md)), applies the project's patches and touches the files listed in its `touch` file ([D20](DEVIATIONS.md)).
 3. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
-4. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>` (Leopard's sudo has no `/usr/local/bin` in its path). Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
-5. A failure is fixed by rule 3 and listed in DEVIATIONS.md.
+4. `scripts/prepare-buildroot <host>` puts the build-environment workarounds in place (below).
+5. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>` (Leopard's sudo has no `/usr/local/bin` in its path). Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
+6. A failure is fixed by rule 3 and listed in DEVIATIONS.md.
 
-The build environment (`~/9L30/BuildRoot`, a sparse disk image) holds workarounds put there by hand: [D4](DEVIATIONS.md), [D6](DEVIATIONS.md) to [D10](DEVIATIONS.md), [D13](DEVIATIONS.md) to [D15](DEVIATIONS.md), [D18](DEVIATIONS.md), [D19](DEVIATIONS.md), [D24](DEVIATIONS.md), [D30](DEVIATIONS.md), [D36](DEVIATIONS.md), [D37](DEVIATIONS.md), [D40](DEVIATIONS.md), [D49](DEVIATIONS.md), and the 9L30 `IOKitUser.hdrs` and `AppleDisplays` Roots from the first IOKitUser attempts. Re-apply them if it is recreated.
+The build environment (`~/9L30/BuildRoot`, a sparse disk image) needs files that darwinbuild does not put there. `scripts/prepare-buildroot <host> [--check] [step...]` places them, one step per deviation: [D4](DEVIATIONS.md), [D5](DEVIATIONS.md), [D6](DEVIATIONS.md), [D7](DEVIATIONS.md), [D8](DEVIATIONS.md), [D9](DEVIATIONS.md), [D10](DEVIATIONS.md), [D13](DEVIATIONS.md), [D14](DEVIATIONS.md), [D15](DEVIATIONS.md), [D18](DEVIATIONS.md), [D19](DEVIATIONS.md), [D24](DEVIATIONS.md), [D30](DEVIATIONS.md), [D36](DEVIATIONS.md), [D37](DEVIATIONS.md), [D40](DEVIATIONS.md), [D49](DEVIATIONS.md), [D59](DEVIATIONS.md), [D60](DEVIATIONS.md); its `plist` step copies `manifest/plists/9A581.plist` into `~/9L30/.build/` and reloads it with `darwinxref loadIndex`. A step already in place is left alone, and a step whose input is not built or staged yet says so and waits, so the script is rerun after the build that unblocks it; `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later. The 9L30 `IOKitUser.hdrs` and `AppleDisplays` Roots left in the build environment by the first IOKitUser attempts are not part of it.
 
 ## Status
 
