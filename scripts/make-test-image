@@ -4,9 +4,8 @@ set -e
 roots=~/9L30/Roots
 userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
-mount=/Volumes/Darwin9
-kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C"
-reference_kexts="IOATAFamily.kext/Contents/PlugIns/IOATABlockStorage.kext"
+mount=/Volumes/Darwin9-image
+kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
@@ -21,9 +20,6 @@ sudo rm -f $mount/mach_kernel.ctfsys
 
 for project in $kext_projects; do
    sudo ditto "$(latest $project)/System/Library/Extensions" $mount/System/Library/Extensions
-done
-for kext in $reference_kexts; do
-   sudo ditto /System/Library/Extensions/$kext $mount/System/Library/Extensions/$kext
 done
 sudo ditto "$(latest BootX)" $mount
 sudo mkdir -p $mount/System/Library/CoreServices

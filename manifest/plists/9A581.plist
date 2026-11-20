@@ -2242,6 +2242,28 @@
 			version = 6;
 		};
 		IOATABlockStorage = {
+			dependencies = {
+				build = (
+					bash,
+					distcc,
+					file_cmds,
+					gcc,
+					gcc_os,
+					gcc_select,
+					jam,
+					shell_cmds,
+					system_cmds,
+				);
+				header = (
+					IOATAFamily,
+					IOStorageFamily,
+					xnu,
+				);
+				staticlib = (
+					Libcpp_kext,
+					xnu,
+				);
+			};
 			version = 200.1.8;
                         binary_sites = (
                                 "http://src.macosforge.org/BinaryDrivers/9A581/",
