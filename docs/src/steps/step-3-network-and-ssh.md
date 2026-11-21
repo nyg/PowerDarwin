@@ -154,6 +154,7 @@ and `pam_strerror` spells that "User account has expired". The console was not a
 - [D76](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d76): DirectoryService's framework is built without the Objective-C helper library for plug-ins written on the closed Foundation.
 - [D77](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d77): the daemon is built without XSEventPort, a closed Mac OS X Server library, using the switch its source already has.
 - [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78): darwinbuild's copy of Xcode misplaced `APPLE_INTERNAL_DEVELOPER_DIR`, where the daemon looks for SASL's headers; the build list now sets it.
+- [D96](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d96): the daemon includes or links CF, ICU, IOKit, Security, SQLite and Cyrus SASL, none of which the build list names, so their projects become its dependencies.
 
 ## How it was proved
 
@@ -179,7 +180,7 @@ From another Mac on the network, a current OpenSSH client logged in as root, wit
 
 ## Where to look
 
-- DEVIATIONS.md, [D63](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d63) to [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80).
+- DEVIATIONS.md, [D63](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d63) to [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), and [D96](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d96).
 - [patches/DirectoryService-514.25/](https://github.com/nyg/PowerDarwin/blob/master/patches/DirectoryService-514.25/), [patches/pam-32.1/](https://github.com/nyg/PowerDarwin/blob/master/patches/pam-32.1/), [patches/Kerberos-75.10.11/](https://github.com/nyg/PowerDarwin/blob/master/patches/Kerberos-75.10.11/), [patches/bootp-170.1/](https://github.com/nyg/PowerDarwin/blob/master/patches/bootp-170.1/), [patches/passwordserver_sasl-118.1/](https://github.com/nyg/PowerDarwin/blob/master/patches/passwordserver_sasl-118.1/).
 - [env/CoreServices/](https://github.com/nyg/PowerDarwin/blob/master/env/CoreServices/), [env/ApplicationServices/](https://github.com/nyg/PowerDarwin/blob/master/env/ApplicationServices/), [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist).
 - [scripts/boot-qemu](https://github.com/nyg/PowerDarwin/blob/master/scripts/boot-qemu) (the `sungem` card and the forwarded SSH port) and [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) (`root.plist` and `ssh.plist`).
