@@ -271,7 +271,7 @@ bool OpenSMU::readSensor(OpenSMUSensor *sensor)
    case kSensorLM75:
       if (readI2C(sensor, 0, data, sizeof(data)) != kIOReturnSuccess)
          return false;
-      sensor->temperature = (SInt16)((data[0] << 8) | data[1]) * 256;
+      sensor->temperature = (SInt16)(((data[0] << 8) | data[1]) & 0xff80) * 256;
       return true;
    case kSensorMAX6690:
       if (readI2C(sensor, sensor->reg, &data[0], 1) != kIOReturnSuccess
