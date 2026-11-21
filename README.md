@@ -22,6 +22,18 @@ Logged in over SSH on the iMac G5, everyday commands work: `grep`, `ps`, `less` 
 
 On the iMac G5, `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot.
 
+## Step 6
+
+On the iMac G5, securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
+
+## Step 7
+
+On the iMac G5, OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
+
+## Step 8
+
+On the iMac G5, the image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
+
 ## Rules
 
 1. Project versions are exactly those in [manifest/9L30.tsv](manifest/9L30.tsv), taken from darwinbuild's 9L30 build list. A project moves to another version only to backport Apple's own fix.
