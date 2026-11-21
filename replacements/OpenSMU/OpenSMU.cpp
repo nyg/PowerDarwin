@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-#include <IOKit/IOService.h>
+#include "OpenSMU.h"
 #include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IOLib.h>
-#include <IOKit/IOLocks.h>
 #include <pexpert/pexpert.h>
 
 extern "C" {
@@ -32,30 +31,6 @@ enum {
    kDaysFrom1904To1970 = 24107,
    kDaysFromYear0To1970 = 719468,
    kWeekdayOf1904 = 5
-};
-
-class OpenSMU : public IOService
-{
-   OSDeclareDefaultStructors(OpenSMU)
-
-public:
-   virtual bool start(IOService *provider);
-   virtual void free(void);
-   IOReturn sendCommand(UInt8 command, const void *data, UInt8 length, void *reply = 0, UInt8 replyLength = 0);
-
-private:
-   IOLock *fLock;
-   volatile UInt8 *fCommand;
-   UInt32 fCommandAddress;
-   const OSSymbol *fBufferFunction;
-   const OSSymbol *fRequestFunction;
-   const OSSymbol *fAckFunction;
-   IOService *fBufferPerformer;
-   IOService *fRequestPerformer;
-   IOService *fAckPerformer;
-
-   IOService *findFunction(const char *name, UInt32 phandle, const OSSymbol **function);
-   bool commandDone(void);
 };
 
 #define super IOService
@@ -231,6 +206,7 @@ bool OpenSMU::start(IOService *provider)
    publishResource("IORTC", this);
    registerService();
    IOLog("OpenSMU: command buffer at 0x%08lx\n", (unsigned long)fCommandAddress);
+   startFanControl(provider);
    return true;
 }
 
@@ -246,5 +222,7 @@ void OpenSMU::free(void)
       fRequestFunction->release();
    if (fAckFunction)
       fAckFunction->release();
+   if (fReadI2CFunction)
+      fReadI2CFunction->release();
    super::free();
 }

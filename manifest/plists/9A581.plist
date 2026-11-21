@@ -3877,6 +3877,7 @@
 		OpenSMU = {
 			dependencies = {
 				build = (
+					IOI2CFamily,
 					bash,
 					cctools,
 					file_cmds,
