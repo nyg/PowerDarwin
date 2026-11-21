@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60"
+all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73"
 usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]  (steps: all, $all_steps)"
 
 on_mac() {
@@ -37,6 +37,11 @@ on_mac() {
             tar -xzOf "$root/sources/$scsi.tar.gz" "IOSCSIArchitectureModelFamily-$scsi/IOSCSIArchitectureModel/SCSITaskDefinition.h" > "$stage/inputs/SCSITaskDefinition.h" ;;
          D49)
             JAVA=${JAVA:-$(/usr/libexec/java_home)/bin/java} "$root/env/antlr2/generate" "$stage/inputs/antlr2" ;;
+         D73)
+            mkdir -p "$stage/inputs/CarbonHeaders"
+            tar -xzf "$root/sources/CarbonHeaders-18.1.tar.gz" -C "$stage/inputs/CarbonHeaders" --strip-components 1 \
+               CarbonHeaders-CarbonHeaders-18.1/ConditionalMacros.h CarbonHeaders-CarbonHeaders-18.1/Endian.h \
+               CarbonHeaders-CarbonHeaders-18.1/MacErrors.h CarbonHeaders-CarbonHeaders-18.1/MacTypes.h ;;
       esac
    done
 
@@ -66,7 +71,7 @@ tree_state() {
    while IFS= read -r file; do
       total=$((total + 1))
       cmp -s "$src/$file" "$dest/$file" || changed=$((changed + 1))
-   done < <(cd "$src" && find . -type f)
+   done < <(cd "$src" && find . -type f ! -name '*.pyc')
    [[ $changed -eq 0 ]] && echo same || echo "$changed of $total files differ or are missing"
 }
 
@@ -248,6 +253,45 @@ step_D60() {
    done
    for header in IOSerialKeys.h ioss.h; do
       put_file D60 "$src/$header" "$build/System/Library/Frameworks/IOKit.framework/Versions/A/Headers/serial/$header" 644
+   done
+}
+
+step_D64() {
+   local link=$build/usr/bin/python target
+   target=$(readlink /usr/bin/python)
+   put_tree D64 /System/Library/Frameworks/Python.framework "$build/System/Library/Frameworks/Python.framework"
+   if [[ -L $link && $(readlink "$link") == "$target" ]]; then say D64 "in place: $(show "$link")"; return; fi
+   if [[ -n $check ]]; then say D64 "missing: $(show "$link")"; return; fi
+   ln -sfn "$target" "$link"
+   say D64 "linked $(show "$link")"
+}
+
+step_D67() {
+   local frameworks=$build/System/Library/Frameworks
+   local application=$frameworks/ApplicationServices.framework
+   put_file D67 "$here/env/CoreServices/CoreServices.h" "$frameworks/CoreServices.framework/Versions/A/Headers/CoreServices.h" 644
+   put_file D67 "$here/env/ApplicationServices/ApplicationServices.h" "$application/Versions/A/Headers/ApplicationServices.h" 644
+   if [[ -L $application/Headers && -L $application/Versions/Current ]]; then say D67 "in place: $(show "$application/Headers")"; return; fi
+   if [[ -n $check ]]; then say D67 "missing: $(show "$application/Headers")"; return; fi
+   ln -sfn A "$application/Versions/Current"
+   ln -sfn Versions/Current/Headers "$application/Headers"
+   say D67 "linked $(show "$application/Headers")"
+}
+
+step_D70() {
+   local order=$build/AppleInternal/OrderFiles/Kerberos.order
+   if [[ -f $order && ! -s $order ]]; then say D70 "in place: $(show "$order")"; return; fi
+   if [[ -n $check ]]; then say D70 "missing: $(show "$order")"; return; fi
+   install -d "$(dirname "$order")"
+   : > "$order"
+   chmod 644 "$order"
+   say D70 "made empty $(show "$order")"
+}
+
+step_D73() {
+   local header
+   for header in ConditionalMacros.h Endian.h MacErrors.h MacTypes.h; do
+      put_file D73 "$here/inputs/CarbonHeaders/$header" "$build/usr/include/$header" 644
    done
 }
 

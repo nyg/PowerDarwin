@@ -1,0 +1,64 @@
+PowerDarwin D79, 2026-11-21: changes to DirectoryService 514.25, under the licence of the files changed.
+--- a/PlugIns/BSD/FlatFileNode.h
++++ b/PlugIns/BSD/FlatFileNode.h
+@@ -100,7 +100,7 @@
+ 		static int						sqlExecSync( const char *command );
+ 		static int						sqlExecSyncInsert( const char *command, int count, ... );
+ 		static void						FreeSearchState( void *inState );
+-		static void						FileChangeNotification( CFFileDescriptorRef cfFD, CFOptionFlags callBackTypes, void *info );
++		static void						*FileChangeThread( void *inKqueue );
+ 
+ 		void							OpenOrCreateDatabase( void );
+ 		void							CreateTableForRecordMap( sFileMapping *inFileType );
+--- a/PlugIns/BSD/FlatFileNode.cpp
++++ b/PlugIns/BSD/FlatFileNode.cpp
+@@ -329,13 +329,13 @@
+ 	{
+ 		fKqueue = kqueue();
+ 		
+-		// we run our kevent on our main runloop
+-		CFFileDescriptorRef cfKQueue = CFFileDescriptorCreate( kCFAllocatorDefault, fKqueue, false, FileChangeNotification, NULL );
+-		CFRunLoopSourceRef src = CFFileDescriptorCreateRunLoopSource( kCFAllocatorSystemDefault, cfKQueue, 0 );
+-		CFFileDescriptorEnableCallBacks( cfKQueue, kCFFileDescriptorReadCallBack );
+-		CFRunLoopAddSource( CFRunLoopGetMain(), src, kCFRunLoopDefaultMode );
++		pthread_t		watchThread;
++		pthread_attr_t	attributes;
+ 		
+-		CFRelease( cfKQueue );	
++		pthread_attr_init( &attributes );
++		pthread_attr_setdetachstate( &attributes, PTHREAD_CREATE_DETACHED );
++		pthread_create( &watchThread, &attributes, FileChangeThread, (void *) (intptr_t) fKqueue );
++		pthread_attr_destroy( &attributes );
+ 	}
+ 	
+ 	while ( mapIter != fFFRecordTypeTable.end() )
+@@ -370,13 +370,15 @@
+ 	pthread_mutex_unlock( &fWatchFilesLock );
+ }
+ 
+-void FlatFileNode::FileChangeNotification( CFFileDescriptorRef cfFD, CFOptionFlags callBackTypes, void *info )
++void *FlatFileNode::FileChangeThread( void *inKqueue )
+ {
+ 	int				iTypeCount				= fFFRecordTypeTable.size();
+ 	struct kevent	evReceive[iTypeCount];
+ 	
+-	int fd = CFFileDescriptorGetNativeDescriptor( cfFD );
++	int fd = (int) (intptr_t) inKqueue;
+ 	
++	for ( ;; )
++	{
+ 	int nevents = kevent( fd, NULL, 0, evReceive, iTypeCount, NULL );
+ 	for (int ii = 0; ii < nevents; ii++)
+ 	{
+@@ -416,9 +418,10 @@
+ 	if ( nevents == 0 )
+ 	{
+ 		DbgLog( kLogPlugin, "FlatFileNode::FileChangeNotification - No events" );
++	}
+ 	}
+ 	
+-	CFFileDescriptorEnableCallBacks( cfFD, callBackTypes );
++	return NULL;
+ }
+ 
+ SInt32 FlatFileNode::InternalSearchRecords( sBDPISearchRecordsContext *inContext, BDPIOpaqueBuffer inBuffer, UInt32 *outCount )

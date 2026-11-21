@@ -1,0 +1,11 @@
+PowerDarwin D72, 2026-11-21: changes to passwordserver_sasl 118.1, under the licence of the files changed.
+--- a/sasl.xcodeproj/project.pbxproj
++++ b/sasl.xcodeproj/project.pbxproj
+@@ -73,7 +73,6 @@
+ 				AAC7504709912C71008E0B59 /* PBXTargetDependency */,
+ 				AAC7504309912C71008E0B59 /* PBXTargetDependency */,
+ 				B00EECCE0C72199B0019B0CA /* PBXTargetDependency */,
+-				AAC7504D09912C7D008E0B59 /* PBXTargetDependency */,
+ 				B020E42F0C39C5CB0053BA78 /* PBXTargetDependency */,
+ 			);
+ 			name = SecondaryTargets;

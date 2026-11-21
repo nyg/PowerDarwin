@@ -1,0 +1,11 @@
+PowerDarwin D76, 2026-11-21: changes to DirectoryService 514.25, under the licence of the files changed.
+--- a/DirectoryService.xcodeproj/project.pbxproj
++++ b/DirectoryService.xcodeproj/project.pbxproj
+@@ -42,7 +42,6 @@
+ 				6195755808D09448004DC9A3 /* PBXTargetDependency */,
+ 				6195755A08D09448004DC9A3 /* PBXTargetDependency */,
+ 				6195755608D09448004DC9A3 /* PBXTargetDependency */,
+-				6BE590B40B781A26008264A0 /* PBXTargetDependency */,
+ 			);
+ 			name = DirectoryServiceFW;
+ 			productName = DirectoryServiceFW;

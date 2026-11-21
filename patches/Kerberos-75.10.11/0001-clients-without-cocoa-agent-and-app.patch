@@ -1,0 +1,12 @@
+PowerDarwin D68, 2026-11-21: changes to Kerberos 75.10.11, under the licence of the files changed.
+--- a/Common/Projects/Kerberos.xcodeproj/project.pbxproj
++++ b/Common/Projects/Kerberos.xcodeproj/project.pbxproj
+@@ -41,8 +41,6 @@
+ 			);
+ 			dependencies = (
+ 				A1DC17090AF31F16001DD410 /* PBXTargetDependency */,
+-				A1E2D23A08C8F1EF000E7389 /* PBXTargetDependency */,
+-				A1E2D24008C8F223000E7389 /* PBXTargetDependency */,
+ 				A1608BB209F442740043153A /* PBXTargetDependency */,
+ 				A1E2D24208C8F233000E7389 /* PBXTargetDependency */,
+ 				A1E2D25408C8F26B000E7389 /* PBXTargetDependency */,

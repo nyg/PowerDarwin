@@ -17,6 +17,7 @@
 		RC_RELEASE = Leopard;
 		RC_XBS = YES;
 		SEPARATE_STRIP = YES;
+		APPLE_INTERNAL_DEVELOPER_DIR = /AppleInternal/Developer;
 		SYSTEM_LIBRARY_DIR = /System/Library;
 		UNAME_RELEASE = 9.0;
 		UNAME_SYSNAME = Darwin;
@@ -1738,6 +1739,7 @@
 					libgcc,
 					libstdcxx,
 					passwordserver_sasl,
+					passwordserver_saslkerberos,
 					system_cmds,
 				);
 				header = (
@@ -1896,19 +1898,25 @@
 		DirectoryService = {
 			dependencies = {
 				build = (
-					Libm,
-					Libsystem,
 					bash,
 					cctools,
+					CF,
 					distcc,
+					DSPasswordServerFramework,
 					file_cmds,
 					gcc,
 					gcc_os,
 					gcc_select,
+					IOKitUser,
+					Kerberos,
 					libgcc,
+					Libm,
 					libresolv,
 					libstdcxx,
+					Libsystem,
 					passwordserver_sasl,
+					passwordserver_saslkerberos,
+					Security,
 					shell_cmds,
 					system_cmds,
 					text_cmds,
@@ -1952,26 +1960,32 @@
 		DirectoryServiceDaemon = {
 			dependencies = {
 				build = (
-					DSPasswordServerFramework,
-					DirectoryService,
-					Kerberos,
-					LDAPFramework,
-					Libm,
-					Libsystem,
 					bash,
 					bsm,
 					cctools,
+					CF,
 					configd,
+					DirectoryService,
 					distcc,
+					DSPasswordServerFramework,
 					file_cmds,
 					gcc,
 					gcc_os,
 					gcc_select,
+					ICU,
+					IOKitUser,
+					Kerberos,
+					LDAPFramework,
 					libgcc,
+					Libm,
 					libresolv,
 					libstdcxx,
+					Libsystem,
 					passwordserver_sasl,
+					passwordserver_saslkerberos,
+					Security,
 					shell_cmds,
+					SQLite,
 					system_cmds,
 					text_cmds,
 					xnu,
@@ -3089,6 +3103,9 @@
 					SystemStubs,
 				);
 			};
+			environment = {
+				RC_ARCHS = "ppc ppc64 i386 x86_64";
+			};
 			version = 75.9;
 		};
 		KerberosHelper = {
@@ -3191,6 +3208,7 @@
 					libresolv,
 					libutil,
 					passwordserver_sasl,
+					passwordserver_saslkerberos,
 					shell_cmds,
 					system_cmds,
 					text_cmds,
@@ -3217,6 +3235,9 @@
 					SystemStubs,
 					gcc,
 				);
+			};
+			environment = {
+				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
 			original = OpenLDAP;
 		};
@@ -4152,6 +4173,11 @@
 			version = 100.0.2;
 		};
 		SQLite = {
+			dependencies = {
+				build = (
+					tcl,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -5590,6 +5616,9 @@
 					Csu,
 					SystemStubs,
 				);
+			};
+			environment = {
+				RC_RELEASE = Darwin;
 			};
 			version = 170;
 		};
@@ -9804,6 +9833,9 @@
 					configd,
 				);
 			};
+			environment = {
+				RC_ARCHS = "ppc ppc64 i386 x86_64";
+			};
 			version = 161.1;
 		};
 		mDNSResponderSystemLibraries = {
@@ -10237,6 +10269,7 @@
 					gnumake,
 					gnutar,
 					gnuzip,
+					ipsec,
 					ld64,
 					libgcc,
 					pb_makefiles,

@@ -6,6 +6,7 @@ boot_args=${2:--v -s}
 cd_args=()
 [[ -n ${3:-} ]] && cd_args=(-drive file="$3",format=raw,media=cdrom,index=2)
 monitor=${QEMU_MONITOR:-/tmp/darwin9-qemu.sock}
+ssh_port=${QEMU_SSH_PORT:-2222}
 
 exec qemu-system-ppc \
    -M mac99,via=pmu \
@@ -15,5 +16,6 @@ exec qemu-system-ppc \
    -boot c \
    -prom-env "boot-args=$boot_args" \
    -g 1024x768x32 \
+   -nic user,model=sungem,hostfwd=tcp:127.0.0.1:"$ssh_port"-:22 \
    -monitor unix:"$monitor",server,nowait \
    -serial file:"${image%.*}.serial.log"

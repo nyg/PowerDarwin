@@ -1,0 +1,39 @@
+PowerDarwin D75, 2026-11-21: changes to DirectoryService 514.25, under the licence of the files changed.
+--- a/DirectoryService.xcodeproj/project.pbxproj
++++ b/DirectoryService.xcodeproj/project.pbxproj
+@@ -2767,7 +2767,6 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				6BA458810C19495B0099C94F /* dslockstat.d in Sources */,
+ 				6195741708D09447004DC9A3 /* CClientEndPoint.cpp in Sources */,
+ 				6195741808D09447004DC9A3 /* CMessaging.cpp in Sources */,
+ 				6195741908D09447004DC9A3 /* DirServices.cpp in Sources */,
+@@ -2822,7 +2821,6 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				6B3F5DA50C192AAA00F26BD9 /* dslockstat.d in Sources */,
+ 				6195748D08D09447004DC9A3 /* CRCCalc.cpp in Sources */,
+ 				6195747C08D09447004DC9A3 /* CBuff.cpp in Sources */,
+ 				6195747D08D09447004DC9A3 /* CDataBuff.cpp in Sources */,
+@@ -2852,7 +2850,6 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				6BA60CBB0C19279D000F0DA7 /* dslockstat.d in Sources */,
+ 				619574E008D09448004DC9A3 /* CHandlers.cpp in Sources */,
+ 				619574E108D09448004DC9A3 /* CLauncher.cpp in Sources */,
+ 				619574E208D09448004DC9A3 /* CMsgQueue.cpp in Sources */,
+--- /dev/null
++++ b/Threads/dslockstat.h
+@@ -0,0 +1,9 @@
++#ifndef _DSLOCKSTAT_H
++#define _DSLOCKSTAT_H
++
++#define DSLOCKSTAT_MUTEX_ACQUIRE(arg0, arg1, arg2, arg3)
++#define DSLOCKSTAT_MUTEX_ACQUIRE_ENABLED() (0)
++#define DSLOCKSTAT_MUTEX_RELEASE(arg0, arg1, arg2, arg3)
++#define DSLOCKSTAT_MUTEX_RELEASE_ENABLED() (0)
++
++#endif

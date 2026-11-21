@@ -1,0 +1,50 @@
+PowerDarwin D77, 2026-11-21: changes to DirectoryService 514.25, under the licence of the files changed.
+--- a/DirectoryService.xcodeproj/project.pbxproj
++++ b/DirectoryService.xcodeproj/project.pbxproj
+@@ -1288,10 +1288,8 @@
+ 				6195752108D09448004DC9A3 /* PasswordServer.framework in Frameworks */,
+ 				6195752208D09448004DC9A3 /* Kerberos.framework in Frameworks */,
+ 				6195752308D09448004DC9A3 /* libbsm.dylib in Frameworks */,
+-				6BEBFD5A09803D1D005D8C49 /* Foundation.framework in Frameworks */,
+ 				610B870B0AC9E7FF0068C7A0 /* libsqlite3.dylib in Frameworks */,
+ 				AAE0BC6C0B5EB78200A599C4 /* libcrypto.dylib in Frameworks */,
+-				AA9312050B6551A30040F800 /* libXSEventPort.a in Frameworks */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+@@ -3719,7 +3717,7 @@
+ 					DSSERVERTCP,
+ 					SERVERINTERNAL,
+ 					"__MigTypeCheck=1",
+-					"HAVE_CORE_SERVER=1",
++					"HAVE_CORE_SERVER=0",
+ 					DEBUG_LOCKS,
+ 				);
+ 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+@@ -3798,7 +3796,7 @@
+ 					DSSERVERTCP,
+ 					SERVERINTERNAL,
+ 					"__MigTypeCheck=1",
+-					"HAVE_CORE_SERVER=1",
++					"HAVE_CORE_SERVER=0",
+ 				);
+ 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+ 				HEADER_SEARCH_PATHS = (
+@@ -3857,7 +3855,7 @@
+ 					DSSERVERTCP,
+ 					SERVERINTERNAL,
+ 					"__MigTypeCheck=1",
+-					"HAVE_CORE_SERVER=1",
++					"HAVE_CORE_SERVER=0",
+ 				);
+ 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+ 				HEADER_SEARCH_PATHS = (
+@@ -3869,7 +3867,7 @@
+ 				LIBRARY_SEARCH_PATHS = "";
+ 				OTHER_CFLAGS = (
+ 					"-fconstant-cfstrings",
+-					"-DHAVE_CORE_SERVER=1",
++					"-DHAVE_CORE_SERVER=0",
+ 				);
+ 				OTHER_LDFLAGS = (
+ 					"-weak_framework",

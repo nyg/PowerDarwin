@@ -6,8 +6,8 @@ userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9-image
 root_hash=~/9L30/root-password.hash
-userland_projects="files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration"
-kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage"
+userland_projects="Libsystem files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon"
+kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
@@ -23,6 +23,7 @@ sudo ditto "$(latest xnu)" $mount
 sudo ditto "$(latest kext_tools)" $mount
 sudo rm -f $mount/mach_kernel.ctfsys
 sudo rm -rf $mount/usr/local/lib/SystemConfiguration
+sudo rm -rf $mount/AppleInternal
 
 for project in $kext_projects; do
    sudo ditto "$(latest $project)/System/Library/Extensions" $mount/System/Library/Extensions
@@ -32,8 +33,10 @@ sudo mkdir -p $mount/System/Library/CoreServices
 
 sudo mkdir -p $mount/Volumes $mount/Library/Preferences/SystemConfiguration
 sudo install -m 644 ~/9L30/Sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
+sudo sed -i '' "/<key>Disabled<\/key>/{n;s|<true/>|<false/>|;}" $mount/System/Library/LaunchDaemons/ssh.plist
 if [ -f $root_hash ]; then
    sudo sed -i '' "s|^root:\*:|root:$(cat $root_hash):|" $mount/private/etc/master.passwd
+   sudo sed -i '' "/<key>passwd<\/key>/{n;n;s|<string>\*</string>|<string>$(cat $root_hash)</string>|;}" $mount/private/var/db/dslocal/nodes/Default/users/root.plist
 fi
 sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>

@@ -1,0 +1,11 @@
+PowerDarwin D66, 2026-11-21: changes to bootp 170.1, under the licence of the files changed.
+--- a/bootp.xcodeproj/project.pbxproj
++++ b/bootp.xcodeproj/project.pbxproj
+@@ -13,7 +13,6 @@
+ 			buildPhases = (
+ 			);
+ 			dependencies = (
+-				1562E06A0AC4F9BD00CF228A /* PBXTargetDependency */,
+ 				1562E18C0AC4FF5100CF228A /* PBXTargetDependency */,
+ 				15F005630AC578A200C5C101 /* PBXTargetDependency */,
+ 				15D7F6AB0AC5B16F0002BE78 /* PBXTargetDependency */,
