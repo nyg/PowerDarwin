@@ -41,7 +41,7 @@ On the iMac G5, the image boots cleanly: the network comes up without a 60-secon
 3. A fix changes the build environment first. Failing that, it backports Apple's fix from a later Apple release. Only then is it a new patch, as small as possible, with no reformatting or unrelated change.
 4. Every patch in [patches/](patches/), every workaround in [env/](env/) and every replacement in [replacements/](replacements/) is listed in [DEVIATIONS.md](DEVIATIONS.md).
 5. Builds use the toolchain of the release: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3, `ld64` 77.1.
-6. The final image contains no Apple binary: darwinbuild's Roots and the host's SDK only bootstrap the first build.
+6. The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries. Closed tools may run the build: the host's Leopard and Xcode, darwinbuild's Roots and the host's SDK.
 
 ## Layout
 
