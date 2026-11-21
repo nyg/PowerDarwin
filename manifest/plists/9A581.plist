@@ -3874,6 +3874,30 @@
 			};
 			version = 106;
 		};
+		OpenSMU = {
+			dependencies = {
+				build = (
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					shell_cmds,
+					text_cmds,
+				);
+				header = (
+					xnu,
+				);
+				staticlib = (
+					xnu,
+				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
+			version = 1.0;
+		};
 		OpenSSH = {
 			dependencies = {
 				build = (

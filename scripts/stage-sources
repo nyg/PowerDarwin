@@ -15,8 +15,14 @@ for arg in "$@"; do
    [[ -n $version ]] || version=$(awk -F'\t' -v p="$project" '$1 == p { print $2 }' "$root/manifest/9L30.tsv")
    [[ -n $version ]] || { echo "not in manifest: $project" >&2; exit 1; }
    tarball="$root/sources/$project-$version.tar.gz"
-   [[ -f $tarball ]] || { echo "no source tarball: $tarball" >&2; exit 1; }
-   tar -xzf "$tarball" -C "$stage" -s "|^$project-$project-$version|$project-$version|"
+   if [[ -f $tarball ]]; then
+      tar -xzf "$tarball" -C "$stage" -s "|^$project-$project-$version|$project-$version|"
+   elif [[ -d $root/replacements/$project ]]; then
+      cp -R "$root/replacements/$project" "$stage/$project-$version"
+   else
+      echo "no source tarball: $tarball" >&2
+      exit 1
+   fi
    echo "$project-$version"
    for patch in "$root/patches/$project-$version"/*.patch; do
       [[ -e $patch ]] || continue
