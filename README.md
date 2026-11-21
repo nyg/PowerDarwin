@@ -34,6 +34,18 @@ On the iMac G5, OpenSMU drives the fans from the SMU's temperature sensors, and 
 
 On the iMac G5, the image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
 
+## Step 9
+
+On the iMac G5, disks and devices work: DiskArbitration mounts the internal partitions, USB and FireWire disks and CDs as they appear, `bless` makes a partition the startup disk, and the sound driver comes up for the built-in audio.
+
+## Step 10
+
+On the iMac G5, the image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
+
+## Step 11
+
+A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
+
 ## Rules
 
 1. Project versions are exactly those in [manifest/9L30.tsv](manifest/9L30.tsv), taken from darwinbuild's 9L30 build list. A project moves to another version only to backport Apple's own fix.
