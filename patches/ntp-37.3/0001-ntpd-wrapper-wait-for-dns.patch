@@ -1,0 +1,27 @@
+PowerDarwin D83, 2026-11-21: changes to ntp 37.3, under the licence of the files changed.
+--- a/ntpd-wrapper
++++ b/ntpd-wrapper
+@@ -1,7 +1,23 @@
+ #!/bin/sh
+ PATH=/usr/sbin:/usr/bin:/bin
++TIMEOUT=30
++KEY=State:/Network/Global/DNS
++DNS=/var/run/resolv.conf
+ 
+ ipconfig waitall
++
++DEADLINE=$((SECONDS+TIMEOUT))
++for (( CURTIMEOUT=TIMEOUT; SECONDS < DEADLINE; CURTIMEOUT=DEADLINE-SECONDS )); do
++    if scutil -w ${KEY} -t ${CURTIMEOUT}; then
++	if [[ -f ${DNS} ]]; then 
++	    break;
++	fi			# else retry false alarms
++    else
++	logger -p daemon.err "$0: scutil key ${KEY} not present after ${TIMEOUT} seconds"
++	break;
++    fi
++done
++
+ ntpdate -bvs
+ 
+ # Un-comment the following line to run ntp with a sandbox profile.

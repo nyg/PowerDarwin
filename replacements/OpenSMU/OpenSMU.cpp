@@ -204,6 +204,8 @@ bool OpenSMU::start(IOService *provider)
    PE_halt_restart = haltRestart;
    PE_read_write_time_of_day = readWriteTimeOfDay;
    publishResource("IORTC", this);
+   // MacRISC4CPU::start waits for IOPMU; we handle none of its sleep or speed calls.
+   publishResource("IOPMU", this);
    registerService();
    IOLog("OpenSMU: command buffer at 0x%08lx\n", (unsigned long)fCommandAddress);
    startFanControl(provider);

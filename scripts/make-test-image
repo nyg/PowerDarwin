@@ -6,8 +6,8 @@ userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9-image
 root_hash=~/9L30/root-password.hash
-userland_projects="Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools"
-kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU"
+userland_projects="Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs"
+kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
@@ -24,6 +24,7 @@ sudo ditto "$(latest kext_tools)" $mount
 sudo rm -f $mount/mach_kernel.ctfsys
 sudo rm -rf $mount/usr/local/lib/SystemConfiguration
 sudo rm -rf $mount/AppleInternal
+sudo rm -f $mount/System/Library/LaunchDaemons/com.apple.DirectoryServicesInstallDaemon.plist
 sudo rm -rf $mount/System/Library/Extensions/CM4040.kext $mount/System/Library/Extensions/CRYPTOCardPCCard.kext $mount/System/Library/Extensions/SCR24X_Apple_Driver.kext
 sudo rm -rf $mount/usr/libexec/SmartCardServices/drivers/*.bundle "$mount/Library/Application Support/Mozilla"
 
@@ -35,7 +36,11 @@ sudo mkdir -p $mount/System/Library/CoreServices
 
 sudo mkdir -p $mount/Volumes $mount/Library/Preferences/SystemConfiguration
 sudo install -m 644 ~/9L30/Sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
+sudo install -m 644 ~/9L30/Sources/launchd-258.25/launchd/src/rc.common ~/9L30/Sources/launchd-258.25/launchd/src/hostconfig $mount/private/etc/
 sudo sed -i '' "/<key>Disabled<\/key>/{n;s|<true/>|<false/>|;}" $mount/System/Library/LaunchDaemons/ssh.plist
+zone=$(readlink /etc/localtime || true)
+[ -f "$mount$zone" ] || zone=/usr/share/zoneinfo/UTC
+sudo ln -sfh "$zone" $mount/private/etc/localtime
 echo "server time.euro.apple.com" | sudo tee $mount/private/etc/ntp.conf > /dev/null
 sudo mkdir -p $mount/private/var/db/dyld/shared_region_roots
 printf '%s\n' /bin/sh /bin/bash /usr/sbin/configd /usr/sbin/DirectoryService /usr/sbin/sshd | sudo tee $mount/private/var/db/dyld/shared_region_roots/Darwin.paths > /dev/null
@@ -43,6 +48,20 @@ if [ -f $root_hash ]; then
    sudo sed -i '' "s|^root:\*:|root:$(cat $root_hash):|" $mount/private/etc/master.passwd
    sudo sed -i '' "/<key>passwd<\/key>/{n;n;s|<string>\*</string>|<string>$(cat $root_hash)</string>|;}" $mount/private/var/db/dslocal/nodes/Default/users/root.plist
 fi
+sudo tee $mount/System/Library/CoreServices/SystemVersion.plist > /dev/null <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ProductBuildVersion</key>
+	<string>9L30</string>
+	<key>ProductName</key>
+	<string>Darwin</string>
+	<key>ProductVersion</key>
+	<string>9.8</string>
+</dict>
+</plist>
+EOF
 sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
