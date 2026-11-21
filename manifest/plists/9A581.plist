@@ -4249,6 +4249,9 @@
 		SecurityTokend = {
 			dependencies = {
 				build = (
+					CF,
+					Security,
+					SmartCardServices,
 					libsecurity_cdsa_client,
 					libsecurity_cdsa_utilities,
 					libsecurity_utilities,
@@ -11816,8 +11819,11 @@
 		securityd = {
 			dependencies = {
 				build = (
+					CF,
+					IOKitUser,
 					Security,
 					SecurityTokend,
+					SmartCardServices,
 					libsecurity_agent,
 					libsecurity_cdsa_client,
 					libsecurity_cdsa_utilities,
