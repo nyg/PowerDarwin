@@ -1,0 +1,14 @@
+PowerDarwin D90, 2026-11-21: changes to AppleOnboardAudio 258.3.1, under the licence of the files changed.
+--- a/AppleOnboardAudio/AppleOnboardAudioUserClient.h
++++ b/AppleOnboardAudio/AppleOnboardAudioUserClient.h
+@@ -22,7 +22,9 @@
+ 	kCodec_TAS3004,
+ 	kCodec_CS8406,
+ 	kCodec_CS8420,
+-	kCodec_CS8416
++	kCodec_CS8416,
++	kCodec_PCM3052,
++	kCodec_NumberOfTypes
+ } ;
+ //
+ // HardwarePlugin State 

@@ -1,0 +1,12 @@
+PowerDarwin D86, 2026-11-21: changes to IOUSBMassStorageClass 208.0.1, under the licence of the files changed.
+--- a/IOUSBMassStorageClass.xcodeproj/project.pbxproj
++++ b/IOUSBMassStorageClass.xcodeproj/project.pbxproj
+@@ -213,7 +213,7 @@
+ 	<key>OSBundleLibraries</key>
+ 	<dict>
+ 		<key>com.apple.iokit.IOSCSIArchitectureModelFamily</key>
+-		<string>2.0.7</string>
++		<string>1.0.0</string>
+ 		<key>com.apple.iokit.IOStorageFamily</key>
+ 		<string>1.5.0</string>
+ 		<key>com.apple.iokit.IOUSBFamily</key>

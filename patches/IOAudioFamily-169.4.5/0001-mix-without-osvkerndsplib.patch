@@ -1,0 +1,24 @@
+PowerDarwin D87, 2026-11-21: changes to IOAudioFamily 169.4.5, under the licence of the files changed.
+--- a/IOAudioEngineMixer.cpp
++++ b/IOAudioEngineMixer.cpp
+@@ -49,7 +49,8 @@
+ 		
+ 		__darwin_ptrdiff_t strideOne=1, strideTwo=1, resultStride=1;
+ 		
+-		vDSP_vadd(floatSource1Buf, strideOne, floatSource2Buf, strideTwo, floatMixBuf, resultStride, numSamps);
++		for (__darwin_size_t i = 0; i < numSamps; i++)
++			floatMixBuf[i] = floatSource1Buf[i] + floatSource2Buf[i];
+ 		
+         result = kIOReturnSuccess;
+     }
+--- a/Info-IOAudioFamily.plist
++++ b/Info-IOAudioFamily.plist
+@@ -42,8 +42,6 @@
+ 		<string>9.0.0d1</string>
+ 		<key>com.apple.kpi.bsd</key>
+ 		<string>8.0</string>
+-		<key>com.apple.kext.OSvKernDSPLib</key>
+-		<string>1.0</string>		
+ 	</dict>
+ 	<key>VBRSupported</key>
+ 	<string>YES</string>

@@ -819,6 +819,28 @@
 			version = 102.3.1;
 		};
 		AppleOnboardAudio = {
+			dependencies = {
+				build = (
+					AppleI2C,
+					bash,
+					cctools,
+					distcc,
+					file_cmds,
+					gcc,
+					gcc_os,
+					gcc_select,
+					system_cmds,
+				);
+				header = (
+					IOAudioFamily,
+					IOUSBFamily,
+					xnu,
+				);
+				staticlib = (
+					Libcpp_kext,
+					xnu,
+				);
+			};
 			environment = {
 				RC_ARCHS = ppc;
 			};
@@ -2852,6 +2874,31 @@
 			version = 103;
 		};
 		IOSCSIArchitectureModelFamily = {
+			dependencies = {
+				build = (
+					CF,
+					IOKitUser,
+					bash,
+					distcc,
+					file_cmds,
+					gcc,
+					gcc_os,
+					gcc_select,
+					jam,
+					shell_cmds,
+					system_cmds,
+				);
+				header = (
+					IOCDStorageFamily,
+					IODVDStorageFamily,
+					IOStorageFamily,
+					xnu,
+				);
+				staticlib = (
+					Libcpp_kext,
+					xnu,
+				);
+			};
 			version = 200.3.6;
                         binary_sites = (
                                 "http://src.macosforge.org/BinaryDrivers/9A581/",
@@ -3873,6 +3920,33 @@
 				);
 			};
 			version = 106;
+		};
+		OpenOnyx = {
+			dependencies = {
+				build = (
+					AppleI2C,
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					shell_cmds,
+					text_cmds,
+				);
+				header = (
+					IOAudioFamily,
+					IOUSBFamily,
+					xnu,
+				);
+				staticlib = (
+					xnu,
+				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
+			version = 1.0;
 		};
 		OpenSMU = {
 			dependencies = {
@@ -10067,6 +10141,11 @@
 			version = 20;
 		};
 		msdosfs = {
+			dependencies = {
+				staticlib = (
+					diskdev_cmds,
+				);
+			};
 			version = 135;
 		};
 		nano = {

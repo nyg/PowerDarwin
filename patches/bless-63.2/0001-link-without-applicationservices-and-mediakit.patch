@@ -1,0 +1,25 @@
+PowerDarwin D91, 2026-11-21: changes to bless 63.2, under the licence of the files changed.
+--- a/bless.xcodeproj/project.pbxproj
++++ b/bless.xcodeproj/project.pbxproj
+@@ -1273,12 +1273,8 @@
+ 				GCC_DYNAMIC_NO_PIC = YES;
+ 				INSTALL_PATH = /usr/sbin;
+ 				OTHER_LDFLAGS = (
+-					"-framework",
+-					ApplicationServices,
+ 					"-framework",
+ 					DiskArbitration,
+-					"-framework",
+-					MediaKit,
+ 				);
+ 				PRODUCT_NAME = bless;
+ 				VALID_ARCHS = "ppc i386";
+@@ -1315,8 +1311,6 @@
+ 				GCC_DYNAMIC_NO_PIC = YES;
+ 				INSTALL_PATH = /usr/local/bin;
+ 				OTHER_LDFLAGS = (
+-					"-framework",
+-					ApplicationServices,
+ 				);
+ 				PRODUCT_NAME = setOFLabel;
+ 				VALID_ARCHS = "ppc i386";

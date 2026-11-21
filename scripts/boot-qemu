@@ -1,10 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-image=${1:?usage: boot-qemu <raw disk image> [boot-args] [CD image]}
+image=${1:?usage: boot-qemu <raw disk image> [boot-args] [CD image] [USB disk image]}
 boot_args=${2:--v -s}
 cd_args=()
 [[ -n ${3:-} ]] && cd_args=(-drive file="$3",format=raw,media=cdrom,index=2)
+usb_args=()
+[[ -n ${4:-} ]] && usb_args=(-drive if=none,id=usbdisk,file="$4",format=raw -device usb-storage,drive=usbdisk)
 monitor=${QEMU_MONITOR:-/tmp/darwin9-qemu.sock}
 ssh_port=${QEMU_SSH_PORT:-2222}
 
@@ -13,6 +15,7 @@ exec qemu-system-ppc \
    -m 1024 \
    -drive file="$image",format=raw,media=disk \
    ${cd_args[@]+"${cd_args[@]}"} \
+   ${usb_args[@]+"${usb_args[@]}"} \
    -boot c \
    -prom-env "boot-args=$boot_args" \
    -g 1024x768x32 \

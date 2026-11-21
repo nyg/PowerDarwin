@@ -1,0 +1,19 @@
+PowerDarwin D93, 2026-11-21: changes to AppleOnboardAudio 258.3.1, under the licence of the files changed.
+--- a/AppleOnboardAudio/AppleDBDMAClip.c
++++ b/AppleOnboardAudio/AppleDBDMAClip.c
+@@ -3763,5 +3763,15 @@
+ 	*t4 = offset;
+ 	*t5 = volumedB;
+ #endif	
++}
++
++
++static double UInt64ToDouble (UInt64 inValue)
++{
++	return (double)(UInt32)(inValue >> 32) * 4294967296.0 + (double)(UInt32)inValue;
+ }
+ 
++void convertNanosToPercent (UInt64 inNumerator, UInt64 inDenominator, float * percent)
++{
++	*percent = inDenominator ? (float)(UInt64ToDouble (inNumerator) * 100.0 / UInt64ToDouble (inDenominator)) : 0.0f;
++}

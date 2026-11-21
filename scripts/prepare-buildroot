@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82"
+all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82 D89 D94"
 usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]  (steps: all, $all_steps)"
 
 on_mac() {
@@ -303,6 +303,21 @@ step_D82() {
    install -d "$(dirname "$link")"
    ln -sfn "$target" "$link"
    say D82 "linked $(show "$link")"
+}
+
+step_D89() { put_tree D89 "/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/CoreAudio.framework" "$build/System/Library/Frameworks/CoreAudio.framework"; }
+
+step_D94() {
+   local src=$folder/Sources/AppleOnboardAudio-258.3.1 file
+   [[ -d $src ]] || { say D94 "waiting: no AppleOnboardAudio source (scripts/stage-sources <host> AppleOnboardAudio)"; return; }
+   for file in AppleOnboardAudio/AudioHardwareObjectInterface.h AppleOnboardAudio/AppleDBDMAAudio.h AppleOnboardAudio/AppleDBDMAClipLib.h \
+      AppleOnboardAudio/AppleDBDMAFloatLib.h AppleOnboardAudio/AppleOnboardAudioUserClient.h AppleOnboardAudio/DSP/DSP_Manager.h \
+      AppleOnboardAudio/PlatformInterface.h AppleOnboardAudio/PlatformInterfaceDBDMA.h AppleOnboardAudio/PlatformInterfaceFCR.h \
+      AppleOnboardAudio/PlatformInterfaceGPIO.h AppleOnboardAudio/PlatformInterfaceI2C.h AppleOnboardAudio/PlatformInterfaceI2S.h \
+      AppleOnboardAudio/PlatformInterfaceSupportCommon.h AppleLegacyAudio/AudioHardwareCommon.h AppleLegacyAudio/AudioHardwareConstants.h \
+      AppleLegacyAudio/AudioHardwareUtilities.h AppleiSubEngine.h iSubTypes.h; do
+      put_file D94 "$src/$file" "$build/usr/local/include/AppleOnboardAudio/${file##*/}" 644
+   done
 }
 
 on_build_machine() {
