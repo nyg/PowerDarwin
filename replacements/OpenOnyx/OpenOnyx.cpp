@@ -27,6 +27,13 @@ enum {
    kOnyxMaximumSampleRate = 96000
 };
 
+// Reset timings in milliseconds, from Apple's TAS3004 plug-in.
+enum {
+   kOnyxResetSetupTime = 5,
+   kOnyxResetHoldTime = 20,
+   kOnyxResetReleaseTime = 10
+};
+
 // The codec's registers and their first values, from FreeBSD's onyx.c (Copyright 2012 by Andreas Tobler, BSD-2-Clause: see LICENSE).
 static const UInt8 kOnyxRegisterAddress[kOnyxRegisterCount] = { 65, 66, 67, 68, 69, 70, 71, 72, 75, 77, 78, 79, 80 };
 static const UInt8 kOnyxRegisterDefault[kOnyxRegisterCount] = { 0x80, 0x80, 0xc0, 0x00, 0x00, 0x04, 0x00, 0x07, 0x04, 0x04, 0x02, 0x00, 0x01 };
@@ -49,7 +56,7 @@ void OpenOnyxAudio::initPlugin(PlatformInterface *inPlatformObject)
 
 bool OpenOnyxAudio::preDMAEngineInit()
 {
-   IOReturn result = writeAllRegisters();
+   IOReturn result = startCodec();
    if (result != kIOReturnSuccess) {
       IOLog("OpenOnyx: cannot reach the PCM3052 codec (0x%x)\n", result);
       return false;
@@ -78,6 +85,30 @@ IOReturn OpenOnyxAudio::writeAllRegisters()
    return kIOReturnSuccess;
 }
 
+// AppleOnboardAudio holds the codec in reset until its plug-in releases it, once the I2S clocks run.
+IOReturn OpenOnyxAudio::resetCodec()
+{
+   mPlatformInterface->setCodecReset(kCODEC_RESET_Analog, kGPIO_Run);
+   IOSleep(kOnyxResetSetupTime);
+   mPlatformInterface->setCodecReset(kCODEC_RESET_Analog, kGPIO_Reset);
+   IOSleep(kOnyxResetHoldTime);
+   IOReturn result = mPlatformInterface->setCodecReset(kCODEC_RESET_Analog, kGPIO_Run);
+   IOSleep(kOnyxResetReleaseTime);
+   return result;
+}
+
+IOReturn OpenOnyxAudio::startCodec()
+{
+   if (!mPlatformInterface) {
+      return kIOReturnNotReady;
+   }
+   IOReturn result = resetCodec();
+   if (result == kIOReturnSuccess) {
+      result = writeAllRegisters();
+   }
+   return result == kIOReturnSuccess ? writeMute() : result;
+}
+
 IOReturn OpenOnyxAudio::writeMute()
 {
    UInt8 value = mRegisters[kOnyxDACControl] & ~kOnyxDACMuteBits;
@@ -90,8 +121,12 @@ IOReturn OpenOnyxAudio::setCodecMute(bool muteState)
    return writeMute();
 }
 
+// AppleOnboardAudio mutes the digital stream while no S/PDIF cable is in: that must not mute the DAC.
 IOReturn OpenOnyxAudio::setCodecMute(bool muteState, UInt32 streamType)
 {
+   if (streamType != kAnalogAudioSelector) {
+      return kIOReturnSuccess;
+   }
    return setCodecMute(muteState);
 }
 
@@ -195,10 +230,7 @@ IOReturn OpenOnyxAudio::performSetPowerState(UInt32 currentPowerState, UInt32 pe
       result = writeRegister(kOnyxDACControl, value | kOnyxDACMuteBits);
       mRegisters[kOnyxDACControl] = value;
    } else if (pendingPowerState == kIOAudioDeviceActive && currentPowerState != kIOAudioDeviceActive) {
-      result = writeAllRegisters();
-      if (result == kIOReturnSuccess) {
-         result = writeMute();
-      }
+      result = startCodec();
    }
    mPluginCurrentPowerState = pendingPowerState;
    return result;
@@ -216,8 +248,7 @@ IOReturn OpenOnyxAudio::setSampleDepth(UInt32 sampleDepth)
 
 IOReturn OpenOnyxAudio::recoverFromFatalError(FatalRecoverySelector selector)
 {
-   IOReturn result = writeAllRegisters();
-   return result == kIOReturnSuccess ? writeMute() : result;
+   return startCodec();
 }
 
 IOReturn OpenOnyxAudio::requestSleepTime(UInt32 *microsecondsUntilComplete)

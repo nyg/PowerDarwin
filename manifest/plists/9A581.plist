@@ -3948,6 +3948,47 @@
 			};
 			version = 1.0;
 		};
+		OpenPlay = {
+			dependencies = {
+				build = (
+					CF,
+					IOAudioFamily,
+					IOKitUser,
+					Libm,
+					Libsystem,
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					libgcc,
+					shell_cmds,
+					text_cmds,
+				);
+				header = (
+					Libc_headers,
+					Libm,
+					Libsyscall,
+					architecture,
+					gcc,
+					xnu,
+				);
+				lib = (
+					Libsystem,
+					dyld,
+					libgcc,
+				);
+				staticlib = (
+					Csu,
+					SystemStubs,
+				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
+			version = 1.0;
+		};
 		OpenSMU = {
 			dependencies = {
 				build = (

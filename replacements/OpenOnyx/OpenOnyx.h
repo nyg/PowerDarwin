@@ -53,6 +53,8 @@ public:
 private:
    IOReturn writeRegister(UInt32 index, UInt8 value);
    IOReturn writeAllRegisters();
+   IOReturn resetCodec();
+   IOReturn startCodec();
    IOReturn writeMute();
 
    UInt8 mRegisters[kOnyxRegisterCount];
