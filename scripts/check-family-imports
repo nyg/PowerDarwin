@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import re
+import subprocess
+
+DESCRIPTION = '''Lists every symbol that the kexts import from a family's C++ classes and that
+the family's source does not define: a method it declares but never implements,
+or a reserved vtable slot it has already used. The classes are those the source
+defines with OSDefineMetaClass. Used to check that Panther's
+IOSCSIArchitectureModelFamily 139.0.2 offers what Leopard's kexts import.'''
+
+
+def strip_comments(text):
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+    return re.sub(r'//[^\n]*', '', text)
+
+
+def read_source(folder, skip):
+    classes, defined, unused_slots = set(), set(), set()
+    for root, folders, files in os.walk(folder):
+        folders[:] = [f for f in folders if f not in skip]
+        for name in files:
+            if not name.endswith(('.cpp', '.h')):
+                continue
+            text = strip_comments(open(os.path.join(root, name), encoding='latin-1').read())
+            for m in re.finditer(r'OSDefineMetaClass\w*\s*\(\s*(\w+)', text):
+                classes.add(m.group(1))
+            for m in re.finditer(r'OSMetaClassDefineReservedUnused\s*\(\s*(\w+)\s*,\s*(\d+)', text):
+                unused_slots.add((m.group(1), int(m.group(2))))
+            for m in re.finditer(r'\b(\w+)\s*::\s*(~?\w+)\s*\(', text):
+                defined.add((m.group(1), m.group(2)))
+            if name.endswith('.h'):
+                for body in re.finditer(r'class\s+(\w+)\s*:\s*public\s+\w+\s*\{(.*?)\n\};', text, flags=re.S):
+                    for m in re.finditer(r'\b(~?\w+)\s*\([^;{]*\)\s*(const\s*)?\{', body.group(2)):
+                        defined.add((body.group(1), m.group(1)))
+    return classes, defined, unused_slots
+
+
+def imports(binary):
+    raw = subprocess.run(['nm', '-u', binary], capture_output=True, text=True).stdout.split()
+    demangled = subprocess.run(['c++filt'], input='\n'.join(raw), capture_output=True, text=True).stdout.split('\n')
+    return demangled[:len(raw)]
+
+
+def provided(cls, method, defined, unused_slots):
+    if method in (None, 'gMetaClass', 'metaClass', 'superClass') or method in (cls, '~' + cls):
+        return True
+    if method.startswith('_RESERVED'):
+        return (cls, int(re.search(r'(\d+)$', method).group(1))) in unused_slots
+    return (cls, method) in defined
+
+
+def main():
+    parser = argparse.ArgumentParser(prog='check-family-imports', description=DESCRIPTION)
+    parser.add_argument('--skip', action='append', default=[], metavar='FOLDER',
+                        help='a folder of the source to leave out, such as TestTools; may be repeated')
+    parser.add_argument('source', help="the family's source folder")
+    parser.add_argument('kexts', nargs='+', metavar='kext', help="a kext's executable")
+    args = parser.parse_args()
+
+    classes, defined, unused_slots = read_source(args.source, set(args.skip))
+    missing = {}
+    for binary in args.kexts:
+        for name in imports(binary):
+            if name.startswith(('vtable for ', 'typeinfo for ')):
+                cls, method = name.split()[-1], None
+            else:
+                m = re.match(r'(\w+)::(~?\w+)', name)
+                if not m:
+                    continue
+                cls, method = m.group(1), m.group(2)
+            if cls in classes and not provided(cls, method, defined, unused_slots):
+                missing.setdefault(name, set()).add(os.path.basename(binary))
+    print('classes defined in the source:', len(classes))
+    for name, binaries in sorted(missing.items()):
+        print('MISSING', name, sorted(binaries))
+
+
+if __name__ == '__main__':
+    main()

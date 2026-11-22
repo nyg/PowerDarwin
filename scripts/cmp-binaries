@@ -1,0 +1,61 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: cmp-binaries <build folder> <Leopard root> <project>...
+
+Run on the build machine. For each project, compares every Mach-O file of its
+latest Root in <build folder>/Roots with Leopard's file at the same path under
+<Leopard root> (/ for the running system): architectures, and the ppc slice's
+imports, exports and section sizes. Differing symbol lists are shown in part."
+
+[[ $# -ge 3 ]] || { echo "$usage" >&2; exit 1; }
+roots=$1/Roots
+leopard=${2%/}
+shift 2
+[[ -d $roots ]] || { echo "no Roots folder at $roots" >&2; exit 1; }
+[[ -d $leopard/System ]] || { echo "no Leopard system at ${leopard:-/}" >&2; exit 1; }
+
+latest() { ls -d "$roots/$1/$1"-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1 || true; }
+
+work=$(mktemp -d /tmp/cmp-binaries.XXXXXX)
+trap 'rm -rf "$work"' EXIT
+
+archs() { lipo -info "$1" 2>/dev/null | sed 's/.*: //' || true; }
+imports() { nm -arch ppc -u "$1" 2>/dev/null | sort > "$2" || true; }
+exports() { nm -arch ppc -g "$1" 2>/dev/null | grep -v ' U ' | awk '{ print $3 }' | sort > "$2" || true; }
+sections() { size -arch ppc "$1" 2>/dev/null | tail -1 | awk '{ print $1, $2, $3 }' || true; }
+same() { cmp -s "$1" "$2" && echo yes || echo no; }
+
+compare() {
+   local ours=$1 apple=$2 path=$3
+   imports "$ours" "$work/ours.imports"
+   imports "$apple" "$work/apple.imports"
+   exports "$ours" "$work/ours.exports"
+   exports "$apple" "$work/apple.exports"
+   echo "$path: archs [$(archs "$ours")] vs Apple [$(archs "$apple")];" \
+      "imports $(wc -l < "$work/ours.imports" | tr -d ' ') vs $(wc -l < "$work/apple.imports" | tr -d ' ')" \
+      "same=$(same "$work/ours.imports" "$work/apple.imports");" \
+      "exports $(wc -l < "$work/ours.exports" | tr -d ' ') vs $(wc -l < "$work/apple.exports" | tr -d ' ')" \
+      "same=$(same "$work/ours.exports" "$work/apple.exports");" \
+      "ppc sizes $(sections "$ours") vs $(sections "$apple")"
+   cmp -s "$work/ours.imports" "$work/apple.imports" || diff "$work/ours.imports" "$work/apple.imports" | head -8 || true
+   cmp -s "$work/ours.exports" "$work/apple.exports" || diff "$work/ours.exports" "$work/apple.exports" | head -8 || true
+}
+
+for project in "$@"; do
+   root=$(latest "$project")
+   if [[ -z $root ]]; then
+      echo "no Root of $project in $roots" >&2
+      continue
+   fi
+   echo "== $project: $(basename "$root")"
+   find "$root" -type f -print0 | while IFS= read -r -d '' file; do
+      [[ $(file -b "$file") == *Mach-O* ]] || continue
+      path=${file#"$root"}
+      if [[ -f $leopard$path ]]; then
+         compare "$file" "$leopard$path" "$path"
+      else
+         echo "$path: no Apple counterpart"
+      fi
+   done
+done

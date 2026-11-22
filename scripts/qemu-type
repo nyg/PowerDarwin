@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+import os
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+
+USAGE = '''usage: qemu-type <monitor socket> <screenshot.png> <line>...
+
+Types each line, then Return, into the guest through the QEMU monitor socket
+that scripts/boot-qemu opens (QEMU_MONITOR), waits 4 seconds after each line,
+and saves a screenshot of the guest's screen as a PNG, converted with sips.'''
+
+PLAIN = {' ': 'spc', '/': 'slash', '-': 'minus', '.': 'dot', '=': 'equal', ',': 'comma', ';': 'semicolon',
+         "'": 'apostrophe', '\\': 'backslash', '[': 'bracket_left', ']': 'bracket_right', '`': 'grave_accent',
+         '\t': 'tab'}
+SHIFTED = {'!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0',
+           '_': 'minus', '+': 'equal', '|': 'backslash', '"': 'apostrophe', '>': 'dot', '<': 'comma',
+           ':': 'semicolon', '?': 'slash', '~': 'grave_accent', '{': 'bracket_left', '}': 'bracket_right'}
+
+
+def key(ch):
+    if ch.isascii() and (ch.isdigit() or ch.islower()):
+        return ch
+    if ch.isascii() and ch.isupper():
+        return 'shift-' + ch.lower()
+    if ch in PLAIN:
+        return PLAIN[ch]
+    if ch in SHIFTED:
+        return 'shift-' + SHIFTED[ch]
+    return None
+
+
+def send(monitor, command):
+    monitor.sendall((command + '\n').encode())
+    time.sleep(0.08)
+
+
+def main(args):
+    if len(args) < 3:
+        sys.exit(USAGE)
+    socket_path, screenshot, lines = args[0], args[1], args[2:]
+    unknown = sorted({ch for line in lines for ch in line if key(ch) is None})
+    if unknown:
+        sys.exit('qemu-type: no key for %s' % ' '.join(repr(ch) for ch in unknown))
+    monitor = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    monitor.connect(socket_path)
+    time.sleep(0.3)
+    for line in lines:
+        for ch in line:
+            send(monitor, 'sendkey ' + key(ch))
+        send(monitor, 'sendkey ret')
+        time.sleep(4)
+    with tempfile.TemporaryDirectory() as folder:
+        dump = os.path.join(folder, 'screen.ppm')
+        send(monitor, 'screendump ' + dump)
+        time.sleep(1)
+        monitor.close()
+        subprocess.run(['sips', '-s', 'format', 'png', dump, '--out', screenshot], check=True, capture_output=True)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

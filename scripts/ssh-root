@@ -1,0 +1,41 @@
+#!/usr/bin/expect -f
+
+set usage "usage: ssh-root <host> <port> <command>
+
+Logs in to the image as root over SSH with the test password, which it reads from
+DARWIN9_ROOT_PASSWORD, runs the command and exits with its status. For QEMU, the
+host is 127.0.0.1 and the port the one scripts/boot-qemu forwards (QEMU_SSH_PORT)."
+
+if {$argc != 3} {
+   puts stderr $usage
+   exit 1
+}
+if {![info exists env(DARWIN9_ROOT_PASSWORD)]} {
+   puts stderr "ssh-root: DARWIN9_ROOT_PASSWORD is not set"
+   exit 1
+}
+lassign $argv host port command
+
+set timeout 600
+log_user 1
+# OpenSSH 5.1 on the image offers only these older algorithms, and every new image has new host keys.
+spawn ssh -p $port \
+   -o PreferredAuthentications=keyboard-interactive,password -o PubkeyAuthentication=no \
+   -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+   -o HostKeyAlgorithms=+ssh-rsa \
+   -o KexAlgorithms=+diffie-hellman-group14-sha1,diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1 \
+   root@$host $command
+expect {
+   -re "assword:" {
+      log_user 0
+      send -- "$env(DARWIN9_ROOT_PASSWORD)\r"
+      log_user 1
+      exp_continue
+   }
+   timeout {
+      puts stderr "ssh-root: no answer from $host:$port after $timeout seconds"
+      exit 1
+   }
+   eof
+}
+exit [lindex [wait] 3]

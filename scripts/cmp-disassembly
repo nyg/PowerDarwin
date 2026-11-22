@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+import difflib
+import re
+import sys
+
+USAGE = '''usage: cmp-disassembly <apple.dis> <ours.dis> <apple.cstring> <ours.cstring> <apple.nm> <ours.nm> [function...]
+
+Compares Apple's binary and ours function by function, and prints a unified diff
+of each function named. Make the six files on the build machine, for each binary:
+   otool -arch ppc -tV <binary>                  > <name>.dis
+   otool -arch ppc -v -s __TEXT __cstring <binary> > <name>.cstring
+   nm -arch ppc <binary>                         > <name>.nm'''
+
+
+def symbols(path):
+    table = {}
+    for line in open(path, encoding='latin-1'):
+        fields = line.split()
+        if len(fields) == 3 and fields[1] in 'TtSsDdBb':
+            table[fields[2]] = int(fields[0], 16)
+    return table
+
+
+def strings(path):
+    table = {}
+    for line in open(path, encoding='latin-1'):
+        match = re.match(r'^([0-9a-f]{8})  (.*)$', line.rstrip('\n'))
+        if match:
+            table[int(match.group(1), 16)] = match.group(2)
+    return table
+
+
+def normalise(instruction, start, strs, syms):
+    # Addresses differ between two builds: branch targets become offsets from the
+    # function's start, and string addresses become the strings they point at.
+    instruction = re.sub(r'^(b[\w+-]*\s+(?:cr\d,)?)0x([0-9a-f]+)',
+                         lambda m: m.group(1) + '+0x%x' % (int(m.group(2), 16) - start), instruction)
+    instruction = re.sub(r'(jbsr\s+[^,]+),0x[0-9a-f]+', r'\1', instruction)
+    instruction = re.sub(r'(ha16|lo16)\(0x([0-9a-f]+)\)',
+                         lambda m: '%s("%s")' % (m.group(1), strs.get(int(m.group(2), 16), 'ADDR')), instruction)
+    return re.sub(r'(?<![(\w])(_[\w.$]+)(?![\w)])',
+                  lambda m: '0x%x' % syms[m.group(1)]
+                  if m.group(1) in syms and not instruction.startswith('jbsr') else m.group(1),
+                  instruction)
+
+
+def functions(path, strs, syms):
+    result, name, start = {}, None, None
+    for line in open(path, encoding='latin-1'):
+        line = line.rstrip('\n')
+        if re.match(r'^[_.A-Za-z].*:$', line):
+            name, start = line[:-1], None
+            result[name] = []
+            continue
+        fields = line.split('\t')
+        if name is None or len(fields) < 2 or not re.fullmatch(r'[0-9a-f]{8}', fields[0]):
+            continue
+        address = int(fields[0], 16)
+        if start is None:
+            start = address
+        result[name].append(normalise('\t'.join(fields[1:]), start, strs, syms))
+    return result
+
+
+def main(args):
+    if len(args) < 6:
+        sys.exit(USAGE)
+    apple_dis, ours_dis, apple_cstring, ours_cstring, apple_nm, ours_nm = args[:6]
+    apple = functions(apple_dis, strings(apple_cstring), symbols(apple_nm))
+    ours = functions(ours_dis, strings(ours_cstring), symbols(ours_nm))
+    same = [n for n in apple if n in ours and apple[n] == ours[n]]
+    different = [n for n in apple if n in ours and apple[n] != ours[n]]
+    print('functions: apple %d ours %d identical %d different %d' % (len(apple), len(ours), len(same), len(different)))
+    print('only apple:', [n for n in apple if n not in ours])
+    print('only ours:', [n for n in ours if n not in apple])
+    for n in different:
+        print('DIFF %s apple %d ours %d' % (n, len(apple[n]), len(ours[n])))
+    for n in args[6:]:
+        print('==', n)
+        for line in difflib.unified_diff(apple.get(n, []), ours.get(n, []), 'apple', 'ours', n=2, lineterm=''):
+            print(line)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
