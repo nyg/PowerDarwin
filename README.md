@@ -1,97 +1,96 @@
 # PowerDarwin
 
-Darwin 9.8 (Mac OS X 10.5.8, build `9L30`) built for PowerPC from Apple's published sources, with the smallest documented fixes.
+Darwin 9.8 for PowerPC Macs: the open core of Mac OS X 10.5.8 Leopard (build `9L30`), built from the sources Apple published, with the fewest changes that make it boot and run, each one documented.
 
-## Step 1
+The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin](https://nyg.github.io/PowerDarwin/), explains the project from the hardware up: what Darwin is, how it is built, and how each step was reached.
 
-A disk image whose files all come from this repo's builds boots to a single-user root shell (`-v -s`) in QEMU `mac99` and on an iMac G5.
+## Credits
 
-## Step 2
+- Apple, for publishing Darwin's sources ([apple-oss-distributions](https://github.com/apple-oss-distributions)) and darwinbuild ([macosforge/darwinbuild](https://github.com/macosforge/darwinbuild)), whose `Darwin9` branch builds every project here, unchanged.
+- The [Internet Archive](https://web.archive.org/), whose Wayback Machine still serves darwinbuild's Roots and the opensource.apple.com tarballs that GitHub lacks.
+- Andrew-R, whose [darwinbuild work on Darwin 9 for PowerPC](https://forums.macrumors.com/threads/building-with-darwinbuild-for-darwin9-ppc-in-2026-wip.2485638/) built 99 of its projects on a Leopard PowerPC Mac in 2026.
+- [barracuda156](https://github.com/barracuda156) and the [macos-powerpc](https://github.com/macos-powerpc) organisation, who keep darwinbuild and Apple's projects building for PowerPC.
+- NetBSD's macppc drivers, [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`fancontrol.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/fancontrol.c), whose SMU protocol and fan zones OpenSMU follows, and FreeBSD's [`onyx.c`](https://github.com/freebsd/freebsd-src/blob/main/sys/dev/sound/macio/onyx.c), whose codec settings OpenOnyx uses.
+- [PureDarwin](https://github.com/PureDarwin/PureDarwin), which built bootable Darwin 9 systems for Intel Macs.
+- [QEMU](https://www.qemu.org/) and [OpenBIOS](https://github.com/openbios/openbios), whose `mac99` machine tests each image before it reaches a real Mac.
 
-The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in, in QEMU `mac99` and on an iMac G5.
-
-## Step 3
-
-Booted on the iMac G5, the image brings up its Ethernet port and accepts SSH logins.
-
-## Step 4
-
-Logged in over SSH on the iMac G5, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network.
-
-## Step 5
-
-On the iMac G5, `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot.
-
-## Step 6
-
-On the iMac G5, securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
-
-## Step 7
-
-On the iMac G5, OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
-
-## Step 8
-
-On the iMac G5, the image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
-
-## Step 9
-
-On the iMac G5, disks and devices work: DiskArbitration mounts the internal partitions, USB disks and CDs as they appear, `bless` makes a partition the startup disk, and the sound driver comes up for the built-in audio.
-
-## Step 10
-
-On the iMac G5, the image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
-
-## Step 11
-
-A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
-
-## Rules
-
-1. Project versions are exactly those in [manifest/9L30.tsv](manifest/9L30.tsv), taken from darwinbuild's 9L30 build list. A project moves to another version only to backport Apple's own fix.
-2. Sources stay as Apple published them: fetched by tag from [apple-oss-distributions](https://github.com/apple-oss-distributions), their SHA-256 recorded in [manifest/9L30.sha256](manifest/9L30.sha256), never edited in place. The 14 projects marked `archive` have no matching tag there and come from the archived opensource.apple.com tarballs, where those exist: `IOATABlockStorage` 200.1.8 and `IOSCSIArchitectureModelFamily` 200.3.6 were never published.
-3. A fix changes the build environment first. Failing that, it backports Apple's fix from a later Apple release. Only then is it a new patch, as small as possible, with no reformatting or unrelated change.
-4. Every patch in [patches/](patches/), every workaround in [env/](env/) and every replacement in [replacements/](replacements/) is listed in [DEVIATIONS.md](DEVIATIONS.md).
-5. Builds use the toolchain of the release: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3, `ld64` 77.1.
-6. The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries. Closed tools may run the build: the host's Leopard and Xcode, darwinbuild's Roots and the host's SDK.
-
-## Layout
-
-- `manifest/`: project versions, their source, and the hashes of the fetched tarballs.
-- `patches/<project>-<version>/`: one patch file per fix.
-- `env/`: build-environment workarounds, each with the error it fixes.
-- `replacements/`: new code standing in for a closed Apple library or driver, each listed in DEVIATIONS.md.
-- `scripts/fetch-sources [project...]`: downloads the `github` sources, or the named projects including `archive` ones from the Wayback Machine, into `sources/` (not committed), records the hash of each new tarball and checks them all.
-- `scripts/resolve-buildlist`, `scripts/fetch-roots`, `scripts/stage-sources`, `scripts/stage-roots`: work out each project's version and build, fetch darwinbuild's Roots from the Wayback Machine, and copy sources and Roots to the build machine.
-- `scripts/prepare-buildroot <host>`: puts the build-environment workarounds of DEVIATIONS.md into the build machine's build environment, or with `--check` reports which are in place.
-- `scripts/make-test-image` (run on the build machine) and `scripts/boot-qemu`: make an Apple-partitioned HFS+ test image and boot it in QEMU `mac99`, optionally with a CD image, with a `sungem` Ethernet card (Apple's GMAC) on QEMU's user network and the guest's port 22 forwarded to port 2222 on the host (`QEMU_SSH_PORT`). The image's root password is the DES hash in `~/9L30/root-password.hash` on the build machine (`openssl passwd -crypt -stdin`); without that file, root cannot log in.
-- `scripts/check-image <image.dmg> <build folder> <userland folder> [project...]` (run on the build machine): lists every file on the test image whose MD5 matches no file of the userland folder or of the projects' latest Roots, so that only the files `make-test-image` writes remain.
-- `scripts/cmp-binaries <build folder> <Leopard root> <project>...` (run on the build machine): compares every Mach-O file of each project's latest Root with Leopard's at the same path: architectures, and the ppc slice's imports, exports and section sizes.
-- `scripts/cmp-disassembly <apple.dis> <ours.dis> <apple.cstring> <ours.cstring> <apple.nm> <ours.nm> [function...]`: compares two `otool -tV` disassemblies function by function, with branch targets and string addresses normalised.
-- `scripts/check-family-imports [--skip <folder>]... <family source> <kext>...`: lists each symbol the kexts import from a family's classes that the family's source does not define ([D85](DEVIATIONS.md#d85)).
-- `scripts/qemu-type <monitor socket> <screenshot.png> <line>...` and `scripts/ssh-root <host> <port> <command>`: type into a QEMU guest through `boot-qemu`'s monitor and save a screenshot; log in to the image as root over SSH, with the test password from `DARWIN9_ROOT_PASSWORD`, and run one command.
-- `docs/`: the book, an mdBook that explains the project from the hardware up; `docs/tools/make-svgs.py` draws its block diagrams, and `scripts/make-book-indexes` writes its indexes of deviations, projects and commits from DEVIATIONS.md, `docs/projects-built.tsv`, the chapters and the git log.
-- `reference/`: what the reference system runs, and a description of Andrew-R's darwinbuild patch.
-- [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
-
-## Building
-
-A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub or archive.org over TLS. A PowerPC Mac running Leopard with Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`.
-
-1. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md), [D25](DEVIATIONS.md)).
-2. `scripts/stage-sources <host> <project>...` unpacks the GitHub tarballs as `<project>-<version>` (`<project>=<version>` for a replacement at another version, [D40](DEVIATIONS.md), or for a project in `replacements/`, which it copies, [D81](DEVIATIONS.md)) into `~/9L30/Sources` ([D1](DEVIATIONS.md)), applies the project's patches and touches the files listed in its `touch` file ([D20](DEVIATIONS.md)).
-3. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
-4. `scripts/prepare-buildroot <host>` puts the build-environment workarounds in place (below).
-5. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>` (Leopard's sudo has no `/usr/local/bin` in its path). Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
-6. A failure is fixed by rule 3 and listed in DEVIATIONS.md.
-
-The build environment (`~/9L30/BuildRoot`, a sparse disk image) needs files that darwinbuild does not put there. `scripts/prepare-buildroot <host> [--check] [step...]` places them, one step per deviation: [D4](DEVIATIONS.md), [D5](DEVIATIONS.md), [D6](DEVIATIONS.md), [D7](DEVIATIONS.md), [D8](DEVIATIONS.md), [D9](DEVIATIONS.md), [D10](DEVIATIONS.md), [D13](DEVIATIONS.md), [D14](DEVIATIONS.md), [D15](DEVIATIONS.md), [D18](DEVIATIONS.md), [D19](DEVIATIONS.md), [D24](DEVIATIONS.md), [D30](DEVIATIONS.md), [D36](DEVIATIONS.md), [D37](DEVIATIONS.md), [D40](DEVIATIONS.md), [D49](DEVIATIONS.md), [D59](DEVIATIONS.md), [D60](DEVIATIONS.md), [D64](DEVIATIONS.md), [D67](DEVIATIONS.md), [D70](DEVIATIONS.md), [D73](DEVIATIONS.md), [D82](DEVIATIONS.md), [D89](DEVIATIONS.md), [D94](DEVIATIONS.md), [D97](DEVIATIONS.md), [D98](DEVIATIONS.md), [D99](DEVIATIONS.md); its `plist` step copies `manifest/plists/9A581.plist` into `~/9L30/.build/` and reloads it with `darwinxref loadIndex`. A step already in place is left alone, and a step whose input is not built or staged yet says so and waits, so the script is rerun after the build that unblocks it; `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later. The 9L30 `IOKitUser.hdrs` and `AppleDisplays` Roots left in the build environment by the first IOKitUser attempts are not part of it.
+[RESOURCES.md](RESOURCES.md) lists everyone else's work this project draws on.
 
 ## Status
 
-Built from source so far: `bootstrap_cmds`, `file_cmds`, `shell_cmds`, the kernel (`xnu`, booted to a single-user shell on the iMac G5), `libSystem` with all its parts, `dyld`, `launchd`, `bash`, `ncurses`, `libiconv`, `libgcc`, `bsm`, `libutil`, `libedit`, `diskdev_cmds`, `bzip2`, `IOKitUser`, `CF`, `ICU`, `Security` and its parts, `DirectoryServiceMIG`, `configd` (SystemConfiguration, the `configd` daemon with its plug-ins, `scutil`), `notify` (`notifyd`), `IOSerialFamily`, `DiskArbitration`, `network_cmds`, `libresolv`, `ipsec` (`libipsec`), `tcp_wrappers`, `OpenSSL`, `bootp` (the DHCP client), `Kerberos`, `OpenSSH`, `tcl`, `SQLite`, `passwordserver_sasl` (Cyrus SASL), `DSPasswordServerFramework`, `LDAPFramework` (OpenLDAP's LDAP.framework), `DirectoryService`, `SmartCardServices` (PCSC.framework), `SecurityTokend`, `securityd`, `IOKitTools` (`ioreg`), `objc4`, `autozone`, `libstdcxx`, `zlib`, `kext_tools`, `BootX`, `files`, `system_cmds`, `text_cmds`, `pam`, `pam_modules`, `grep`, `less`, `adv_cmds` (`ps`), `syslog`, `ntp`, `vim`, `libmd`, `SystemStubs`, `TimeZoneData`, `hfs` (`hfs.util`), `BootCache`, `bless`, `isoutil` (`cd9660.util`), `msdosfs`, `cddafs`, `cctools`, `ld64`, `gcc` and `gcc_42` (for PowerPC only), `gcc_select`, `gnumake`, `perl`, `expat`, `libffi`, `python`, `ruby`, `samba`, and the drivers `IOPCIFamily`, `IOStorageFamily`, `IOATAFamily`, `IOI2CFamily`, `AppleMacRiscPCI`, `AppleMacRISC2PE`, `AppleKeyLargo`, `AppleMPIC`, `AppleCore99NVRAM`, `AppleVIA`, `AppleGPIO`, `KeyLargoATA`, `AppleFileSystemDriver`, `IOHIDFamily`, `IOUSBFamily`, `IOATAPIProtocolTransport`, `IOCDStorageFamily`, `IODVDStorageFamily`, `IOBDStorageFamily`, `AppleMediaBay`, `AppleKauaiATA`, `AppleK2SATARoot`, `AppleK2SATA`, `IOGraphics`, `AppleMacRISC4PE`, `AppleFlashNVRAM`, `AppleI2C`, `IONetworkingFamily`, `AppleGMACEthernet`, `IOUSBMassStorageClass`, `IOAudioFamily`, `AppleI2S`, `AppleOnboardAudio`, `IOFireWireFamily`, `IOFireWireSBP2`, `IOFireWireSerialBusProtocolTransport` and, Panther's versions, `IOATABlockStorage` and `IOSCSIArchitectureModelFamily`, two drivers of our own, `OpenSMU` in place of the closed `AppleSMU` ([D81](DEVIATIONS.md)) and `OpenOnyx` in place of the closed `AppleOnyxAudio` ([D94](DEVIATIONS.md)), and our `openplay` command ([D95](DEVIATIONS.md)). In a chroot holding only our files, our shell, `ls`, `mount`, `fsck_hfs` and `launchctl` run. A QEMU `mac99` image with this userland and our kernel boots to a single-user shell, with its driver cache made by our kextcache. Every file on it comes from our builds, the USB keyboard driver and BootX included; `IOATABlockStorage`, through which the root disk is reached, is Panther's 130.3.1, since Leopard's 200.1.8 was never published ([D40](DEVIATIONS.md)). The same image, restored onto a partition of the iMac G5's internal disk, boots the iMac to the same shell through our platform, PCI, SATA and disk drivers. Step 1 is reached. Booted without `-s`, the image runs launchd's multi-user startup to getty's `login:` on the console, where root logs in: PAM's `pam_unix` checks the password against `/etc/master.passwd`, into which `make-test-image` writes the hash of a test password, since neither `passwd` ([D44](DEVIATIONS.md)) nor DirectoryService is built. The iMac G5 boots to the same prompt from its partition, and root logs in there too. Step 2 is reached. `Security`, `configd` with its daemon and plug-ins, `notifyd` and `DiskArbitration` are built, Security in Apple's own `Darwin` configuration without the closed CryptKit ([D51](DEVIATIONS.md)); with them kextd, configd, notifyd and diskarbitrationd run, and `reboot` syncs the disks and stops at `MACH Reboot`, in QEMU and on the iMac G5, since only the closed ApplePMU and AppleSMU restart or power off these Macs. With `IONetworkingFamily` and `AppleGMACEthernet`, the iMac G5's Ethernet driver, QEMU's model of that chip comes up as `en0` and gets its address by DHCP; with `DirectoryService` built, root logs in over SSH from another machine, its password checked by PAM through DirectoryService's local directory, about three minutes after power-on. On the iMac G5, its own Ethernet port comes up at gigabit speed and gets its address and name server from the home router by DHCP, and root logs in over SSH from another Mac on the network. Step 3 is reached in QEMU and on the iMac G5. With `grep`, `less`, `adv_cmds`, `syslog`, `ntp` and `vim` built, `grep`, `ps`, `less` and `vi` run over SSH, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network a few minutes after boot, in QEMU and on the iMac G5. Step 4 is reached. With `OpenSMU` driving the iMac G5's system management unit, `reboot` restarts the iMac G5, `shutdown -h now` switches it off, and the kernel reads the clock from the hardware at boot and writes it when the time is set, in a form Leopard's own driver reads back. Step 5 is reached. With `SmartCardServices`, `SecurityTokend` and `securityd` built, launchd starts securityd at boot on the iMac G5 and in QEMU, and `launchctl`, `launchproxy` and `login` use Security and `pam_launchd` as Apple built them: each SSH login gets its own security session from `launchproxy`, without the `SessionCreate() failed` it logged before, and root logs in on the console with `pam_launchd` required. Step 6 is reached. OpenSMU also drives the iMac G5's three fans: it reads the CPU diode through the SMU, calibrated by the SMU's own data, and the disk, optical drive, GPU and north bridge sensors through our IOI2CFamily on the U4's I²C bus, and sets each fan's speed through the SMU, in zones that work as NetBSD's do, with the sensors and temperatures of Apple's thermal profile for this model, published with Tiger's AppleMacRISC4PE; if a sensor fails or a temperature passes its limit, every fan runs at full speed. At idle the fans run at Leopard's speeds, within about 50 rpm, and the iMac is as quiet; under load the CPU fan speeds up, and slows down again after. Step 7 is reached. Without a GPU driver the GPU and north bridge run some 5 to 10 °C warmer at idle than under Leopard. OpenSMU also publishes the `IOPMU` resource, which AppleMacRISC4PE's CPU driver waits for before its start ends ([D81](DEVIATIONS.md)): until then IOKit never went quiet and configd waited 60 seconds before naming `en0`, where now the network is up some 6 seconds after the kernel starts. `ntpd-wrapper` waits for DNS before it runs `ntpdate`, as Apple's ntp-45.1 does ([D83](DEVIATIONS.md)), and `ntpdate` sets the clock at boot. `/usr/share/zoneinfo` comes from system_cmds, whose `zic` compiles TimeZoneData's tz data, now built too, and links `/etc/localtime` to US/Pacific; `make-test-image` replaces that link with the build machine's, or with UTC if it has none. With `BootCache` built, launchctl starts it at boot as on Leopard; from the third boot after a restore, about 95 % of the blocks read while it runs come from its cache. With `hfs` built, DiskArbitration reads the root volume's UUID through `hfs.util`, and kextd no longer logs `error reconsidering volume /` at shutdown. The image also gets `/etc/rc.common` and `/etc/hostconfig` from launchd's source ([D21](DEVIATIONS.md)) and a `SystemVersion.plist` naming Darwin 9.8 `9L30`, loses DirectoryService's installer job, whose label clashes with DirectoryService's own, and IOATAPIProtocolTransport, which cannot load without the closed IOSCSIArchitectureModelFamily, and logins no longer try `pam_securityserver` ([D84](DEVIATIONS.md)). What `/var/log/system.log` still shows after a boot comes from Apple's own files or from closed parts the image lacks: launchd's `Unknown key: SHAuthorizationRight` for ntpd's and sshd's jobs, as on Leopard; `ReportCrash`, Apple's closed crash reporter, missing for launchd and configd; the kernel's notes that AppleMacRISC4PE's Info.plist mixes `com.apple.kernel` and `com.apple.kpi` dependencies, as Apple's does, and that Panther's IOATABlockStorage declares none ([D40](DEVIATIONS.md)); `update`'s `sandbox_init` failure from our sandbox stub ([D13](DEVIATIONS.md)); and, on the first boot after a restore, BootCacheControl's missing playlist and launchd's throttled `aslmanager`, and on the second, BootCache's `hit rate below threshold`, while its playlist still holds the first boot's reads. Step 8 is reached. In QEMU, AppleMacRISC2PE's CPU driver waits for the closed `ApplePMU` in the same way, so the 60-second wait remains there. Panther's `IOSCSIArchitectureModelFamily` 139.0.2 stands in for Leopard's unpublished one ([D85](DEVIATIONS.md)): its classes have the same layout as the 200.3.6 headers in the SDK, and Leopard's IOATAPIProtocolTransport, IOUSBMassStorageClass ([D86](DEVIATIONS.md)) and IOFireWireSerialBusProtocolTransport import nothing it lacks. With it, IOATAPIProtocolTransport is back in the image and finds the iMac G5's optical drive. DiskArbitration mounts removable and external disks without a console user, whom only the closed loginwindow registers, through the `AutomountDisksWithoutUserLogin` setting that `make-test-image` writes, as Apple does on servers; with `hfs`, `isoutil`, `msdosfs` and `cddafs` built, it mounts the iMac G5's internal `Tiger` and `Leopard` volumes at boot, and a USB key as soon as it is plugged in, at high speed through EHCI; in QEMU, a CD and HFS+ and FAT32 USB disks, plugged in while it runs, mount, are written and are ejected with `disktool`. Our `bless` makes Darwin9, then Leopard, the startup disk, and the iMac restarts into each without the Startup Manager. For sound, IOAudioFamily calls the closed `OSvKernDSPLib` no more ([D87](DEVIATIONS.md)), and AppleOnboardAudio, whose iMac G5 codec plug-in `AppleOnyxAudio` Apple published only as a stub, drives the iMac's PCM3052 codec through OpenOnyx ([D94](DEVIATIONS.md)): AppleOnboardAudio publishes its engine, streams and controls as on Leopard, and its output selector moves from the internal speakers to the line output when headphones are plugged in and back when they are pulled out. CoreAudio, through which Leopard plays sound, is closed; our `openplay` ([D95](DEVIATIONS.md)) plays a tone or a WAV file through IOAudioFamily's engine interface instead, and it is heard on the iMac G5's internal speakers and headphone socket. AppleOnboardAudio's DSP, whose sources Apple left empty, does not run. No FireWire device appears: `AppleFWOHCI`, the iMac G5's FireWire controller driver, is closed and not in IOFireWireFamily's source, so FireWire disks wait for an open controller driver. On the iMac G5, Step 9 is reached for the internal volumes, USB disks, `bless` and sound; CDs were mounted in QEMU only, as the iMac's optical drive is unreliable, and FireWire disks wait for an open controller driver, left for a later step. The vendors' prebuilt smart-card reader drivers that SmartCardServices' source carries are left out of the image. sshd's account phase uses `pam_unix` instead of `pam_securityserver`, which needs OpenDirectory's Objective-C framework ([D80](DEVIATIONS.md)). Without Apple's `ApplePMU` its clock starts at 1 January 1970. In QEMU, USB disks work on an EHCI controller; on QEMU's OHCI model, the controller stops about 90 seconds after boot. `IOATABlockStorage` 200.1.8, `IOSCSIArchitectureModelFamily` 200.3.6, `AppleFWOHCI`, `AppleOnyxAudio`, `OSvKernDSPLib`, `ApplePMU`, `XsanFilter` and the security policy kexts have no published source. `AppleMacRISC4PE`, the iMac G5's platform driver, builds with 66 register constants that a patch defines ([D39](DEVIATIONS.md)); the published source leaves parts of five of its functions out, of which only a model-name line in panic logs applies to the iMac G5. With the release's own toolchain built, `gcc` 5465 and `gcc_42` 5531 for PowerPC only ([D100](DEVIATIONS.md)), `cctools` 667.3, `ld64` 77.1 and `gnumake`, the image compiles, links and runs C, C++ and CoreFoundation programs on the iMac G5, for ppc and ppc64, with or without `-g` ([D112](DEVIATIONS.md)); built from the same input, our compilers, assembler and linker give the same output as Apple's builds of them. Perl 5.8.8, Python 2.5.1 and Ruby 1.8.6 run there with sockets, threads, OpenSSL, zlib, readline, SQLite, XML and `ctypes`; their DTrace probes compile to nothing ([D97](DEVIATIONS.md), [D103](DEVIATIONS.md)), and Python's 36 Carbon modules, Build Applet and Python Launcher are left out ([D102](DEVIATIONS.md)). Samba 3.0.25b, started by launchd at boot, shares `/Users/Shared` with another Mac over SMB1, and files copied both ways arrive unchanged; its passwords are in its own `tdbsam` file, set with `smbpasswd`, and `make-test-image` writes its `smb.conf` and turns off Apple's preference sync, which needs the closed Sharing pane ([D113](DEVIATIONS.md)). Step 10 is reached. The image still lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
+Steps 1 to 10 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
 
-The reference system is Leopard 10.5.8 on an iMac G5: the image's drivers, binaries and logs are compared with Leopard's.
+## Hardware
+
+- iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10.
+- QEMU `mac99`: tested, Steps 1 to 4 and 6.
+- Other PowerPC Macs that Leopard supports: untested.
+
+[hardware/](hardware/) has a page per machine, with the drivers it needs and which of them are closed.
+
+## Rules
+
+1. **Apple's release, as published.** Projects and versions are those of darwinbuild's `9L30` build list ([manifest/9L30.tsv](manifest/9L30.tsv)). Sources are fetched as Apple published them, checked by their SHA-256 ([manifest/9L30.sha256](manifest/9L30.sha256)), and never edited in place. A project changes version only to take Apple's own fix from a later release, or, when Apple never published 9L30's version, to build the nearest one it did publish.
+2. **The smallest fix, in this order.** Change the build environment; failing that, take Apple's fix from another release; only then write a new patch, as small as possible, with no reformatting or unrelated change.
+3. **Every change documented.** Every patch, build-environment workaround and replacement is listed in [DEVIATIONS.md](DEVIATIONS.md).
+4. **The release's own toolchain.** Builds use `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1.
+5. **Open source only in the image.** The image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries. Closed tools may run the build.
+
+## Steps
+
+- **Step 1, reached.** A disk image whose files all come from this repo's builds boots to a single-user root shell (`-v -s`) in QEMU `mac99` and on an iMac G5.
+- **Step 2, reached.** The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in.
+- **Step 3, reached.** On the iMac G5, the image brings up its Ethernet port and accepts SSH logins.
+- **Step 4, reached.** Over SSH, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network.
+- **Step 5, reached.** `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot.
+- **Step 6, reached.** securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
+- **Step 7, reached.** OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
+- **Step 8, reached.** The image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
+- **Step 9, reached except FireWire and the microphone.** DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound.
+- **Step 10, reached.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
+- **Step 11.** A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
+
+## Build it
+
+A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub or archive.org over TLS. Sources come from [apple-oss-distributions](https://github.com/apple-oss-distributions) by tag, and the 14 projects with no tag there from the archived opensource.apple.com tarballs. A PowerPC Mac running Leopard with Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`.
+
+1. `scripts/fetch-sources` and `scripts/fetch-roots` download the sources and Roots into `sources/` and `roots/` and check their hashes.
+2. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md#d2), [D25](DEVIATIONS.md#d25)).
+3. `scripts/stage-sources <host> <project>...` unpacks each project's source into `~/9L30/Sources` as `<project>-<version>`, applies its patches and touches the files listed in its `touch` file. `<project>=<version>` stages another version, or a project from `replacements/`.
+4. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
+5. `scripts/prepare-buildroot <host>` puts the build-environment workarounds of DEVIATIONS.md into the build environment, one step per workaround. A step already in place is left alone, a step whose input is not built yet says so and waits, and `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later.
+6. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>`. Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
+7. A failure is fixed by rule 2 and listed in DEVIATIONS.md.
+
+## Install it
+
+No image is published yet: build one, then install it.
+
+1. On the build machine, `scripts/make-test-image` writes the image as `/private/var/tmp/darwin9-step1.dmg`, an Apple-partitioned HFS+ disk of 1.6 GB, and a raw copy as `darwin9-step1.cdr`. Root's password is the DES hash in `~/9L30/root-password.hash` (`openssl passwd -crypt -stdin`); without that file, root cannot log in.
+2. To try it in QEMU, copy the raw image to the current Mac and run `scripts/boot-qemu <image> [boot-args]`; the guest's SSH port is forwarded to port 2222.
+3. To install it on a PowerPC Mac, make an empty HFS+ partition of at least 2 GB, then, from Leopard on the same Mac:
+   ```
+   hdiutil convert /private/var/tmp/darwin9-step1.dmg -format UDZO -o darwin9-asr.dmg
+   sudo asr imagescan --source darwin9-asr.dmg
+   sudo asr restore --source darwin9-asr.dmg --target /Volumes/<partition> --erase --noprompt
+   ```
+4. Boot it: hold Option at power-on and choose it in the Startup Manager, or run `sudo bless --mount /Volumes/<partition> --setOF` and restart. From Open Firmware, `setenv boot-args -v` then `boot sata/k2-sata@0/@0:<partition number>,\\:tbxi` boots it verbosely on an iMac G5.
+5. Log in as root on the console or over SSH. `bless --mount /Volumes/<Leopard volume> --setOF` and `reboot` go back to Leopard.
+
+## Layout
+
+- `manifest/`: project versions, their source, the hashes of the fetched tarballs and Roots, and darwinbuild's build lists in `plists/`.
+- `patches/<project>-<version>/`: one patch file per fix.
+- `env/`: build-environment workarounds, each with the error it fixes.
+- `replacements/`: new code that stands in for a closed Apple library or driver.
+- `LICENSES/`: the texts of the licences that the patches and the copied files are under.
+- `scripts/`: fetching, staging and building (`fetch-sources`, `fetch-roots`, `resolve-buildlist`, `stage-sources`, `stage-roots`, `prepare-buildroot`), making and checking the image (`make-test-image`, `check-image`, `cmp-binaries`, `cmp-disassembly`, `check-family-imports`), running it (`boot-qemu`, `qemu-type`, `ssh-root`), and the book's indexes (`make-book-indexes`). The book's Method chapters explain each one.
+- `hardware/`: one page per machine, with the drivers it needs.
+- `reference/`: listings and logs from Leopard, against which the image is compared, and a description of Andrew-R's darwinbuild patch.
+- `docs/`: the book, an mdBook.
+- [DEVIATIONS.md](DEVIATIONS.md): every change from Apple's sources and build.
+- [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
+- [AGENTS.md](AGENTS.md): a guide for coding agents working in this repo.
 
 ## Licence
 
