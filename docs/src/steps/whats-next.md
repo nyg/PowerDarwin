@@ -1,0 +1,119 @@
+# What's next
+
+## What you will learn
+
+- What the project leaves open once Step 11 is reached, in four areas: drivers, machines, userland and distribution.
+- What each open item would take, from what the repo already records.
+- Which closed parts stand behind most of them.
+
+Steps 1 to 8 are reached, Step 9 is reached but for CDs on the iMac G5 (`PowerMac12,1`), and Steps 10 and 11 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-usb-boot.md)). This chapter lists what would remain after them. Every item is an idea, not a commitment: none is a step in README.md yet. The chapter changes whenever README.md gains a step.
+
+## Drivers
+
+### An open driver for the PMU
+
+QEMU's `mac99`, and many PowerPC Macs before the later G5s, keep their clock and switch their power through a PMU, whose driver, ApplePMU, is closed ([PowerPC Macs](../background/powerpc-macs.md)). Without it, QEMU's clock starts at 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds before it names `en0`. That wait has a twist ([Step 8](step-8-clean-boot.md)): AppleMacRISC2PE's processor driver waits with `waitForService(serviceMatching("ApplePMU"))`, for a driver of that class, not for a resource. IOKit matches a class or any subclass of it, so only a driver whose class is named `ApplePMU`, or derives from one so named, ends the wait.
+
+It would take a kext like OpenSMU ([Step 5](step-5-clock-and-power.md)): the PMU's clock, restart and power-off commands, known from NetBSD's `pmu.c` under the BSD licence, the kernel's two hooks filled in, `IORTC` published, and the class name above. Anyone could test it in QEMU, and QEMU would then cover Steps 5 and 8 too.
+
+### FireWire
+
+FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 32 pure virtual functions cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
+
+### The GPU
+
+Leopard's GPU driver, `ATIRadeon9700`, is closed, and without it the iMac's GPU and north bridge run some 5 to 9 °C warmer at idle than under Leopard ([Step 7](step-7-fans.md)). The screen itself comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either.
+
+### What Step 9 leaves
+
+A CD test on the iMac; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. 9L30's build list has no UDF project, so a DVD with only a UDF volume has no file system to mount it.
+
+### Unpublished sources
+
+Panther's IOATABlockStorage 130.3.1 and IOSCSIArchitectureModelFamily 139.0.2 stand in for Leopard's 200.1.8 and 200.3.6, which Apple never published ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85)). If either source ever appears, the project would build it, drop the stand-in and the deviations around it, and compare the result with Leopard's binary. AppleMacRISC4PE builds with 66 register values that no published header defines ([D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)), and the published source leaves parts of five of its functions out; only a model-name line in panic logs applies to the iMac, so what the others lack can matter only on other Macs.
+
+## Machines
+
+### Other PowerPC Macs
+
+The image is built for PowerPC Macs, not for one model, but only the iMac has run it. Another Mac needs four things:
+
+- its platform driver, AppleMacRISC2PE or AppleMacRISC4PE, both built here;
+- a driver for its power controller: OpenSMU for an SMU, or the open PMU driver above;
+- on an SMU Mac, its own fans, sensors and temperatures in OpenSMU, which today knows only the iMac's ([OpenSMU](../synthesis/opensmu.md));
+- drivers for its own chips, such as its Ethernet, disk controller and sound codec, each open, closed, or to be written.
+
+For temperatures, Tiger's AppleMacRISC4PE releases publish the iMac G5's platform plug-in and thermal profile under the APSL; whether they hold other models' is not checked.
+
+### QEMU
+
+QEMU's OHCI USB model stops about 90 seconds after boot under our drivers, so USB disks there go on its EHCI controller ([Step 9](step-9-disks-and-devices.md)). Finding which guest access stops it, and reporting it to QEMU, would let USB disks use QEMU's default controller.
+
+## Userland
+
+### OpenDirectory
+
+Several pieces wait for OpenDirectory, Leopard's interface to directory services: `passwd` ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), `pam_securityserver` ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)) and `bootpd`, the DHCP server ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)). Its C part includes a private header of Apple's CoreFoundation that CF-Lite lacks, and its Objective-C part needs the closed Foundation. It would take the missing declarations from a later open CoreFoundation, as other gaps in CF-Lite were filled ([D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56)), and a way around the Objective-C part for the pieces that use it.
+
+### Other closed parts
+
+- ReportCrash, the crash reporter, whose absence launchd and configd still log ([Step 8](step-8-clean-boot.md)).
+- loginwindow, which registers the console user; `autodiskmount.plist` works around its absence for disks ([Step 9](step-9-disks-and-devices.md)).
+- CoreAudio: `openplay` plays a sound, and no more; a sound server for other programs would be new code ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
+
+[What stays closed](../synthesis/what-stays-closed.md) lists them all.
+
+### Deferred features
+
+A `deferred` deviation turns a feature off until the open project it needs is built. [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72) leaves out Cyrus SASL's MySQL plug-in, which needs MySQL's client library; the 9L30 build list has MySQL 45, so building it would bring the plug-in back.
+
+### Darwin 10 for PowerPC
+
+Darwin 10, Snow Leopard's, dropped PowerPC. Others have started on it: macos-powerpc's darwinbuild has a `Darwin10` branch that adds PowerPC to the `10A432` build list, and a group built a Snow Leopard kernel for PowerPC from `xnu-1504.9.37` ([the history](../background/history.md)). This project could serve as a base: its method and rules, its deviations as a list of what to expect, its open drivers, and Panther's stand-ins. It would take a Darwin 10 build list with PowerPC, a toolchain for it, and every deviation checked again.
+
+## Distribution
+
+### An image others can boot
+
+Today the image is made for tests: `make-test-image` writes the hash of a test password into it, and `passwd`, the usual way to change a password, is not built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)). An image for others would need a first-boot way to set the password, and one download, a disk image to restore with `asr` or, after Step 11, to write to a USB key.
+
+Rule 6 already holds for such an image: every file is built from source or written by the scripts, and the check of each file's MD5 proves it ([Making the image](../method/making-the-image.md)). The licences ask for more. Most of Darwin is under the APSL 2.0, and bash, gcc and Samba under the GPL; both ask that binaries come with their sources and changes. The repo holds the patches and scripts, and `manifest/` pins each source by its hash, so publishing them beside the image would be most of it.
+
+### A second build machine
+
+Every image so far was built on one build machine. A rebuild from scratch on another would show that the scripts repeat the build. It would first need a script for one input no script makes yet: the userland folder, `/private/var/tmp/step1-chroot`, from which `make-test-image` starts every image.
+
+## A map of the open items
+
+```mermaid
+mindmap
+  root((Open items))
+    Drivers
+      open PMU driver
+      open AppleFWOHCI
+      GPU power
+      CDs, sound input, UDF
+      unpublished sources
+    Machines
+      other PowerPC Macs
+      QEMU's OHCI
+    Userland
+      OpenDirectory
+      ReportCrash, loginwindow, CoreAudio
+      MySQL for SASL
+      Darwin 10 for PowerPC
+    Distribution
+      image for others
+      second build machine
+```
+
+Some items help others: the PMU driver would serve both QEMU and the older Macs, and OpenDirectory would bring back `passwd`, with which an image for others could set its password.
+
+## Where to look
+
+- README.md: "Status".
+- DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), and the `closed-*` rows, among them [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95).
+- [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): NetBSD's `pmu.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
+- In AppleMacRISC2PE-187.0.5: `MacRISC2CPU.cpp`, the wait for `ApplePMU`.
+- [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the userland folder and the test password.
+- [What stays closed, and why](../synthesis/what-stays-closed.md).
