@@ -6,7 +6,7 @@
 - What each open item would take, from what the repo already records.
 - Which closed parts stand behind most of them.
 
-Steps 1 to 8 and Step 10 are reached, Step 9 is reached but for CDs on the iMac G5 (`PowerMac12,1`), and Step 11 is defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-usb-boot.md)). This chapter lists what would remain after them. Every item is an idea, not a commitment: none is a step in README.md yet. The chapter changes whenever README.md gains a step.
+Steps 1 to 10 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Step 11 is defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-usb-boot.md)). This chapter lists what would remain after them. Every item is an idea, not a commitment: none is a step in README.md yet. The chapter changes whenever README.md gains a step.
 
 ## Drivers
 

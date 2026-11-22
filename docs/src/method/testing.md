@@ -149,7 +149,7 @@ Every step's goal names the machine it is proved on. Steps 1 and 2 name both QEM
 | 6, securityd | tested | reached |
 | 7, fan control | no SMU | reached |
 | 8, a clean boot | tested, the 60-second wait remains | reached |
-| 9, disks and devices | CDs and USB disks tested | reached, but for CDs, mounted in QEMU only |
+| 9, disks and devices | CDs and USB disks tested | reached, with CDs tested in QEMU only |
 | 10, a working Unix system | not tested; the same checks ran in a chroot of the image | reached |
 
 ## Where to look
