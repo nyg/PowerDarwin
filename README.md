@@ -20,6 +20,8 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 
 Steps 1 to 10 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
 
+The comparisons with Leopard are provisional: the reference system is Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](reference/imacg5/README.md)), until they are repeated against an unmodified Leopard 10.5.8.
+
 ## Hardware
 
 - iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10.
