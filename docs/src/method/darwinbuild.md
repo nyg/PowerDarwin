@@ -38,7 +38,7 @@ The build environment shares the host's kernel and daemons. The notes at the top
 
 The programs a build makes run on the build machine as soon as they are installed into the build environment, since later builds use them: our `/bin/sh` runs the build scripts of the projects built after bash, and Apple's `tar` runs on our libSystem. So the build machine must run PowerPC binaries natively.
 
-Rule 5 asks for the release's own toolchain: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1, the compilers, assembler and linkers of 10.5.8. They are projects of the build list like any other, and darwinbuild installs them into each build environment from their Roots: Apple's until Step 10, ours since, after a check that ours and Apple's give the same output for the same input ([Step 10](../steps/step-10-working-unix.md)). Xcode 3.1.4 is the last Xcode for Leopard, not the one Apple built 9L30 with ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23) shows one difference); the build uses only its `xcodebuild` and closed helpers, which darwinbuild points at the toolchain's own compilers (below).
+Rule 4 asks for the release's own toolchain: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1, the compilers, assembler and linkers of 10.5.8. They are projects of the build list like any other, and darwinbuild installs them into each build environment from their Roots: Apple's until Step 10, ours since, after a check that ours and Apple's give the same output for the same input ([Step 10](../steps/step-10-working-unix.md)). Xcode 3.1.4 is the last Xcode for Leopard, not the one Apple built 9L30 with ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23) shows one difference); the build uses only its `xcodebuild` and closed helpers, which darwinbuild points at the toolchain's own compilers (below).
 
 The build machine does not download. Leopard's TLS is too old for GitHub and archive.org, so the current Mac fetches and checks everything, and copies it across.
 
@@ -229,7 +229,7 @@ This project does without it, and runs darwinbuild unchanged: the build lists ar
 
 ## Where to look
 
-- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Building" and "Layout".
+- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Build it" and "Layout".
 - Scripts: [stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources), [stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots), [prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot).
 - [env/](https://github.com/nyg/PowerDarwin/blob/master/env/), the files the build-environment deviations install.
 - [reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md).

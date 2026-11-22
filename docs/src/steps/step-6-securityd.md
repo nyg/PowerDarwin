@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them."
+README.md sets it as: "securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them."
 
 Security, the framework of Apple's security calls, was built in [Step 3](step-3-security-and-daemons.md), but securityd, the daemon it talks to, was not. Two workarounds stood in the way of using Security as Apple built it: `launchctl` was built without it ([D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26)), and the console login made `pam_launchd` optional ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)). Logins on an iMac G5 (`PowerMac12,1`) worked, but each SSH connection logged:
 
@@ -147,13 +147,13 @@ securityd's Xcode target has an exports file, `src/securityd.exp`, which lists t
 
 darwinbuild puts its own copy of Xcode 3.1.4 in the build environment, with `/Developer` rewritten to `/XCD/loper` ([D25](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d25)), and links `strip`, `libtool`, `mig` and other tools from there to the build environment's `/usr/bin`. It does not link `nmedit`.
 
-The fix is in the build environment, rule 3's first choice ([The rules](../method/rules.md)): [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), a step of [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot), links `/XCD/loper/usr/bin/nmedit` to `/usr/bin/nmedit`, which the build list's cctools 667.3 Root installs. securityd then built in 10 minutes 37 seconds, and its `ppc` slice imports the same 354 symbols as Leopard's `securityd`.
+The fix is in the build environment, rule 2's first choice ([The rules](../method/rules.md)): [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), a step of [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot), links `/XCD/loper/usr/bin/nmedit` to `/usr/bin/nmedit`, which the build list's cctools 667.3 Root installs. securityd then built in 10 minutes 37 seconds, and its `ppc` slice imports the same 354 symbols as Leopard's `securityd`.
 
-### Prebuilt drivers in a source (rule 6)
+### Prebuilt drivers in a source (rule 5)
 
 SmartCardServices' install phase does not only install what it builds. It also copies binaries that its source tarball carries ready-made: three kexts (`CM4040.kext`, `CRYPTOCardPCCard.kext` and `SCR24X_Apple_Driver.kext`), four reader bundles in `/usr/libexec/SmartCardServices/drivers/`, and `pkcs11.shlb`. They are vendors' drivers for particular card readers, and no source for them is published.
 
-Rule 6 had said only that the image holds no Apple binary. Commit `4ac9c86` widened it to what it says now: "The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." `make-test-image` removes the three kexts, the reader bundles and `pkcs11.shlb` from the image.
+Rule 5 had said only that the image holds no Apple binary. Commit `4ac9c86` widened it to what it says now: "The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." `make-test-image` removes the three kexts, the reader bundles and `pkcs11.shlb` from the image.
 
 ### Dropping D26 and D45
 
@@ -191,4 +191,4 @@ Step 6 was reached on the iMac. Two lines remained at each login, both from part
 - [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26) and [D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45), dropped in this step; [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48), widened; [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), new; [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), for launchd's build, and [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), for the `pam_securityserver` still missing.
 - [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot) (`step_D82`), [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) (the reader drivers), [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist) (SecurityTokend and securityd).
 - In libsecurity_authorization-32564: `lib/Authorization.cpp` (`SessionCreate`). In libsecurityd-36292: `lib/ssclient.cpp` (`findSecurityd`). In libsecurity_cdsa_utilities-33506: `lib/cssmerrors.cpp` (`CssmError::cssmError`). In libsecurity_cssm-32993: `lib/cssmapple.h` (`CSSM_ERRCODE_SERVICE_NOT_AVAILABLE`). In securityd-36489: `src/session.h` and `src/session.cpp` (root and dynamic sessions), `etc/com.apple.securityd.plist` (the job). In launchd-258.25: `launchd/src/launchd.c` and `launchd_core_logic.c` (the `SessionCreate` key), `launchproxy.c`, `launchctl.c`, `libvproc.c` (`_vprocmgr_move_subset_to_user`), `vproc_priv.h` (session types). In pam_modules-36.2: `pam_launchd/pam_launchd.c`. In system_cmds-433.8: `getty.tproj/com.apple.getty.plist`. In OpenSSH-95.1.5: `launchd-ssh.plist`. In SmartCardServices-34733: `installPhase/`.
-- Commits `daa71f9`, which defined the step, `a4d892a`, which reached it, and `4ac9c86`, which widened rule 6.
+- Commits `daa71f9`, which defined the step, `a4d892a`, which reached it, and `4ac9c86`, which widened rule 5.

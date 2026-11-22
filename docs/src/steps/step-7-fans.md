@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard."
+README.md sets it as: "OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard."
 
 "As quiet" was checked in two ways: by ear at the machine, and by the fans' speeds against Leopard's, read on the same iMac on the same day.
 

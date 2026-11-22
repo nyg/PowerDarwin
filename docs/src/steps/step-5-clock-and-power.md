@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot."
+README.md sets it as: "`reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot."
 
 By Step 4 the image did everything else a small Unix system does, but it could do none of these three things, on the iMac or in QEMU. They have one cause: the chip that does all three has no open driver.
 
@@ -28,7 +28,7 @@ A program cannot cut its own power: the moment it did, it would stop. A computer
 
 On the iMac, both jobs belong to the SMU, the system management unit: a small processor on the logic board, with its own firmware, that keeps the real-time clock, switches the power, and also reads temperature sensors and drives the fans ([Step 7](step-7-fans.md)). Many earlier PowerPC Macs, and QEMU's `mac99`, have a PMU instead, an older chip for the same jobs; [PowerPC Macs](../background/powerpc-macs.md) says which Mac has which.
 
-The kernel talks to the SMU through a driver, as it does to any device ([Hardware and boot basics](../background/hardware-basics.md)). Leopard's driver for it, AppleSMU, is closed: Leopard ships it as a binary, and Apple never published its source. The project's rule 6 keeps every Apple binary off the image, so until this step the image had no driver for the SMU at all.
+The kernel talks to the SMU through a driver, as it does to any device ([Hardware and boot basics](../background/hardware-basics.md)). Leopard's driver for it, AppleSMU, is closed: Leopard ships it as a binary, and Apple never published its source. The project's rule 5 keeps every Apple binary off the image, so until this step the image had no driver for the SMU at all.
 
 ## Before: a kernel with no one to ask
 

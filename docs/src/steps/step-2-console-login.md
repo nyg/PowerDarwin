@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets Step 2 as: "The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in, in QEMU `mac99` and on an iMac G5."
+README.md sets Step 2 as: "The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in."
 
 Without `-s`, launchd does not stop at a shell: it checks and mounts the disk, then starts the system's daemons, one of which offers a login. Leopard's own login screen is loginwindow, a closed graphical program, so the image needs the older Unix way: a text `login:` prompt on the console.
 

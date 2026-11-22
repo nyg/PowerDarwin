@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, the image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine."
+README.md sets it as: "The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine."
 
 After Step 9 the image ran every program the earlier steps needed, on the iMac and in QEMU's `mac99`, but it could not make one: every binary on it had been compiled on the build machine. The step was reached on 22 November 2026.
 
@@ -18,7 +18,7 @@ After Step 9 the image ran every program the earlier steps needed, on the iMac a
 
 `cc hello.c` looks like one program and is several. `cc` is a driver: it runs `cc1`, the compiler proper, which turns C into assembly; `as`, the assembler, which turns that into an object file; and `ld`, the linker, which joins the object file with start-up code and libraries into a program. Each needs files of its own: the headers that `#include` names, such as `stdio.h`; `crt1.o`, the start-up code that calls `main`; and the libraries to link against, `libSystem` first ([Step 1, part 1](step-1-kernel-and-userland.md)).
 
-Rule 5 says which tools: "Builds use the toolchain of the release: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3, `ld64` 77.1." Until this step the build machine ran Apple's builds of them, from darwinbuild's Roots ([darwinbuild and the build machine](../method/darwinbuild.md)). Step 10 built them from source and put them on the image, so that the system compiles with the same tools that build it.
+Rule 4 says which tools: "Builds use `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1." Until this step the build machine ran Apple's builds of them, from darwinbuild's Roots ([darwinbuild and the build machine](../method/darwinbuild.md)). Step 10 built them from source and put them on the image, so that the system compiles with the same tools that build it.
 
 The image lacked more than the compiler:
 
@@ -73,7 +73,7 @@ Apple's perl 51.1.4, python 30.1.3 and ruby 67.6 wrap Perl 5.8.8, Python 2.5.1 a
 ld: couldn't dlopen() /usr/lib/libdtrace.dylib: … Library not loaded: …/Symbolication.framework/Versions/A/Symbolication
 ```
 
-Libc and DirectoryService met it too, and there the probes were patched out ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75)). This time rule 3's first choice, the build environment, served perl and python. [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace) goes into it as `/usr/sbin/dtrace` ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)) and does only what their builds ask, `dtrace -h -s <file.d> -o <file.h>`: for each probe of the file it writes a macro that does nothing and an `_ENABLED()` macro that is `(0)`. The probe sites compile to nothing, no object refers to a probe, and ld64 never loads libdtrace.
+Libc and DirectoryService met it too, and there the probes were patched out ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75)). This time rule 2's first choice, the build environment, served perl and python. [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace) goes into it as `/usr/sbin/dtrace` ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)) and does only what their builds ask, `dtrace -h -s <file.d> -o <file.h>`: for each probe of the file it writes a macro that does nothing and an `_ENABLED()` macro that is `(0)`. The probe sites compile to nothing, no object refers to a probe, and ld64 never loads libdtrace.
 
 Ruby's tarball ships its `dtrace.h` already generated, and its build never runs `dtrace -h`, so for Ruby a patch replaces that header with the same kind of macros ([D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [0001-dtrace-probes-without-libdtrace.patch](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/0001-dtrace-probes-without-libdtrace.patch)):
 
@@ -166,7 +166,7 @@ Apple's `smbd.plist` is a launchd job that listens on Samba's ports, 139 and 445
 
 ## The image
 
-`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, 61 userland projects in all, and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 6. Three more things come from no build:
+`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, 61 userland projects in all, and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
 
 - `/usr/bin/dsymutil`, a script that exits 0 ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). A compile and link in one step with `-g` makes gcc run `dsymutil` after linking (`gcc/config/darwin.h` in gcc-5465), as autoconf's `configure` scripts do with `-g -O2`, and Apple's `dsymutil` is closed; the build environment has a wrapper for it ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). A one-step `-g` build then gets no `.dSYM` bundle, and a two-step build keeps its debugging information in its object files.
 - CarbonHeaders 18.1, of Mac OS X 10.6, which [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) already uses, installed by its own Makefile: nine headers in `/usr/include`, and `MacTypes.h` again in a `CarbonCore.framework` inside an otherwise empty `CoreServices.framework`, where CF's `CFBase.h` looks for it ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)).
@@ -224,6 +224,6 @@ The final image, made after these tests, holds 28,525 files, of which the 25 not
 - Patches: [python-30.1.3](https://github.com/nyg/PowerDarwin/blob/master/patches/python-30.1.3/), [ruby-67.6](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/), [samba-187.8](https://github.com/nyg/PowerDarwin/blob/master/patches/samba-187.8/).
 - [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist): the entries of gcc, gcc_42, perl, python, ruby, samba and SystemStubs.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): `header_projects`, CarbonHeaders, `dsymutil`, `smb.conf`, `smbd.plist` and the image's size; [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image).
-- README.md: Step 10, rule 5, and "Status".
+- README.md: Step 10, rule 4, and "Status".
 - In gcc-5465: `gcc/config/darwin.h`, the `dsymutil` run. In samba-187.8: `samba/source/param/loadparm.c`, `passdb/pdb_get_set.c` and `libsmb/clispnego.c`.
 - Commits `f491d41`, which reached the step, and `5264e12`, which added `check-image`.

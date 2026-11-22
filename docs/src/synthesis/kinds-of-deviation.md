@@ -10,7 +10,7 @@
 
 ## A row for every change
 
-Rule 4 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. By the end of Step 10 there are 113 rows, D1 to D113. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. By the end of Step 10 there are 113 rows, D1 to D113. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -232,7 +232,7 @@ Five rows come from the passage of time between Leopard and now. The build lists
 
 ### Faults in Apple's code
 
-Four rows fix a fault in the code itself, rather than in what surrounds it: libgcc compiles `crt2.o` without a deployment target, the oldest Mac OS X version a binary is built for, which Leopard's headers need ([D17](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d17)), three IOUSBFamily headers never close their include guards ([D33](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d33)), Libinfo's `getgrouplist_2` passes the address of a pointer where it means the buffer ([D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46)), and `ntpd-wrapper` runs `ntpdate` before the network can look up names ([D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83)). Two have a later Apple fix, which rule 3 prefers: IOUSBFamily 378.4.3 closes the guards, and ntp-45.1, of Mac OS X 10.6, waits for DNS. For the other two the patch is new and as small as possible: D46 changes one argument.
+Four rows fix a fault in the code itself, rather than in what surrounds it: libgcc compiles `crt2.o` without a deployment target, the oldest Mac OS X version a binary is built for, which Leopard's headers need ([D17](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d17)), three IOUSBFamily headers never close their include guards ([D33](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d33)), Libinfo's `getgrouplist_2` passes the address of a pointer where it means the buffer ([D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46)), and `ntpd-wrapper` runs `ntpdate` before the network can look up names ([D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83)). Two have a later Apple fix, which rule 2 prefers: IOUSBFamily 378.4.3 closes the guards, and ntp-45.1, of Mac OS X 10.6, waits for DNS. For the other two the patch is new and as small as possible: D46 changes one argument.
 
 ### Waiting for an open project
 

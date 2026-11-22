@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets Step 3 as: "Booted on the iMac G5, the image brings up its Ethernet port and accepts SSH logins."
+README.md sets Step 3 as: "On the iMac G5, the image brings up its Ethernet port and accepts SSH logins."
 
 Neither half of that is a single program. The network is configured by configd and its plug-ins, through SystemConfiguration.framework, which uses Security.framework and CoreFoundation; DiskArbitration, which kextd needs, uses them too. This part builds that foundation: Security, the missing pieces of CF, configd, notifyd and DiskArbitration. Part 2 adds the Ethernet driver, DHCP, DirectoryService and SSH, and proves the step.
 
@@ -115,7 +115,7 @@ flowchart LR
     closed --> c3["CFBridgingPriv.h: D42, D66"]
 ```
 
-Rule 3 prefers Apple's own later code to a new patch ([The rules](../method/rules.md)). [D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54) backports from CF-550 the three symbols libsecurity_codesigning needs, `_kCFBundleResourceSpecificationKey`, `_CFBundleCreateIfMightBeBundle` and `_CFBundleCreateWithExecutableURLIfMightBeBundle`, which Apple's 10.5.8 CoreFoundation exports and CF-476.19's source lacks; they are adapted to 476, without CF-550's check for bundles built for the iPhone.
+Rule 2 prefers Apple's own later code to a new patch ([The rules](../method/rules.md)). [D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54) backports from CF-550 the three symbols libsecurity_codesigning needs, `_kCFBundleResourceSpecificationKey`, `_CFBundleCreateIfMightBeBundle` and `_CFBundleCreateWithExecutableURLIfMightBeBundle`, which Apple's 10.5.8 CoreFoundation exports and CF-476.19's source lacks; they are adapted to 476, without CF-550's check for bundles built for the iPhone.
 
 ### CFStringTransform from Apple's later open CF (D56)
 

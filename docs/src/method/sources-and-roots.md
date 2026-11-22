@@ -35,7 +35,7 @@ The project builds the versions of `9L30`, and nothing else, for two reasons.
 - It is the last Leopard, so it holds every fix Apple made to it. Leopard is also the last Mac OS X that runs on PowerPC: 10.6 is for Intel Macs only.
 - Exact versions make every result comparable. When our build of a project imports the same symbols and has the same sections as Apple's binary of the same version, the build is right; if the versions differed, a difference could come from either.
 
-The third reason is rule 1 of the project: "Project versions are exactly those in `manifest/9L30.tsv`, taken from darwinbuild's 9L30 build list. A project moves to another version only to backport Apple's own fix." [The rules](rules.md) explains it with the other five.
+The third reason is rule 1 of the project: "Projects and versions are those of darwinbuild's `9L30` build list (`manifest/9L30.tsv`)." A project changes version only to take Apple's own fix from a later release, or to build the nearest version Apple published when it never published 9L30's. [The rules](rules.md) explains it with the other four.
 
 ## Projects and versions
 
@@ -140,7 +140,7 @@ One input is not a source. The build machine needs Xcode 3.1.4, Apple's develope
 
 The hashes make the download repeatable. Someone fetching the sources later, from GitHub or the Wayback Machine, gets exactly the bytes this project built from, or `shasum` says which file differs. The four tarballs that a deviation brings in also have their hashes in their row of DEVIATIONS.md.
 
-Rule 2 adds that a source is never edited in place. A fix is a patch file in a folder of [patches/](https://github.com/nyg/PowerDarwin/blob/master/patches/) named after the project and version it applies to, such as `patches/bash-76.2/`, and it is applied to a copy of the source when the source is staged on the build machine, by `scripts/stage-sources` ([darwinbuild and the build machine](darwinbuild.md)). The tarball in `sources/` keeps its hash; the change is a file anyone can read, with its row in DEVIATIONS.md.
+Rule 1 also says that a source is never edited in place. A fix is a patch file in a folder of [patches/](https://github.com/nyg/PowerDarwin/blob/master/patches/) named after the project and version it applies to, such as `patches/bash-76.2/`, and it is applied to a copy of the source when the source is staged on the build machine, by `scripts/stage-sources` ([darwinbuild and the build machine](darwinbuild.md)). The tarball in `sources/` keeps its hash; the change is a file anyone can read, with its row in DEVIATIONS.md.
 
 ## Roots
 
@@ -154,7 +154,7 @@ darwinbuild's site served Roots of most projects for each Leopard build, at `src
 
 darwinbuild builds each project inside a nearly empty volume, which holds only what the project needs: the compiler, the shell, the headers and libraries it uses, all installed from Roots ([darwinbuild and the build machine](darwinbuild.md)). At the start nothing is built yet, so those Roots can only be Apple's. Every build runs shell commands, so darwinbuild installs `bash` into every build environment, and `bash` itself cannot be built without a compiler and a C library that were built before it. Apple's Roots break that circle. As the project builds its own Roots, darwinbuild takes ours in place of Apple's, project by project.
 
-Apple's Roots are Apple binaries, and some are binaries of closed projects, such as the Carbon headers that [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10) unpacks into the build environment. They run the build; none of them reaches the image. Rule 6 says so, and [Making the image](making-the-image.md) shows how every file on the image is checked.
+Apple's Roots are Apple binaries, and some are binaries of closed projects, such as the Carbon headers that [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10) unpacks into the build environment. They run the build; none of them reaches the image. Rule 5 says so, and [Making the image](making-the-image.md) shows how every file on the image is checked.
 
 ### Fetching them
 
@@ -192,7 +192,7 @@ flowchart LR
 
 - [manifest/](https://github.com/nyg/PowerDarwin/blob/master/manifest/): [9L30.tsv](https://github.com/nyg/PowerDarwin/blob/master/manifest/9L30.tsv), [9L30.sha256](https://github.com/nyg/PowerDarwin/blob/master/manifest/9L30.sha256), [plists/](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/), [9L30-roots.tsv](https://github.com/nyg/PowerDarwin/blob/master/manifest/9L30-roots.tsv), [9L30-roots-used.tsv](https://github.com/nyg/PowerDarwin/blob/master/manifest/9L30-roots-used.tsv), [9L30-roots.sha256](https://github.com/nyg/PowerDarwin/blob/master/manifest/9L30-roots.sha256).
 - Scripts: [resolve-buildlist](https://github.com/nyg/PowerDarwin/blob/master/scripts/resolve-buildlist), [fetch-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/fetch-sources), [fetch-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/fetch-roots).
-- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rules 1 and 2, and "Building".
+- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rule 1, and "Build it".
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md), "Apple's sources and binaries".
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md), for driver versions read from Leopard.
 - Deviations: [D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1), [D2](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d2), [D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3), [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D25](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d25), [D29](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d29), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D49](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d49), [D51](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d51), [D58](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d58), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D92](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d92).

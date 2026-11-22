@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, disks and devices work: DiskArbitration mounts the internal partitions, USB disks and CDs as they appear, `bless` makes a partition the startup disk, and the sound driver comes up for the built-in audio."
+README.md sets it as: "DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound."
 
 By Step 8 the image booted cleanly from its own partition, and saw nothing else. The iMac's other volumes stayed unmounted, a USB key did nothing, and there was no CD drive and no sound.
 
@@ -65,7 +65,7 @@ DiskArbitration also waits for a console user before it mounts a removable or ex
 
 ### bless
 
-`bless` makes a volume the startup disk by setting Open Firmware's `boot-device` ([the boot chain](../background/boot-chain.md)). Its link named two closed frameworks it never calls, `ld: framework not found ApplicationServices`, which [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91) removes; its source also carries 68k boot blocks as a prebuilt binary, which rule 6 keeps off the image.
+`bless` makes a volume the startup disk by setting Open Firmware's `boot-device` ([the boot chain](../background/boot-chain.md)). Its link named two closed frameworks it never calls, `ld: framework not found ApplicationServices`, which [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91) removes; its source also carries 68k boot blocks as a prebuilt binary, which rule 5 keeps off the image.
 
 ### FireWire
 

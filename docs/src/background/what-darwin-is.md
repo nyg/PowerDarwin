@@ -122,7 +122,7 @@ Mac OS X's libraries are frameworks: bundles in `/System/Library/Frameworks` tha
 
 ## What Apple kept closed
 
-Apple publishes only part of Mac OS X. What it keeps closed, it ships as binaries only, and those are not on the image: the project's rule 6 lets the image hold only what is built from open source or written by the project's scripts. Three groups matter here.
+Apple publishes only part of Mac OS X. What it keeps closed, it ships as binaries only, and those are not on the image: the project's rule 5 lets the image hold only what is built from open source or written by the project's scripts. Three groups matter here.
 
 ### The graphical system and its frameworks
 
@@ -148,7 +148,7 @@ Many drivers are closed, and several of them are ones a PowerPC Mac needs:
 - the graphics drivers' acceleration (`ATIRadeon9700` on the iMac), AirPort, Bluetooth, and the FireWire controller driver, `AppleFWOHCI`;
 - the sandbox and firewall policies, and the disk-image driver.
 
-Two open driver projects are missing from Apple's publications at the versions Leopard ships: IOATABlockStorage 200.1.8, through which the iMac's disk is reached, and IOSCSIArchitectureModelFamily 200.3.6, which CDs and USB disks need ([README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), rule 2). [What stays closed](../synthesis/what-stays-closed.md) lists every closed piece the project met, with what its absence costs.
+Two open driver projects are missing from Apple's publications at the versions Leopard ships: IOATABlockStorage 200.1.8, through which the iMac's disk is reached, and IOSCSIArchitectureModelFamily 200.3.6, which CDs and USB disks need ([README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), rule 1). [What stays closed](../synthesis/what-stays-closed.md) lists every closed piece the project met, with what its absence costs.
 
 ## What the project adds
 

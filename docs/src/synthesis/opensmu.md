@@ -26,7 +26,7 @@ Leopard's driver for the SMU is AppleSMU 1.2.1d1. It is closed: Leopard ships th
 
 The fans are not AppleSMU's alone: on Leopard a platform plug-in, closed as well, decides each fan's speed from a thermal profile, through AppleSMU's nubs and partitions ([Step 7](../steps/step-7-fans.md)).
 
-Rule 6 keeps every Apple binary off the image ([The rules](../method/rules.md)). Without AppleSMU the iMac still boots, but its clock starts at 1970, it cannot restart or switch itself off ([Step 5](../steps/step-5-clock-and-power.md)), the SMU's firmware runs the fans by its own loud rules ([Step 7](../steps/step-7-fans.md)), and IOKit never goes quiet ([Step 8](../steps/step-8-clean-boot.md)).
+Rule 5 keeps every Apple binary off the image ([The rules](../method/rules.md)). Without AppleSMU the iMac still boots, but its clock starts at 1970, it cannot restart or switch itself off ([Step 5](../steps/step-5-clock-and-power.md)), the SMU's firmware runs the fans by its own loud rules ([Step 7](../steps/step-7-fans.md)), and IOKit never goes quiet ([Step 8](../steps/step-8-clean-boot.md)).
 
 ### What OpenSMU is
 
@@ -340,7 +340,7 @@ Every kext carries a `kmod_info` structure, with its name and version, which the
 
 ### The Makefile
 
-darwinbuild builds a project by running `make install` in its source, with `SRCROOT`, `OBJROOT`, `SYMROOT` and `DSTROOT` naming the source, the scratch folders and the Root to install into ([darwinbuild and the build machine](../method/darwinbuild.md)). OpenSMU's Makefile compiles with `gcc-4.0` and `g++-4.0`, the release's compilers under rule 5, and the flags Xcode gives Apple's kexts, among them:
+darwinbuild builds a project by running `make install` in its source, with `SRCROOT`, `OBJROOT`, `SYMROOT` and `DSTROOT` naming the source, the scratch folders and the Root to install into ([darwinbuild and the build machine](../method/darwinbuild.md)). OpenSMU's Makefile compiles with `gcc-4.0` and `g++-4.0`, the release's compilers under rule 4, and the flags Xcode gives Apple's kexts, among them:
 
 - `-arch ppc`, written in the Makefile, which matches the build list's `RC_ARCHS = ppc`;
 - `-nostdinc` with the headers of `Kernel.framework`, since kernel code cannot use the user programs' C library, and IOI2CFamily's `PrivateHeaders` folder for `IOI2CDefs.h`;

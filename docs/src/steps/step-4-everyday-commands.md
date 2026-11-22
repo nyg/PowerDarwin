@@ -9,7 +9,7 @@
 
 ## The goal
 
-README.md sets it as: "Logged in over SSH on the iMac G5, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network."
+README.md sets it as: "Over SSH, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network."
 
 By Step 3 an iMac G5 (`PowerMac12,1`) took SSH logins from another Mac, but the image held little beyond a shell, the core file and text tools, and the daemons that bring up the network. Step 4 adds what a user expects to find after logging in, and the first log file, which turned out to show what the earlier steps could not see.
 
@@ -19,7 +19,7 @@ A program uses a library in one of two ways. A dynamic library, such as `libSyst
 
 A static library is an archive, a `.a` file that bundles object files. At link time the linker copies the members a program needs into the program itself, and the archive is not needed again. Its code then lives on inside every program linked with it, whatever happens to the archive later.
 
-This matters for rule 6 ([The rules](../method/rules.md)), which keeps every Apple binary off the image. Replacing Apple's libraries in the build environment with ours changes what programs load. It does not change code that an archive had already copied into a program built earlier.
+This matters for rule 5 ([The rules](../method/rules.md)), which keeps every Apple binary off the image. Replacing Apple's libraries in the build environment with ours changes what programs load. It does not change code that an archive had already copied into a program built earlier.
 
 ### SystemStubs
 

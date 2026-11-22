@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets Step 3 as: "Booted on the iMac G5, the image brings up its Ethernet port and accepts SSH logins."
+README.md sets Step 3 as: "On the iMac G5, the image brings up its Ethernet port and accepts SSH logins."
 
 [Part 1](step-3-security-and-daemons.md) built Security, the missing pieces of CF, configd, notifyd and DiskArbitration. This part adds what sits on top: the Ethernet driver, the DHCP client and the network tools, DirectoryService with the libraries it needs, and OpenSSH. It then proves the step, first in QEMU's `mac99`, then on an iMac G5 (`PowerMac12,1`).
 

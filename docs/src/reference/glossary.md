@@ -36,7 +36,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`AutomountDisksWithoutUserLogin`**: the setting in `/Library/Preferences/SystemConfiguration/autodiskmount.plist` with which DiskArbitration mounts removable and external disks without a console user, as on Apple's servers. `make-test-image` writes it. See [Step 9](../steps/step-9-disks-and-devices.md).
 
-**backport**: a fix taken from a later Apple release of the same project and applied to the `9L30` version, the second choice of rule 3. See [The rules](../method/rules.md).
+**backport**: a fix taken from a later Apple release of the same project and applied to the `9L30` version, the second choice of rule 2. See [The rules](../method/rules.md).
 
 **BCD**: binary-coded decimal, a way of storing a number with each decimal digit in four bits, so that 59 is stored as the byte `0x59`. The SMU keeps its clock this way. See [Step 5](../steps/step-5-clock-and-power.md).
 
@@ -580,7 +580,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **toolbox glue**: Python's Mac modules, such as `MacOS` and `_Res`, built on the closed Carbon; the image's Python is built without them ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)). See [Step 10](../steps/step-10-working-unix.md).
 
-**toolchain**: the compiler, assembler, linker and their tools. Rule 5 names the release's own: gcc 5465, gcc_42 5531, cctools 667.3, ld64 77.1. See [Step 10](../steps/step-10-working-unix.md).
+**toolchain**: the compiler, assembler, linker and their tools. Rule 4 names the release's own: gcc 5465, gcc_42 5531, cctools 667.3, ld64 77.1. See [Step 10](../steps/step-10-working-unix.md).
 
 **transport driver**: a driver that carries SCSI commands over one bus: IOATAPIProtocolTransport over ATA, IOUSBMassStorageClass over USB, IOFireWireSerialBusProtocolTransport over FireWire. See [Step 9](../steps/step-9-disks-and-devices.md).
 

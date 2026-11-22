@@ -10,7 +10,7 @@
 
 ## The goal
 
-README.md sets it as: "On the iMac G5, the image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors."
+README.md sets it as: "The image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors."
 
 "No errors" needs a definition, since some of the lines a boot logs come from Apple's own files and would appear on Leopard too, and some from closed parts that the image will never have. Here a boot is clean when every line left in `system.log` comes from Apple's own files, from a closed part the image lacks, or from the stand-in the project uses for a closed or unpublished part (the sandbox stub, Panther's IOATABlockStorage), and from nothing else the project built or wrote. The chapter's last sections list those lines.
 
@@ -115,7 +115,7 @@ ntpdate -bvs
 
 ### A fix from Mac OS X 10.6 (D83)
 
-Apple fixed this in ntp-45.1, the version of Mac OS X 10.6, whose `ntpd-wrapper` also waits for DNS. Rule 3 ([The rules](../method/rules.md)) prefers such a backport to a new patch, so [D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83), [0001-ntpd-wrapper-wait-for-dns.patch](https://github.com/nyg/PowerDarwin/blob/master/patches/ntp-37.3/0001-ntpd-wrapper-wait-for-dns.patch), takes that wait into ntp-37.3:
+Apple fixed this in ntp-45.1, the version of Mac OS X 10.6, whose `ntpd-wrapper` also waits for DNS. Rule 2 ([The rules](../method/rules.md)) prefers such a backport to a new patch, so [D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83), [0001-ntpd-wrapper-wait-for-dns.patch](https://github.com/nyg/PowerDarwin/blob/master/patches/ntp-37.3/0001-ntpd-wrapper-wait-for-dns.patch), takes that wait into ntp-37.3:
 
 ```sh
 DEADLINE=$((SECONDS+TIMEOUT))

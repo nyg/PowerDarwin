@@ -54,7 +54,7 @@ The Mac names in the G5 rows are Linux's, from its Kconfig and the table of mode
 
 ### Why the controller decides the closed driver
 
-Leopard drives the PMU with ApplePMU and the SMU with AppleSMU, and Apple published the source of neither. Both are closed. The project's rule 6 keeps every Apple binary off the image, so a Darwin 9 built from source has no driver for either chip. On every PowerPC Mac, that means no clock at boot, and a kernel that cannot restart or switch the machine off: `RTC did not show up` and `MACH Reboot`, as [Step 5](../steps/step-5-clock-and-power.md) shows.
+Leopard drives the PMU with ApplePMU and the SMU with AppleSMU, and Apple published the source of neither. Both are closed. The project's rule 5 keeps every Apple binary off the image, so a Darwin 9 built from source has no driver for either chip. On every PowerPC Mac, that means no clock at boot, and a kernel that cannot restart or switch the machine off: `RTC did not show up` and `MACH Reboot`, as [Step 5](../steps/step-5-clock-and-power.md) shows.
 
 Which chip a Mac has therefore decides what the project must write. For the iMac G5's SMU, the project wrote OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), which keeps the clock, restarts, powers off and drives the fans. QEMU's `mac99` has a PMU, for which no open driver exists yet; [What's next](../steps/whats-next.md) lists one.
 

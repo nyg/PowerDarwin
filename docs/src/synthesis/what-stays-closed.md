@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- The four ways in which a part of Leopard can be missing from Apple's open source, and why rule 6 keeps all of them off the image.
+- The four ways in which a part of Leopard can be missing from Apple's open source, and why rule 5 keeps all of them off the image.
 - Every closed Apple component the project met, layer by layer: what it does on Leopard, what its absence costs on the image, and what stands in for it.
 - Which closed tools run the build without reaching the image.
 - What the image cannot do because of them, and which of those costs an open part could remove.
@@ -16,7 +16,7 @@ The book calls code "closed" when Apple ships only a binary, "open" when the pro
 - Published empty: a source that Apple published as a stub or as empty files, such as AppleOnyxAudio or IOKitUser's HID event system.
 - Prebuilt inside a source: a binary that a published source carries but cannot rebuild, such as the smart-card reader drivers in SmartCardServices.
 
-Rule 6 keeps all four off the image: "The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." Its reason is the project's goal, a Darwin 9 made from Apple's published sources: with a closed binary on the image, what the sources cannot do would be hidden ([The rules](../method/rules.md)). So each closed part shows up either as something missing or as an open stand-in, and this chapter lists both. It does not guess why Apple kept any part closed; it records what the sources and binaries show.
+Rule 5 keeps all four off the image: "The image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." Its reason is the project's goal, a Darwin 9 made from Apple's published sources: with a closed binary on the image, what the sources cannot do would be hidden ([The rules](../method/rules.md)). So each closed part shows up either as something missing or as an open stand-in, and this chapter lists both. It does not guess why Apple kept any part closed; it records what the sources and binaries show.
 
 ## The map
 
@@ -94,17 +94,17 @@ block-beta
 
 ## Binaries inside published sources
 
-Four published sources carry binaries that cannot be rebuilt from them, and rule 6 keeps those off the image too ([The rules](../method/rules.md)): an Apple `libncurses.5.dylib` from 2006 in ncurses' source; SmartCardServices' prebuilt drivers for smart-card readers, three kexts, four bundles and `pkcs11.shlb`, which `make-test-image` leaves out; bless's 68k boot blocks, `/usr/share/misc/bootblockdata`, which it leaves out as well ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)); and Python's `wininst-*.exe`, Windows programs that its `distutils` installs, which it removes too.
+Four published sources carry binaries that cannot be rebuilt from them, and rule 5 keeps those off the image too ([The rules](../method/rules.md)): an Apple `libncurses.5.dylib` from 2006 in ncurses' source; SmartCardServices' prebuilt drivers for smart-card readers, three kexts, four bundles and `pkcs11.shlb`, which `make-test-image` leaves out; bless's 68k boot blocks, `/usr/share/misc/bootblockdata`, which it leaves out as well ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)); and Python's `wininst-*.exe`, Windows programs that its `distutils` installs, which it removes too.
 
 ## Closed tools that run the build
 
-Rule 6 lets closed tools run the build, as long as nothing of theirs reaches the image, and the MD5 check of every file on the image against the project's builds enforces it ([Making the image](../method/making-the-image.md)):
+Rule 5 lets closed tools run the build, as long as nothing of theirs reaches the image, and the MD5 check of every file on the image against the project's builds enforces it ([Making the image](../method/making-the-image.md)):
 
 | Tool | What it does in the build |
 |---|---|
 | Leopard 10.5.8 on the build machine | runs darwinbuild, `hdiutil` and `kextload -n`, and is the reference against which our binaries are compared |
 | Xcode 3.1.4 | `xcodebuild` and its helpers, such as `copyplist`; `dsymutil`, wrapped ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)) |
-| darwinbuild's Roots | Apple's binaries of each project, which fill the BuildRoots until our builds replace them ([D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3)); the release's compilers among them (rule 5), until Step 10 built ours |
+| darwinbuild's Roots | Apple's binaries of each project, which fill the BuildRoots until our builds replace them ([D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3)); the release's compilers among them (rule 4), until Step 10 built ours |
 | Xcode's `MacOSX10.5.sdk` | headers and link stubs of what was never published: the SCSI family's headers ([D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36)), CoreAudio's ([D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)) |
 | The 9G55 CarbonHeaders Root | CarbonCore's headers, for compiling only ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)) |
 | The build machine's Ruby 1.8.6 and Python 2.5.1 | Xcode's `copyplist` and a script of Kerberos ([D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D64](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d64)) |
@@ -128,5 +128,5 @@ Some of these could come back as open parts, on the model of OpenSMU and OpenOny
 
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): every driver of the iMac G5, open and closed.
 - [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md): the `closed-replacement` and `closed-dependency` rows, and the `deferred` rows around OpenDirectory.
-- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rule 6, and "Status", whose last lines list the drivers with no published source.
-- [What Darwin is](../background/what-darwin-is.md), for the layers; [The rules](../method/rules.md), for rule 6; [Kinds of deviation](kinds-of-deviation.md), for the causes behind the rows; [What's next](../steps/whats-next.md), for what could be opened.
+- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rule 5, and "Hardware", whose machine pages in `hardware/` list the drivers with no published source.
+- [What Darwin is](../background/what-darwin-is.md), for the layers; [The rules](../method/rules.md), for rule 5; [Kinds of deviation](kinds-of-deviation.md), for the causes behind the rows; [What's next](../steps/whats-next.md), for what could be opened.
