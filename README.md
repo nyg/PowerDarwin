@@ -38,17 +38,17 @@ Steps 1 to 10 are reached: on an iMac G5, the image boots to a multi-user system
 
 ## Steps
 
-- **Step 1, reached.** A disk image whose files all come from this repo's builds boots to a single-user root shell (`-v -s`) in QEMU `mac99` and on an iMac G5.
-- **Step 2, reached.** The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in.
-- **Step 3, reached.** On the iMac G5, the image brings up its Ethernet port and accepts SSH logins.
-- **Step 4, reached.** Over SSH, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network.
-- **Step 5, reached.** `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot.
-- **Step 6, reached.** securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
-- **Step 7, reached.** OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
-- **Step 8, reached.** The image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
-- **Step 9, reached except FireWire and the microphone.** DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound.
-- **Step 10, reached.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
-- **Step 11.** A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
+- ✅ **Step 1.** A disk image whose files all come from this repo's builds boots to a single-user root shell (`-v -s`) in QEMU `mac99` and on an iMac G5.
+- ✅ **Step 2.** The same image, booted without `-s`, runs launchd's multi-user startup to a `login:` prompt on the console, where root logs in.
+- ✅ **Step 3.** On the iMac G5, the image brings up its Ethernet port and accepts SSH logins.
+- ✅ **Step 4.** Over SSH, everyday commands work: `grep`, `ps`, `less` and `vi` run, syslogd writes `/var/log/system.log`, and ntpd sets the clock from the network.
+- ✅ **Step 5.** `reboot` restarts the machine, `shutdown -h now` switches it off, and the clock is read from the hardware at boot.
+- ✅ **Step 6.** securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
+- ✅ **Step 7.** OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
+- ✅ **Step 8.** The image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
+- ✅ **Step 9**, except FireWire and the microphone. DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound.
+- ✅ **Step 10.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
+- ⬜ **Step 11.** A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
 
 ## Build it
 
