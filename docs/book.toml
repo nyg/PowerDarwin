@@ -1,0 +1,15 @@
+[book]
+title = "PowerDarwin"
+description = "Darwin 9.8 for PowerPC Macs, built from Apple's published sources, explained step by step."
+authors = ["nyg"]
+language = "en"
+src = "src"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+site-url = "/PowerDarwin/"
+git-repository-url = "https://github.com/nyg/PowerDarwin"
+edit-url-template = "https://github.com/nyg/PowerDarwin/edit/master/docs/{path}"
+additional-js = ["mermaid.min.js", "mermaid-init.js"]

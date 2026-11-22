@@ -1,0 +1,59 @@
+name: Book
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - DEVIATIONS.md
+      - scripts/make-book-indexes
+      - docs/**
+      - .github/workflows/book.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  MDBOOK_VERSION: 0.5.4
+  MDBOOK_MERMAID_VERSION: 0.17.1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install mdBook and mdbook-mermaid
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar -xz -C "$HOME/.local/bin"
+          curl -fsSL "https://github.com/badboy/mdbook-mermaid/releases/download/v${MDBOOK_MERMAID_VERSION}/mdbook-mermaid-v${MDBOOK_MERMAID_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar -xz -C "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: mdbook-mermaid install docs
+      - run: scripts/make-book-indexes
+      - run: mdbook build docs
+      - uses: actions/configure-pages@v6
+        if: ${{ !github.event.repository.private }}
+      - uses: actions/upload-pages-artifact@v5
+        if: ${{ !github.event.repository.private }}
+        with:
+          path: docs/book
+
+  deploy:
+    needs: build
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

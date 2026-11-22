@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+USAGE = '''usage: make-book-indexes [<repo>]
+
+Writes <repo>/docs/src/reference/indexes.md, the book's indexes of deviations,
+projects and commits, from DEVIATIONS.md, docs/projects-built.tsv, the book's
+chapters and the git log of <repo> (default: the current folder). Needs the
+whole history, so a CI checkout must fetch it all.
+
+docs/projects-built.tsv lists each project version built, with the step under
+way when it was first built; a new build adds its row by hand.'''
+
+REPO_URL = 'https://github.com/nyg/PowerDarwin'
+STEP_SUBJECT = re.compile(r'reach Step (\d+)( except)?')
+# Commits that reached a step without saying so in their subject.
+STEP_COMMITS = {'build: log in on the console and build Security, configd, notifyd and DiskArbitration': 2}
+ROW = re.compile(r'^\| (.+) \|$', re.M)
+ANCHOR = re.compile(r'<a id="d\d+"></a>')
+LINK = re.compile(r'\[([^\]]*)\]\([^)]*\)')
+SUMMARY_LENGTH = 110
+
+
+def git(repo, *args, check=True):
+   result = subprocess.run(['git', '-C', str(repo), *args], capture_output=True, text=True)
+   if check and result.returncode:
+      sys.exit(result.stderr.strip())
+   return result.stdout if result.returncode == 0 else None
+
+
+def cells(text):
+   return [row.split(' | ') for row in ROW.findall(text)]
+
+
+def deviation_rows(text):
+   rows = [[ANCHOR.sub('', row[0]), *row[1:]] for row in cells(text)]
+   return [row for row in rows if re.fullmatch(r'D\d+', row[0]) and len(row) >= 6]
+
+
+def built_projects(repo):
+   lines = (Path(repo) / 'docs' / 'projects-built.tsv').read_text().splitlines()[1:]
+   return [tuple(line.split('\t')) for line in lines if line]
+
+
+def commits(repo):
+   log = git(repo, 'log', '--reverse', '--format=%H%x09%h%x09%ad%x09%s', '--date=format:%Y-%m-%d')
+   entries = [dict(zip(('full', 'short', 'date', 'subject'), line.split('\t', 3))) for line in log.splitlines()]
+   for entry in entries:
+      match = STEP_SUBJECT.search(entry['subject'])
+      step = STEP_COMMITS.get(entry['subject']) or (int(match[1]) if match else None)
+      entry['reached'] = step
+      entry['partly'] = bool(match and match[2])
+   following = None
+   last_full = max((e['reached'] for e in entries if e['reached'] and not e['partly']), default=0)
+   for entry in reversed(entries):
+      if entry['reached']:
+         following = entry['reached']
+      entry['step'] = following or last_full + 1
+   return entries, last_full + 1
+
+
+def first_commits(repo, entries, path, keys_of):
+   first = {}
+   for entry in entries:
+      text = git(repo, 'show', f"{entry['full']}:{path}", check=False)
+      for key in keys_of(text or ''):
+         first.setdefault(key, entry)
+   return first
+
+
+def chapters(repo):
+   src = Path(repo) / 'docs' / 'src'
+   found = []
+   for title, path in re.findall(r'^- \[([^\]]+)\]\(([^)]+)\)', (src / 'SUMMARY.md').read_text(), re.M):
+      if path.startswith('reference/'):
+         continue
+      label = title.split(':')[0] if title.startswith('Step') else re.split(r'[:,]', title)[0]
+      step = re.match(r'Step (\d+)', title)
+      found.append({'label': label, 'path': path, 'step': int(step[1]) if step else None,
+                    'text': (src / path).read_text()})
+   return found
+
+
+def one_line(change):
+   text = LINK.sub(r'\1', change)
+   sentence = re.split(r'(?<=[a-z0-9`)])\. ', text, maxsplit=1)[0].rstrip('.')
+   if len(sentence) > SUMMARY_LENGTH:
+      sentence = sentence[:SUMMARY_LENGTH].rsplit(' ', 1)[0].rstrip(',;:') + '…'
+      if sentence.count('`') % 2:
+         sentence = sentence.replace('…', '`…')
+   return sentence + '.' if not sentence.endswith('…') else sentence
+
+
+def chapter_links(found):
+   return ', '.join(f"[{c['label']}](../{c['path']})" for c in found) or '–'
+
+
+def deviation_link(number):
+   return f'[D{number}]({REPO_URL}/blob/master/DEVIATIONS.md#d{number})'
+
+
+def project_names(cell):
+   return [name.strip('` ') for name in re.split(r', | and ', cell)]
+
+
+def main():
+   if len(sys.argv) > 2 or sys.argv[1:2] in (['-h'], ['--help']):
+      sys.exit(USAGE)
+   repo = Path(sys.argv[1] if len(sys.argv) == 2 else '.').resolve()
+   entries, under_way = commits(repo)
+   book = chapters(repo)
+   deviations = deviation_rows((repo / 'DEVIATIONS.md').read_text())
+   projects = built_projects(repo)
+   first_deviation = first_commits(repo, entries, 'DEVIATIONS.md', lambda t: [r[0] for r in deviation_rows(t)])
+
+   def step_of(first):
+      return first['step'] if first else under_way
+
+   cited = {}
+   for chapter in book:
+      for number in dict.fromkeys(re.findall(r'DEVIATIONS\.md#d(\d+)', chapter['text'], re.I)):
+         cited.setdefault(int(number), []).append(chapter)
+   by_project = {}
+   for row in deviations:
+      for name in project_names(row[1]):
+         by_project.setdefault(name, []).append(int(row[0][1:]))
+
+   lines = ['# Indexes and timeline', '',
+            f'This page is made by [scripts/make-book-indexes]({REPO_URL}/blob/master/scripts/make-book-indexes) '
+            'from DEVIATIONS.md, the list of projects built, the chapters and the git log, each time the book is built. '
+            'A row\'s step is the one under way when its row or commit was added: the step that the next '
+            'step-reaching commit reached.', '',
+            '## Deviations', '',
+            'Every row of DEVIATIONS.md, with the chapters that cite it.', '',
+            '| ID | Project | Kind | Change | Step | Chapters |', '|---|---|---|---|---|---|']
+   for row in deviations:
+      number = int(row[0][1:])
+      lines.append(f"| {deviation_link(number)} | {row[1]} | {row[2]} | {one_line(row[3])} | "
+                   f"{step_of(first_deviation.get(row[0]))} | {chapter_links(cited.get(number, []))} |")
+
+   lines += ['', '## Projects built', '',
+             f'Every project and version built, headers-only builds left out, as [docs/projects-built.tsv]({REPO_URL}/blob/master/docs/projects-built.tsv) lists them.', '',
+             '| Project | Version | Step | Chapters | Deviations |', '|---|---|---|---|---|']
+   for name, version, step in projects:
+      step = int(step)
+      of_step = [c for c in book if c['step'] == step]
+      mentioning = [c for c in of_step if re.search(rf'(?<![\w-]){re.escape(name)}(?![\w-])', c['text'])]
+      ids = ', '.join(deviation_link(n) for n in by_project.get(name, [])) or '–'
+      lines.append(f'| `{name}` | {version} | {step} | {chapter_links(mentioning or of_step)} | {ids} |')
+
+   lines += ['', '## Commits', '',
+             'Every commit, oldest first, with the step under way and the step it reached.', '',
+             '| Date | Commit | Subject | Step | Reached |', '|---|---|---|---|---|']
+   for entry in entries:
+      reached = f"Step {entry['reached']}{', partly' if entry['partly'] else ''}" if entry['reached'] else ''
+      subject = entry['subject'].replace('|', '\\|')
+      lines.append(f"| {entry['date']} | [`{entry['short']}`]({REPO_URL}/commit/{entry['full']}) | "
+                   f"{subject} | {entry['step']} | {reached} |")
+
+   (repo / 'docs' / 'src' / 'reference' / 'indexes.md').write_text('\n'.join(lines) + '\n')
+
+
+main()
