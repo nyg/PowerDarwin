@@ -90,13 +90,29 @@ No image is published yet: build one, then install it.
 - `hardware/`: one page per machine, with the drivers it needs.
 - `reference/`: listings and logs from Leopard, against which the image is compared, and a description of Andrew-R's darwinbuild patch.
 - `docs/`: the book, an mdBook.
+- `worker/`: a Cloudflare Worker that passes the book's page views on to GoatCounter.
 - [DEVIATIONS.md](DEVIATIONS.md): every change from Apple's sources and build.
 - [RESOURCES.md](RESOURCES.md): other people's work, tools, and where Apple's sources and binaries live.
 - [AGENTS.md](AGENTS.md): a guide for coding agents working in this repo.
 
+## Page views
+
+The published book counts its page views with [GoatCounter](https://powerdarwin.goatcounter.com), through a Cloudflare Worker, so that blockers listing GoatCounter's domains do not drop them. `docs/src/count.js` is an unmodified copy of `https://gc.zgo.at/count.v4.js`, served with the book, and `docs/theme/head.hbs` points it at the Worker's `/hit` endpoint. The Worker in `worker/` accepts only `POST /hit` from `https://nyg.github.io`, and forwards the hit to GoatCounter's API with the visitor's IP address, user agent and language. Publishing the book does not deploy the Worker:
+
+```sh
+cd worker
+pnpm install
+
+# the GoatCounter API token, never committed (use worker/.dev.vars for local runs)
+pnpm wrangler secret put GOATCOUNTER_TOKEN
+
+pnpm run deploy
+```
+
 ## Licence
 
-- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/`, the replacements in `replacements/` (each with its own copy of the licence), the book in `docs/` and the other documents.
+- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/`, the replacements in `replacements/` (each with its own copy of the licence), the book in `docs/`, the Worker in `worker/` and the other documents.
+- `docs/src/count.js` is GoatCounter's script, under the ISC licence, as its first lines state.
 - Each patch in `patches/` changes another project's source, so its changes are under the licence of the files it changes, as that project's source states: the APSL, version 2.0 or 1.1, for most of Apple's projects, and the licences of bash, gcc, Kerberos, ntp, Python, Ruby, Samba and the others for theirs. Its first line gives its deviation and the date of the change. A file that a patch adds is this project's, under the MIT licence, unless its notice says otherwise: the one that `patches/CF-476.19/0003-string-transform-and-forced-preferences.patch` adds comes from swift-corelibs-foundation, under the Apache License 2.0 with Runtime Library Exception.
 - [LICENSES/](LICENSES/) holds the texts of the APSL 2.0 and 1.1, and of the Apache License 2.0 with Swift's Runtime Library Exception.
 - `manifest/plists/` holds darwinbuild's Darwin 9 build lists, under darwinbuild's BSD licence from Apple, with this project's changes to `9A581.plist`.

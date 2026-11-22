@@ -33,6 +33,12 @@ A guide for coding agents working in this repo. The project's goal, rules and st
 - In a chroot of the image on the build machine, never run a `launchctl` command that talks to launchd: the chroot shares the host's launchd.
 - Leopard has no `shasum` on its path: use `md5 -r`.
 
+## Page views
+
+- `docs/src/count.js` is an unmodified copy of GoatCounter's `count.v4.js`. Replace it with a newer upstream copy, never edit it.
+- `docs/theme/head.hbs` loads it on every page of the book, points it at the Worker's `/hit` endpoint, and swaps `sendBeacon` for `fetch`, because blockers drop third-party beacons. `count.js` does not count pages served from `localhost`.
+- The Worker in `worker/` accepts only `POST /hit` from `ALLOWED_ORIGIN`, and forwards the hit with the visitor's IP address, user agent and language. `GOATCOUNTER_TOKEN` is a Wrangler secret (`worker/.dev.vars` locally), never committed. Deploying the Worker is a manual `pnpm run deploy` in `worker/`: the Book workflow does not touch it.
+
 ## Commits and documents
 
 - Commits follow Conventional Commits (`feat:`, `fix:`, `build:`, `docs:`, `chore:`), subject line only, one step of progress each.

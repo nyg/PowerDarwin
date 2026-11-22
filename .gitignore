@@ -3,3 +3,6 @@
 /reference/*/ioreg-l.txt
 /reference/*/nvram.txt
 /images/
+/worker/node_modules/
+/worker/.wrangler/
+/worker/.dev.vars*

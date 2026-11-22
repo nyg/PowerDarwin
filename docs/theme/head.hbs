@@ -1,0 +1,8 @@
+{{!-- Blockers drop third-party sendBeacon requests, so count.js sends its hits with fetch instead. --}}
+<script>
+   if (window.fetch) navigator.sendBeacon = function (url) {
+      fetch(url, { method: 'POST', keepalive: true, mode: 'no-cors' }).catch(function () {})
+      return true
+   }
+</script>
+<script data-goatcounter="https://powerdarwin.cloudflare-mmdif.workers.dev/hit" async src="{{ path_to_root }}count.js"></script>
