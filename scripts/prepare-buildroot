@@ -107,7 +107,7 @@ put_tarball() {
    say "$step" "unpacked $(basename "$tarball")"
 }
 
-latest() { ls -d "$folder/$1/$2/$2"-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1; }
+latest() { ls -d "$folder/$1/$2/$2"-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1 || true; }
 
 put_root() {
    local step=$1 project=$2 found

@@ -9,7 +9,11 @@ userland_projects="Libm dyld bash ncurses libiconv libgcc bsm libutil libedit fi
 header_projects="Libc_headers architecture Librpcsvc Libsyscall Libinfo Libm libdyld launchd_libs CommonCrypto removefile copyfile Libnotify bsm mDNSResponder cctools_ofiles objc4"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU IOSCSIArchitectureModelFamily IOUSBMassStorageClass IOAudioFamily AppleI2S AppleOnboardAudio OpenOnyx"
 
-latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
+latest() { ls -d $roots/$1/$1-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1; }
+
+for project in $userland_projects xnu kext_tools $header_projects $kext_projects BootX; do
+   [ -n "$(latest $project)" ] || { echo "no Root of $project in $roots" >&2; exit 1; }
+done
 
 rm -f $image.dmg $image.cdr $image.cdr.gz
 hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg

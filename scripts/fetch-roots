@@ -22,6 +22,7 @@ for build in "${chain[@]}"; do
    [[ -s $dest/$build/.listing ]] && continue
    curl -fsSL --retry 8 --retry-delay 30 --retry-connrefused "https://web.archive.org/web/2011/http://$site/$build/" \
       | grep -oE 'href="[^"]+\.tar\.gz"' | sed -E 's|.*/||; s|^href="||; s|"$||' | sort -u > "$dest/$build/.listing"
+   [[ -s $dest/$build/.listing ]] || { echo "no listing for $build" >&2; exit 1; }
    echo "$build: $(wc -l < "$dest/$build/.listing" | tr -d ' ') files listed"
 done
 
@@ -42,7 +43,7 @@ position() {
 }
 
 queue=$(mktemp)
-: > "$used"
+new_used=$(mktemp)
 while IFS=$'\t' read -r name version origin _; do
    rootbuild=$(find_build "$name.root.tar.gz" "$origin")
    hdrsbuild=$(find_build "$name.hdrs.tar.gz" "$origin")
@@ -52,8 +53,9 @@ while IFS=$'\t' read -r name version origin _; do
    elif (( $(position "$rootbuild") <= $(position "$origin") )); then status=exact
    else status=older
    fi
-   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$version" "$origin" "${rootbuild:--}" "$status" "${hdrsbuild:--}" >> "$used"
+   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$version" "$origin" "${rootbuild:--}" "$status" "${hdrsbuild:--}" >> "$new_used"
 done < "$list"
+mv "$new_used" "$used"
 
 fetch() {
    local build=$1 file=$2
@@ -67,16 +69,18 @@ fetch() {
    else
       rm -f "$target.part"
       echo "failed: $build/$file" >&2
+      return 1
    fi
 }
 export -f fetch
 
-sort -u "$queue" | xargs -P 2 -n 2 bash -c 'fetch "$0" "$1"'
+failed=0
+sort -u "$queue" | xargs -P 2 -n 2 bash -c 'fetch "$0" "$1"' || failed=1
 rm -f "$queue"
 
 cd "$dest"
 touch "$sums"
-[[ -s $sums ]] && shasum -a 256 -c --quiet "$sums"
+[[ -s $sums ]] && { shasum -a 256 -c --quiet "$sums" || failed=1; }
 added=0
 while read -r file; do
    grep -q "  $file\$" "$sums" && continue
@@ -86,3 +90,4 @@ done < <(find . -name '*.tar.gz' | sed 's|^\./||' | sort)
 sort -k2 -o "$sums" "$sums"
 echo "$(wc -l < "$sums" | tr -d ' ') hashes in manifest/9L30-roots.sha256, $added new"
 cut -f5 "$used" | sort | uniq -c
+exit $failed
