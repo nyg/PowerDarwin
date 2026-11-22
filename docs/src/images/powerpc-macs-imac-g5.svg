@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 617" width="760" height="617" font-family="Helvetica, Arial, sans-serif">
+<title>Block diagram of the iMac G5 with the driver of each block</title>
+<g fill="#8a8a8a">
+<text x="380" y="24" text-anchor="middle" font-size="15">iMac G5 (PowerMac12,1)</text>
+<rect x="280" y="40" width="200" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380.0" y="61.0" text-anchor="middle" font-size="12.5">PowerPC 970FX</text>
+<text x="380.0" y="78.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMacRISC4PE</text>
+<line x1="380" y1="90" x2="380" y2="115" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="20" y="115" width="720" height="90" rx="6" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+<text x="30" y="132" font-size="12">U4 north bridge: AppleMacRISC4PE</text>
+<rect x="35" y="140" width="115" height="50" rx="4" fill="none" fill-opacity="0" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="92.5" y="169.0" text-anchor="middle" font-size="12.5">Memory</text>
+<rect x="160" y="140" width="130" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="225.0" y="161.0" text-anchor="middle" font-size="12.5">DART: IOMMU</text>
+<text x="225.0" y="178.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleDART</text>
+<rect x="300" y="140" width="120" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="360.0" y="161.0" text-anchor="middle" font-size="12.5">MPIC</text>
+<text x="360.0" y="178.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMPIC</text>
+<rect x="430" y="140" width="140" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="500.0" y="161.0" text-anchor="middle" font-size="12.5">I²C: 4 sensors</text>
+<text x="500.0" y="178.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">IOI2CFamily</text>
+<rect x="580" y="140" width="145" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="652.5" y="161.0" text-anchor="middle" font-size="12.5">PCI Express</text>
+<text x="652.5" y="178.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMacRiscPCI</text>
+<line x1="652" y1="190" x2="652" y2="230" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="560" y="230" width="170" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="645.0" y="251.0" text-anchor="middle" font-size="12.5">ATI RV370 GPU</text>
+<text x="645.0" y="268.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">ATIRadeon9700</text>
+<line x1="380" y1="205" x2="380" y2="230" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="270" y="230" width="220" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380.0" y="251.0" text-anchor="middle" font-size="12.5">HyperTransport</text>
+<text x="380.0" y="268.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMacRiscHT</text>
+<line x1="380" y1="280" x2="380" y2="305" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="20" y="305" width="720" height="160" rx="6" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+<text x="30" y="322" font-size="12">K2 I/O controller and the PCI buses behind it (IOPCI2PCIBridge)</text>
+<rect x="35" y="333" width="200" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="135.0" y="354.0" text-anchor="middle" font-size="12.5">SATA: internal disk</text>
+<text x="135.0" y="371.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleK2SATARoot, AppleK2SATA</text>
+<rect x="245" y="333" width="140" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="315.0" y="354.0" text-anchor="middle" font-size="12.5">ATA: optical drive</text>
+<text x="315.0" y="371.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleKauaiATA</text>
+<rect x="395" y="333" width="160" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="475.0" y="354.0" text-anchor="middle" font-size="12.5">GMAC Ethernet</text>
+<text x="475.0" y="371.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleGMACEthernet</text>
+<rect x="565" y="333" width="160" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="645.0" y="354.0" text-anchor="middle" font-size="12.5">USB: OHCI, EHCI</text>
+<text x="645.0" y="371.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">IOUSBFamily</text>
+<rect x="35" y="398" width="255" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="162.5" y="419.0" text-anchor="middle" font-size="12.5">mac-io: MPIC, GPIO, I²C, I²S</text>
+<text x="162.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleKeyLargo, AppleGPIO, AppleI2S</text>
+<rect x="300" y="398" width="200" height="50" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="400.0" y="419.0" text-anchor="middle" font-size="12.5">Audio: PCM3052 codec</text>
+<text x="400.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleOnboardAudio, OpenOnyx</text>
+<rect x="510" y="398" width="95" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="557.5" y="419.0" text-anchor="middle" font-size="12.5">FireWire</text>
+<text x="557.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleFWOHCI</text>
+<rect x="615" y="398" width="110" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="670.0" y="419.0" text-anchor="middle" font-size="12.5">AirPort</text>
+<text x="670.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AirPortBrcm43xx</text>
+<rect x="35" y="490" width="255" height="50" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="162.5" y="511.0" text-anchor="middle" font-size="12.5">SMU: clock, power, fans</text>
+<text x="162.5" y="528.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">OpenSMU</text>
+<rect x="300" y="490" width="200" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="400.0" y="511.0" text-anchor="middle" font-size="12.5">Boot ROM and NVRAM</text>
+<text x="400.0" y="528.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleFlashNVRAM</text>
+<rect x="510" y="490" width="215" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="617.5" y="511.0" text-anchor="middle" font-size="12.5">Bluetooth, on USB</text>
+<text x="617.5" y="528.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">IOBluetoothFamily</text>
+<rect x="20" y="565" width="22" height="16" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="50" y="578" font-size="11.5">built here from Apple’s source</text>
+<rect x="350" y="565" width="22" height="16" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380" y="578" font-size="11.5">written by this project</text>
+<rect x="20" y="589" width="22" height="16" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="50" y="602" font-size="11.5">Apple’s closed driver, not on the image</text>
+<rect x="350" y="589" width="22" height="16" rx="4" fill="none" fill-opacity="0" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380" y="602" font-size="11.5">no driver of its own</text>
+</g>
+</svg>

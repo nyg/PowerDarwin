@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 522" width="760" height="522" font-family="Helvetica, Arial, sans-serif">
+<title>Block diagram of QEMU’s mac99 with the driver of each block</title>
+<g fill="#8a8a8a">
+<text x="380" y="24" text-anchor="middle" font-size="15">QEMU’s mac99 (PowerMac3,1), as boot-qemu starts it</text>
+<rect x="280" y="40" width="200" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380.0" y="61.0" text-anchor="middle" font-size="12.5">PowerPC G4 (7400)</text>
+<text x="380.0" y="78.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMacRISC2PE</text>
+<line x1="380" y1="90" x2="380" y2="115" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="280" y="115" width="200" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380.0" y="136.0" text-anchor="middle" font-size="12.5">UniNorth host bridges</text>
+<text x="380.0" y="153.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMacRiscPCI</text>
+<line x1="480" y1="140" x2="540" y2="140" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="540" y="115" width="190" height="50" rx="4" fill="none" fill-opacity="0" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="635.0" y="144.0" text-anchor="middle" font-size="12.5">Memory, 1 GB</text>
+<line x1="380" y1="165" x2="380" y2="195" stroke="#8a8a8a" stroke-width="1.5"/>
+<line x1="30" y1="195" x2="730" y2="195" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="36" y="188" font-size="11">PCI bus</text>
+<line x1="105" y1="195" x2="105" y2="215" stroke="#8a8a8a" stroke-width="1.5"/>
+<line x1="285" y1="195" x2="285" y2="215" stroke="#8a8a8a" stroke-width="1.5"/>
+<line x1="465" y1="195" x2="465" y2="215" stroke="#8a8a8a" stroke-width="1.5"/>
+<line x1="645" y1="195" x2="645" y2="215" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="30" y="215" width="150" height="50" rx="4" fill="none" fill-opacity="0" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="105.0" y="236.0" text-anchor="middle" font-size="12.5">VGA display</text>
+<text x="105.0" y="253.0" text-anchor="middle" font-size="11">firmware’s framebuffer</text>
+<rect x="195" y="215" width="180" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="285.0" y="236.0" text-anchor="middle" font-size="12.5">USB OHCI: keyboard</text>
+<text x="285.0" y="253.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">IOUSBFamily, IOHIDFamily</text>
+<rect x="390" y="215" width="150" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="465.0" y="236.0" text-anchor="middle" font-size="12.5">sungem Ethernet</text>
+<text x="465.0" y="253.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleGMACEthernet</text>
+<rect x="560" y="215" width="170" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="645.0" y="236.0" text-anchor="middle" font-size="12.5">KeyLargo mac-io</text>
+<text x="645.0" y="253.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleKeyLargo</text>
+<line x1="645" y1="265" x2="645" y2="290" stroke="#8a8a8a" stroke-width="1.5"/>
+<rect x="20" y="290" width="720" height="160" rx="6" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+<text x="30" y="307" font-size="12">Inside KeyLargo</text>
+<rect x="35" y="318" width="150" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="110.0" y="339.0" text-anchor="middle" font-size="12.5">OpenPIC: interrupts</text>
+<text x="110.0" y="356.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMPIC</text>
+<rect x="200" y="318" width="170" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="285.0" y="339.0" text-anchor="middle" font-size="12.5">ATA ×2: disk, CD</text>
+<text x="285.0" y="356.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">KeyLargoATA</text>
+<rect x="385" y="318" width="140" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="455.0" y="339.0" text-anchor="middle" font-size="12.5">VIA</text>
+<text x="455.0" y="356.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleVIA</text>
+<rect x="540" y="318" width="185" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="632.5" y="339.0" text-anchor="middle" font-size="12.5">PMU: clock, power</text>
+<text x="632.5" y="356.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">ApplePMU</text>
+<rect x="35" y="383" width="170" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="120.0" y="404.0" text-anchor="middle" font-size="12.5">NVRAM</text>
+<text x="120.0" y="421.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleCore99NVRAM</text>
+<rect x="220" y="383" width="150" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="295.0" y="404.0" text-anchor="middle" font-size="12.5">GPIO</text>
+<text x="295.0" y="421.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleGPIO</text>
+<rect x="385" y="383" width="160" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="465.0" y="404.0" text-anchor="middle" font-size="12.5">Media bay</text>
+<text x="465.0" y="421.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleMediaBay</text>
+<rect x="20" y="470" width="22" height="16" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="50" y="483" font-size="11.5">built here from Apple’s source</text>
+<rect x="350" y="470" width="22" height="16" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380" y="483" font-size="11.5">written by this project</text>
+<rect x="20" y="494" width="22" height="16" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="50" y="507" font-size="11.5">Apple’s closed driver, not on the image</text>
+<rect x="350" y="494" width="22" height="16" rx="4" fill="none" fill-opacity="0" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380" y="507" font-size="11.5">no driver of its own</text>
+</g>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230" width="640" height="230" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <title>The 32-bit value 0x74627869 in big-endian and little-endian byte order</title>
+  <g fill="#8a8a8a">
+    <text x="320" y="22" text-anchor="middle" font-size="15">The value 0x74627869 stored at address 0x1000</text>
+    <text x="250" y="52" text-anchor="middle">0x1000</text>
+    <text x="350" y="52" text-anchor="middle">0x1001</text>
+    <text x="450" y="52" text-anchor="middle">0x1002</text>
+    <text x="550" y="52" text-anchor="middle">0x1003</text>
+    <text x="20" y="95">Big-endian</text>
+    <text x="20" y="113" font-size="12">PowerPC</text>
+    <text x="20" y="175">Little-endian</text>
+    <text x="20" y="193" font-size="12">x86</text>
+  </g>
+  <g stroke="#8a8a8a" stroke-width="1.5" fill="#4a90d9" fill-opacity="0.18">
+    <rect x="200" y="70" width="100" height="50"/>
+    <rect x="300" y="70" width="100" height="50"/>
+    <rect x="400" y="70" width="100" height="50"/>
+    <rect x="500" y="70" width="100" height="50"/>
+  </g>
+  <g stroke="#8a8a8a" stroke-width="1.5" fill="#d98c4a" fill-opacity="0.18">
+    <rect x="200" y="150" width="100" height="50"/>
+    <rect x="300" y="150" width="100" height="50"/>
+    <rect x="400" y="150" width="100" height="50"/>
+    <rect x="500" y="150" width="100" height="50"/>
+  </g>
+  <g fill="#8a8a8a" text-anchor="middle">
+    <text x="250" y="93" font-family="Menlo, Consolas, monospace">0x74</text>
+    <text x="250" y="111">t</text>
+    <text x="350" y="93" font-family="Menlo, Consolas, monospace">0x62</text>
+    <text x="350" y="111">b</text>
+    <text x="450" y="93" font-family="Menlo, Consolas, monospace">0x78</text>
+    <text x="450" y="111">x</text>
+    <text x="550" y="93" font-family="Menlo, Consolas, monospace">0x69</text>
+    <text x="550" y="111">i</text>
+    <text x="250" y="173" font-family="Menlo, Consolas, monospace">0x69</text>
+    <text x="250" y="191">i</text>
+    <text x="350" y="173" font-family="Menlo, Consolas, monospace">0x78</text>
+    <text x="350" y="191">x</text>
+    <text x="450" y="173" font-family="Menlo, Consolas, monospace">0x62</text>
+    <text x="450" y="191">b</text>
+    <text x="550" y="173" font-family="Menlo, Consolas, monospace">0x74</text>
+    <text x="550" y="191">t</text>
+    <text x="320" y="222" font-size="12">Most significant byte first, or least significant byte first</text>
+  </g>
+</svg>
