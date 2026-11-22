@@ -6,7 +6,7 @@ boot_args=${2:--v -s}
 cd_args=()
 [[ -n ${3:-} ]] && cd_args=(-drive file="$3",format=raw,media=cdrom,index=2)
 usb_args=()
-[[ -n ${4:-} ]] && usb_args=(-drive if=none,id=usbdisk,file="$4",format=raw -device usb-storage,drive=usbdisk)
+[[ -n ${4:-} ]] && usb_args=(-device usb-ehci,id=ehci -drive if=none,id=usbdisk,file="$4",format=raw -device usb-storage,bus=ehci.0,drive=usbdisk)
 monitor=${QEMU_MONITOR:-/tmp/darwin9-qemu.sock}
 ssh_port=${QEMU_SSH_PORT:-2222}
 

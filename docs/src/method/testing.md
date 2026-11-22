@@ -47,7 +47,7 @@ exec qemu-system-ppc \
 
 - `via=pmu` gives the machine a PMU, the power controller of many G4 Macs, and puts its keyboard on USB.
 - `-prom-env` sets the Open Firmware variable `boot-args`, the kernel's arguments, before the machine starts: `-v -s` by default, a verbose boot to a single-user shell, or `-v` for a multi-user boot.
-- The optional CD image goes where QEMU's own CD drive would, on the second IDE bus, and the optional USB disk on QEMU's USB controller. Step 9's tests added an EHCI controller, `-device usb-ehci`, since QEMU's OHCI model stops (below).
+- The optional CD image goes where QEMU's own CD drive would, on the second IDE bus, and the optional USB disk on an EHCI controller that the script adds, `-device usb-ehci`, since QEMU's OHCI model stops (below).
 - `-nic user,model=sungem` gives the guest a model of Apple's GMAC Ethernet, the chip of the iMac, on QEMU's user network: QEMU answers DHCP with `10.0.2.15` and is the name server at `10.0.2.3`. `hostfwd` forwards port 2222 of the current Mac, or `QEMU_SSH_PORT`, to the guest's port 22, so SSH reaches the guest at `127.0.0.1`.
 - `-monitor` opens QEMU's monitor, its command line, on a Unix socket named by `QEMU_MONITOR`, `/tmp/darwin9-qemu.sock` by default. Through it, a script can press keys in the guest, take a screenshot of its screen, or plug in a disk while the guest runs, as Step 9's FAT32 test did.
 - `-serial` writes the guest's serial port to a log file beside the image.
