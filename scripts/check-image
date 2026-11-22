@@ -1,20 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-usage="usage: check-image <image.dmg> <build folder> <userland folder> [project...]
+usage="usage: check-image <image.dmg> <build folder> [project...]
 
 Run on the build machine. Mounts the image read-only and lists every file on it
-whose MD5 matches no file of the userland folder and no file of the latest Root
-of each project in <build folder>/Roots (every project there if none is named)."
+whose MD5 matches no file of the latest Root of each project in
+<build folder>/Roots (every project there if none is named)."
 
-[[ $# -ge 3 ]] || { echo "$usage" >&2; exit 1; }
+[[ $# -ge 2 ]] || { echo "$usage" >&2; exit 1; }
 image=$1
 roots=$2/Roots
-userland=$3
-shift 3
+shift 2
 [[ -f $image ]] || { echo "no image at $image" >&2; exit 1; }
 [[ -d $roots ]] || { echo "no Roots folder at $roots" >&2; exit 1; }
-[[ -d $userland ]] || { echo "no userland folder at $userland" >&2; exit 1; }
 
 projects=("$@")
 if [[ $# -eq 0 ]]; then
@@ -37,7 +35,6 @@ trap cleanup EXIT
 hdiutil attach -readonly -nobrowse -mountpoint "$mount" "$image" > /dev/null
 
 {
-   sudo find "$userland" -type f -print0 | sudo xargs -0 md5 -r
    for project in "${projects[@]}"; do
       root=$(latest "$project")
       if [[ -z $root ]]; then

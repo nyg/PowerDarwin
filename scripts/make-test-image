@@ -2,11 +2,10 @@
 set -e
 
 roots=~/9L30/Roots
-userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9-image
 root_hash=~/9L30/root-password.hash
-userland_projects="Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay Csu SystemStubs cctools ld64 gcc gcc_42 gcc_select gnumake perl expat libffi python ruby samba"
+userland_projects="Libm dyld bash ncurses libiconv libgcc bsm libutil libedit file_cmds shell_cmds diskdev_cmds IOKitUser ICU objc4 autozone libstdcxx zlib Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay Csu SystemStubs cctools ld64 gcc gcc_42 gcc_select gnumake perl expat libffi python ruby samba"
 header_projects="Libc_headers architecture Librpcsvc Libsyscall Libinfo Libm libdyld launchd_libs CommonCrypto removefile copyfile Libnotify bsm mDNSResponder cctools_ofiles objc4"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU IOSCSIArchitectureModelFamily IOUSBMassStorageClass IOAudioFamily AppleI2S AppleOnboardAudio OpenOnyx"
 
@@ -16,7 +15,6 @@ rm -f $image.dmg $image.cdr $image.cdr.gz
 hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
-sudo ditto $userland $mount
 for project in $userland_projects; do
    sudo ditto "$(latest $project)" $mount
 done
@@ -44,6 +42,7 @@ sudo rm -rf $mount/AppleInternal
 sudo rm -f $mount/System/Library/LaunchDaemons/com.apple.DirectoryServicesInstallDaemon.plist
 sudo rm -rf $mount/System/Library/Extensions/CM4040.kext $mount/System/Library/Extensions/CRYPTOCardPCCard.kext $mount/System/Library/Extensions/SCR24X_Apple_Driver.kext
 sudo rm -rf $mount/usr/libexec/SmartCardServices/drivers/*.bundle "$mount/Library/Application Support/Mozilla"
+sudo rm -f $mount/usr/lib/libncurses.5.dylib
 sudo rm -f $mount/usr/share/misc/bootblockdata
 sudo rm -rf $mount/Developer
 sudo rm -f $mount/System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/distutils/command/wininst-*.exe

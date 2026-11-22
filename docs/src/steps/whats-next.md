@@ -96,7 +96,7 @@ Rule 5 already holds for such an image: every file is built from source or writt
 
 ### A second build machine
 
-Every image so far was built on one build machine. A rebuild from scratch on another would show that the scripts repeat the build. It would first need a script for one input no script makes yet: the userland folder, `/private/var/tmp/step1-chroot`, from which `make-test-image` starts every image.
+Every image so far was built on one build machine. A rebuild from scratch on another would show that the scripts repeat the build.
 
 ## A map of the open items
 
@@ -136,5 +136,5 @@ Some items help others: the PMU driver would serve both QEMU and the older Macs,
 - In AppleMacRISC2PE-187.0.5: `MacRISC2CPU.cpp`, the wait for `ApplePMU`.
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
 - In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
-- [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the userland folder and the test password.
+- [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the test password.
 - [What stays closed, and why](../synthesis/what-stays-closed.md).

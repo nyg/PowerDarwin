@@ -16,8 +16,7 @@ The script grew with the steps: each new boot test added a project's Root, a fil
 
 ```mermaid
 flowchart TD
-    A["create a 1,600 MB image:<br/>Apple Partition Map, HFS+"] --> B["copy the userland folder"]
-    B --> C["copy the latest Root<br/>of each userland project"]
+    A["create a 1,600 MB image:<br/>Apple Partition Map, HFS+"] --> C["copy the latest Root<br/>of each userland project"]
     C --> D["copy the Roots of<br/>xnu and kext_tools"]
     D --> D2["copy the headers of the header<br/>projects and CarbonHeaders 18.1"]
     D2 --> E["remove what must not<br/>be on the image"]
@@ -47,15 +46,14 @@ hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
 The script copies, with `ditto`, which keeps owners, modes and links:
 
-1. The userland folder, `/private/var/tmp/step1-chroot` on the build machine. It is the folder of the first chroot tests: the Roots of Libsystem, Libm, dyld, bash, ncurses (without `usr/lib/libncurses.5.dylib`, the Apple binary its source carries), libiconv, libgcc, bsm, libutil, libedit, launchd, file_cmds, shell_cmds and diskdev_cmds, then IOKitUser, CF, ICU, objc4, autozone, libstdcxx and zlib, in one folder ([How testing is done](testing.md)). No script in the repo makes it yet.
-2. The latest Root of each project of its `userland_projects` list, in order: Libsystem, launchd, files, pam, system_cmds, CF, Security, configd, DirectoryService, OpenSSH, ntp, securityd, bless and others, then, since Step 10, Csu, SystemStubs, cctools, ld64, gcc, gcc_42, gcc_select, gnumake, perl, expat, libffi, python, ruby and samba, 61 in all. A later Root replaces a file that an earlier one, or the userland folder, put there. That is how launchd's latest Root, linked with Security again, replaces the build without Security that the userland folder still holds from [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26).
-3. The latest Roots of `xnu`, which holds the kernel, `/mach_kernel`, and its `System.kext`, and of `kext_tools`, which holds `kextd`, `kextload` and `kextcache`.
+1. The latest Root of each project of its `userland_projects` list, in order: first the 18 that, with Libsystem, launchd and CF, made the folder of the first chroot tests ([How testing is done](testing.md)), Libm, dyld, bash, ncurses, libiconv, libgcc, bsm, libutil, libedit, file_cmds, shell_cmds, diskdev_cmds, IOKitUser, ICU, objc4, autozone, libstdcxx and zlib; then Libsystem, launchd, files, pam, system_cmds, CF, Security, configd, DirectoryService, OpenSSH, ntp, securityd, bless and others; then, since Step 10, Csu, SystemStubs, cctools, ld64, gcc, gcc_42, gcc_select, gnumake, perl, expat, libffi, python, ruby and samba, 79 in all. A later Root replaces a file that an earlier one put there. Until 22 November 2026 the first 18 came from that folder, put together by hand. An image made each way holds the same files with the same contents, except for darwinbuild's receipts in `/usr/local/darwinbuild/receipts`: those of the 18 projects are new, and one left by an older build of Libsystem is gone.
+2. The latest Roots of `xnu`, which holds the kernel, `/mach_kernel`, and its `System.kext`, and of `kext_tools`, which holds `kextd`, `kextload` and `kextcache`.
 
 "Latest" means the Root with the highest `~N` ([darwinbuild and the build machine](darwinbuild.md)), found by the same `latest` function as in the other scripts. The image therefore always holds the last build of each project, and the test records which that was.
 
 ### The headers
 
-A compiler on the image needs the headers of every library it links ([Step 10](../steps/step-10-working-unix.md)). For each project of its `header_projects` list, the script copies only the `usr/include` folder of the latest Root: Libc_headers, architecture, Librpcsvc, Libsyscall, Libinfo, Libm, libdyld, launchd_libs, CommonCrypto, removefile, copyfile, Libnotify, bsm, mDNSResponder, cctools_ofiles and objc4, 16 in all. Their libraries, where they have any, are on the image already, as parts of libSystem or from the userland folder.
+A compiler on the image needs the headers of every library it links ([Step 10](../steps/step-10-working-unix.md)). For each project of its `header_projects` list, the script copies only the `usr/include` folder of the latest Root: Libc_headers, architecture, Librpcsvc, Libsyscall, Libinfo, Libm, libdyld, launchd_libs, CommonCrypto, removefile, copyfile, Libnotify, bsm, mDNSResponder, cctools_ofiles and objc4, 16 in all. Their libraries, where they have any, are on the image already, as parts of libSystem or from the Roots of the userland projects.
 
 CarbonHeaders has no 9L30 source, so the script installs CarbonHeaders 18.1, of Mac OS X 10.6, from its staged source with the project's own Makefile ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)):
 
@@ -76,6 +74,7 @@ Then the script removes what a Root installs and the image must not hold:
 | `/AppleInternal` | headers some Roots install there for other builds, such as Cyrus SASL's ([D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78)) | only builds use them |
 | `com.apple.DirectoryServicesInstallDaemon.plist` | an installer's job with the same label as DirectoryService's own | launchd refuses the second (`com.apple.DirectoryServices: Already loaded`); Leopard's installed system has no such job |
 | `CM4040.kext`, `CRYPTOCardPCCard.kext`, `SCR24X_Apple_Driver.kext`, the bundles in `/usr/libexec/SmartCardServices/drivers` and `/Library/Application Support/Mozilla` | vendors' smart-card reader drivers and `pkcs11.shlb`, prebuilt in SmartCardServices' source | rule 5: prebuilt binaries |
+| `/usr/lib/libncurses.5.dylib` | an Apple binary from 2006, prebuilt in ncurses' source | rule 5 |
 | `/usr/share/misc/bootblockdata` | 68k boot blocks, prebuilt in bless' source ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)) | rule 5 |
 | `/Developer` | Xcode's folder, where some of the toolchain's Roots install documentation | not part of the system |
 | `wininst-*.exe` in Python's `distutils` | Windows programs, prebuilt in Python's source, from which `distutils` makes Windows installers | rule 5 |
@@ -145,17 +144,17 @@ Open Firmware usually finds the boot loader without a path. The volume header na
 Rule 5 says that the image holds only what the project builds or its scripts write ([The rules](rules.md)). [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image) proves it for each image. Like `make-test-image`, it runs on the build machine itself, where the image and the Roots are:
 
 ```text
-check-image <image.dmg> <build folder> <userland folder> [project...]
+check-image <image.dmg> <build folder> [project...]
 ```
 
 1. It mounts the image read-only.
-2. It computes the MD5 of every file in the userland folder and in the latest Root of each project named, or of every project in the build folder's `Roots/` if none is named. Those are the known files.
+2. It computes the MD5 of every file in the latest Root of each project named, or of every project in the build folder's `Roots/` if none is named. Those are the known files.
 3. It computes the MD5 of every file on the image.
 4. It prints how many files the image holds, and the path of each whose MD5 is not among the known ones.
 
 The check compares contents, not names. A file from Leopard at the same path as ours would have a name the Roots know and a content they do not, and would be listed. Since `Roots/<project>/` holds only Roots that darwinbuild built here, and the downloaded Roots stay packed in `Roots/.DownloadCache/`, a file that passes came out of one of our builds.
 
-The only files it may list are the 25 of the table above. Most new images were checked this way: on 21 November 2026, for instance, all 12,301 files of the image came from our builds except the twelve that `make-test-image` writes or edits, of which `autodiskmount.plist` was new. At Step 1 the image held 6,763 files, with two not from builds, the boot plist and the driver cache. After Step 9 it held 12,340 files, with twelve not from builds. After Step 10 it holds 28,525, with the 25 that the table lists.
+The only files it may list are the 25 of the table above. Most new images were checked this way: on 21 November 2026, for instance, all 12,301 files of the image came from our builds except the twelve that `make-test-image` writes or edits, of which `autodiskmount.plist` was new. At Step 1 the image held 6,763 files, with two not from builds, the boot plist and the driver cache. After Step 9 it held 12,340 files, with twelve not from builds. After Step 10 it holds 28,525, with the 25 that the table lists. Since `make-test-image` copies every Root itself, with the 18 receipts this adds, it holds 28,542, and the check, which no longer takes a folder of files to trust, lists the same 25.
 
 ## From the image to the machines
 
