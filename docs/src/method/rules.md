@@ -26,7 +26,7 @@ The rule allows two moves. One is taking Apple's own later fix, as rule 2 descri
 
 ### Rule 2: the smallest fix, in this order
 
-> Change the build environment; failing that, take Apple's fix from another release; only then write a new patch, as small as possible, with no reformatting or unrelated change.
+> Change the build environment; failing that, take Apple's fix from another release; only then write a new patch, as small as possible, with no reformatting or unrelated change. Where the missing part is closed, leave out the feature that needs it, or write an open replacement in `replacements/`.
 
 Most failures do not come from a fault in Apple's code. They come from the gap between Apple's build system and ours: Apple built Leopard with its own internal tools, closed headers and a complete set of every project's files, where darwinbuild builds each project in a BuildRoot holding only what its build list names ([darwinbuild and the build machine](darwinbuild.md)). The truest fix then closes that gap and leaves the code as Apple wrote it. A missing header is put where the build looks for it; a tool that crashes is wrapped; a missing dependency is added to the build list.
 
@@ -61,7 +61,7 @@ When the error is a missing closed part, such as a header of Apple's closed Foun
 
 ### Rule 3: every change documented
 
-> Every patch, build-environment workaround and replacement is listed in DEVIATIONS.md.
+> Every patch, build-environment workaround and replacement is listed in DEVIATIONS.md. The files that `scripts/make-test-image` writes or edits on the image are listed in the book's Making the image.
 
 [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) has one row per change, with six columns: its ID, the project, its kind (below), what was changed, the error it fixes, quoted exactly, and `Upstream`, the later Apple release with the same fix, or "none". The error is quoted so that someone who meets the same message in their own build can search for it and find the fix. An ID is never reused: a row that no longer applies keeps its ID, since commits, other rows and the book name it.
 

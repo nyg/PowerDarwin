@@ -33,8 +33,8 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 ## Rules
 
 1. **Apple's release, as published.** Projects and versions are those of darwinbuild's `9L30` build list ([manifest/9L30.tsv](manifest/9L30.tsv)). Sources are fetched as Apple published them, checked by their SHA-256 ([manifest/9L30.sha256](manifest/9L30.sha256)), and never edited in place. A project changes version only to take Apple's own fix from a later release, or, when Apple never published 9L30's version, to build the nearest one it did publish.
-2. **The smallest fix, in this order.** Change the build environment; failing that, take Apple's fix from another release; only then write a new patch, as small as possible, with no reformatting or unrelated change.
-3. **Every change documented.** Every patch, build-environment workaround and replacement is listed in [DEVIATIONS.md](DEVIATIONS.md).
+2. **The smallest fix, in this order.** Change the build environment; failing that, take Apple's fix from another release; only then write a new patch, as small as possible, with no reformatting or unrelated change. Where the missing part is closed, leave out the feature that needs it, or write an open replacement in `replacements/`.
+3. **Every change documented.** Every patch, build-environment workaround and replacement is listed in [DEVIATIONS.md](DEVIATIONS.md). The files that `scripts/make-test-image` writes or edits on the image are listed in the book's [Making the image](docs/src/method/making-the-image.md).
 4. **The release's own toolchain.** Builds use `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1.
 5. **Open source only in the image.** The image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries. Closed tools may run the build.
 
