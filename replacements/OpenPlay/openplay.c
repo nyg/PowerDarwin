@@ -300,7 +300,7 @@ static int readWave(const char *path, Source *source)
       UInt32 size = littleEndian32(bytes + offset + 4);
       const UInt8 *chunk = bytes + offset + 8;
 
-      if (offset + 8 + (long)size > length)
+      if (size > (unsigned long)(length - offset - 8))
          size = length - offset - 8;
       if (!memcmp(bytes + offset, "fmt ", 4) && size >= 16) {
          if (littleEndian16(chunk) != 1 || littleEndian16(chunk + 14) != 16) {
