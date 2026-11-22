@@ -1,0 +1,14 @@
+PowerDarwin D108, 2026-11-22: changes to samba 187.8, under the licence of the files changed.
+--- a/samba/source/Makefile.in
++++ b/samba/source/Makefile.in
+@@ -1396,9 +1396,7 @@
+ # NOTE: This module will never build statically due to its extra dependencies
+ bin/darwin_streams.@SHLIBEXT@: $(VFS_DARWIN_STREAMS_OBJ)
+ 	@echo "Building plugin $@"
+-	@$(SHLD_MODULE) -F/System/Library/PrivateFrameworks \
+-		$(VFS_DARWIN_STREAMS_OBJ) \
+-		-framework ByteRangeLocking
++	@$(SHLD_MODULE) $(VFS_DARWIN_STREAMS_OBJ)
+ 
+ bin/darwinacl.@SHLIBEXT@: $(VFS_DARWINACL_OBJ)
+ 	@echo "Building plugin $@"

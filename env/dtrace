@@ -1,0 +1,41 @@
+#!/bin/sh
+src=
+out=
+while [ $# -gt 0 ]; do
+   case $1 in
+      -h) ;;
+      -s) src=$2; shift ;;
+      -o) out=$2; shift ;;
+      *) echo "dtrace: the build environment's stand-in only writes headers: dtrace -h -s <file.d> -o <file.h>" >&2; exit 1 ;;
+   esac
+   shift
+done
+if [ -z "$src" ] || [ -z "$out" ]; then
+   echo "dtrace: usage: dtrace -h -s <file.d> -o <file.h>" >&2
+   exit 1
+fi
+awk '
+   /^[ \t]*provider[ \t]/ { provider = toupper($2) }
+   /^[ \t]*probe[ \t]/ {
+      line = $0
+      sub(/^[ \t]*probe[ \t]+/, "", line)
+      name = line
+      sub(/[ \t]*\(.*/, "", name)
+      gsub(/__/, "_", name)
+      params = line
+      sub(/^[^(]*\(/, "", params)
+      sub(/\).*/, "", params)
+      gsub(/[ \t]/, "", params)
+      args = ""
+      if (params != "" && params != "void") {
+         n = split(params, p, ",")
+         for (i = 0; i < n; i++) args = args (i ? ", " : "") "arg" i
+      }
+      macro = provider "_" toupper(name)
+      probes = probes "#define " macro "(" args ")\n#define " macro "_ENABLED() (0)\n"
+   }
+   END {
+      guard = "_" provider "_DTRACE_H"
+      printf "#ifndef %s\n#define %s\n\n%s\n#endif\n", guard, guard, probes
+   }
+' "$src" > "$out"

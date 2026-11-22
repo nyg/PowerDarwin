@@ -1,0 +1,60 @@
+PowerDarwin D102, 2026-11-22: changes to python 30.1.3, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -3,7 +3,7 @@
+ ##
+ 
+ Project               = python
+-Extra_Configure_Flags = --enable-ipv6 --with-threads --enable-framework=/System/Library/Frameworks --enable-toolbox-glue --enable-dtrace --with-system-ffi
++Extra_Configure_Flags = --enable-ipv6 --with-threads --enable-framework=/System/Library/Frameworks --disable-toolbox-glue --enable-dtrace --with-system-ffi
+ 
+ ##---------------------------------------------------------------------
+ # Extra_CC_Flags and Extra_LD_Flags are needed because CFLAGS gets overridden
+@@ -70,7 +70,6 @@
+ 		     move-things-around \
+ 		     strip-64-bit \
+ 		     strip-installed-files \
+-		     fix-BAInfo \
+ 		     fix-PAInfo \
+ 		     fix-CFBundleShortVersionString \
+ 		     fix-paths \
+@@ -85,8 +84,6 @@
+ 
+ move-things-around:
+ 	install -d '$(DSTROOT)$(DEVMACPYTHON)'
+-	mv -f '$(DSTROOT)$(MACPYTHON)/$(BUILDAPPLETNAME)' '$(DSTROOT)$(BUILDAPPLET)'
+-	mv -f '$(DSTROOT)$(MACPYTHON)/$(PYTHONLAUNCHERNAME)' '$(DSTROOT)$(RESOURCESVERS)'
+ 	rm -rf '$(DSTROOT)$(APPS)'
+ 
+ ##---------------------------------------------------------------------
+@@ -98,21 +95,20 @@
+ PYTHONW = $(DSTROOT)$(VERSIONSVERS)/bin/pythonw$(VERS)
+ strip-64-bit:
+ 	@set -x && a='' && \
+-	for i in '$(PYTHON)' '$(PYTHONW)' '$(Python_Launcher)'; do \
++	for i in '$(PYTHON)' '$(PYTHONW)'; do \
+ 	    ditto "$$i" $(SYMROOT) || exit 1; \
+ 	done && \
+ 	for i in ppc64 x86_64; do \
+ 	    lipo '$(PYTHONW)' -verify_arch $$i && a="$$a -remove $$i"; \
+ 	done; \
+ 	test -z "$$a" || \
+-	for i in '$(PYTHON)' '$(PYTHONW)' '$(Python_Launcher)'; do \
++	for i in '$(PYTHON)' '$(PYTHONW)'; do \
+ 	    lipo  "$$i" $$a -output "$$i" || exit 1; \
+ 	done
+ 
+ strip-installed-files:
+ 	$(CP) '$(DSTROOT)$(VERSIONSVERS)/Python' '$(SYMROOT)'
+ 	strip -x '$(DSTROOT)$(VERSIONSVERS)/Python'
+-	strip -x '$(Python_Launcher)'
+ 	ditto '$(DSTROOT)$(LIBPYTHONVERS)'/lib-dynload/*.so '$(SYMROOT)/lib-dynload/'
+ 	strip -x '$(DSTROOT)$(LIBPYTHONVERS)'/lib-dynload/*.so
+ 
+--- a/fix/Mac_Makefile.in.ed
++++ b/fix/Mac_Makefile.in.ed
+@@ -1,2 +1,4 @@
+ g/python-config$(VERSION)/s//python$(VERSION)-config/g
++/^installapps:/s/ install_BuildApplet install_PythonLauncher//
++/CACHERSRC) -v/d
+ w

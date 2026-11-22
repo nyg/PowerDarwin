@@ -1,0 +1,54 @@
+PowerDarwin D109, 2026-11-22: changes to samba 187.8, under the licence of the files changed.
+--- a/tools/prefsync/lib/utils.cpp
++++ b/tools/prefsync/lib/utils.cpp
+@@ -127,48 +127,11 @@
+     return now;
+ }
+ 
+-#define SERVICE_CHANGED "com.apple.ServiceConfigurationChangedNotification"
+-
+ void post_service_notification(const char * service_name,
+ 				const char * service_state)
+ {
+-    CFNotificationCenterRef notify;
+-
+-    notify = CFNotificationCenterGetDistributedCenter();
+-    if (notify == NULL) {
+-	return;
+-    }
+-
+-    VERBOSE("posting %s with %s=>%s\n",
+-	    SERVICE_CHANGED, service_name, service_state);
+-
+-    cf_typeref<CFMutableDictionaryRef>
+-	info(CFDictionaryCreateMutable(kCFAllocatorDefault,
+-		0 /* capacity */,
+-		&kCFTypeDictionaryKeyCallBacks /* CFType callbacks */,
+-		&kCFTypeDictionaryValueCallBacks /* CFType callbacks */));
+-    if (info == (CFMutableDictionaryRef)NULL) {
+-	return;
+-    }
+-
+-    try {
+-	cf_typeref<CFStringRef> name(cfstring_wrap(service_name));
+-	cf_typeref<CFStringRef> state(cfstring_wrap(service_state));
+-
+-	/* cfstring_wrap() can throw. */
+-
+-	CFDictionaryAddValue(info, CFSTR("ServiceName"), name);
+-	CFDictionaryAddValue(info, CFSTR("State"), state);
+-
+-	CFNotificationCenterPostNotificationWithOptions(notify,
+-		CFSTR(SERVICE_CHANGED),
+-		NULL /* sender */, info,
+-		kCFNotificationPostToAllSessions);
+-
+-    } catch (...) {
+-	return;
+-    }
+-
++    /* CF-Lite has no distributed notification center to post to. */
++    VERBOSE("not posting %s=>%s\n", service_name, service_state);
+ }
+ 
+ /* vim: set cindent ts=8 sts=4 tw=79 : */

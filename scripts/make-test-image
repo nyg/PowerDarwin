@@ -6,13 +6,14 @@ userland=/private/var/tmp/step1-chroot
 image=/private/var/tmp/darwin9-step1
 mount=/Volumes/Darwin9-image
 root_hash=~/9L30/root-password.hash
-userland_projects="Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay"
+userland_projects="Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay Csu SystemStubs cctools ld64 gcc gcc_42 gcc_select gnumake perl expat libffi python ruby samba"
+header_projects="Libc_headers architecture Librpcsvc Libsyscall Libinfo Libm libdyld launchd_libs CommonCrypto removefile copyfile Libnotify bsm mDNSResponder cctools_ofiles objc4"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU IOSCSIArchitectureModelFamily IOUSBMassStorageClass IOAudioFamily AppleI2S AppleOnboardAudio OpenOnyx"
 
 latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
 rm -f $image.dmg $image.cdr $image.cdr.gz
-hdiutil create -size 1g -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
+hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
 sudo ditto $userland $mount
@@ -21,6 +22,22 @@ for project in $userland_projects; do
 done
 sudo ditto "$(latest xnu)" $mount
 sudo ditto "$(latest kext_tools)" $mount
+for project in $header_projects; do
+   sudo ditto "$(latest $project)/usr/include" $mount/usr/include
+done
+carbon=$(mktemp -d /tmp/carbonheaders.XXXXXX)
+make -s -C ~/9L30/Sources/CarbonHeaders-18.1 install DSTROOT=$carbon KERNEL_SYLINKS= DO_CARBON_CORE_FILES=install_carbon_core_headers
+sudo ditto $carbon/usr/include $mount/usr/include
+core_services=$mount/System/Library/Frameworks/CoreServices.framework
+carbon_core=$core_services/Versions/A/Frameworks/CarbonCore.framework
+sudo mkdir -p $core_services/Versions/A/Headers $carbon_core/Versions/A/Headers
+sudo ln -s A $core_services/Versions/Current
+sudo ln -s Versions/Current/Headers $core_services/Headers
+sudo ln -s Versions/Current/Frameworks $core_services/Frameworks
+sudo ln -s A $carbon_core/Versions/Current
+sudo ln -s Versions/Current/Headers $carbon_core/Headers
+sudo install -m 644 $carbon/usr/include/MacTypes.h $carbon_core/Versions/A/Headers/MacTypes.h
+rm -rf $carbon
 sudo rm -f $mount/mach_kernel.ctfsys
 sudo rm -rf $mount/usr/local/lib/SystemConfiguration
 sudo rm -rf $mount/AppleInternal
@@ -28,6 +45,10 @@ sudo rm -f $mount/System/Library/LaunchDaemons/com.apple.DirectoryServicesInstal
 sudo rm -rf $mount/System/Library/Extensions/CM4040.kext $mount/System/Library/Extensions/CRYPTOCardPCCard.kext $mount/System/Library/Extensions/SCR24X_Apple_Driver.kext
 sudo rm -rf $mount/usr/libexec/SmartCardServices/drivers/*.bundle "$mount/Library/Application Support/Mozilla"
 sudo rm -f $mount/usr/share/misc/bootblockdata
+sudo rm -rf $mount/Developer
+sudo rm -f $mount/System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/distutils/command/wininst-*.exe
+printf '#!/bin/sh\nexit 0\n' | sudo tee $mount/usr/bin/dsymutil > /dev/null
+sudo chmod 755 $mount/usr/bin/dsymutil
 
 for project in $kext_projects; do
    sudo ditto "$(latest $project)/System/Library/Extensions" $mount/System/Library/Extensions
@@ -65,6 +86,27 @@ sudo tee $mount/System/Library/CoreServices/SystemVersion.plist > /dev/null <<EO
 </dict>
 </plist>
 EOF
+sudo mkdir -p -m 1777 $mount/Users/Shared
+sudo tee $mount/private/etc/smb.conf > /dev/null <<EOF
+[global]
+	workgroup = WORKGROUP
+	server string = Darwin 9.8
+	security = user
+	passdb backend = tdbsam
+	opendirectory = no
+	use spnego = no
+	unix password sync = no
+	load printers = no
+	printcap name = /dev/null
+	disable spoolss = yes
+	wide links = no
+
+[Shared]
+	path = /Users/Shared
+	read only = no
+EOF
+sudo /usr/libexec/PlistBuddy -c "Set :Disabled false" $mount/System/Library/LaunchDaemons/smbd.plist
+sudo rm -f $mount/System/Library/LaunchDaemons/com.apple.smb.server.preferences.plist
 sudo tee $mount/Library/Preferences/SystemConfiguration/autodiskmount.plist > /dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

@@ -1,0 +1,12 @@
+PowerDarwin D105, 2026-11-22: changes to ruby 67.6, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -73,7 +73,7 @@
+ 	$(RM) $(FW_VERSION_DIR)/usr/lib/libruby-static.a
+ 	$(STRIP) -x $(FW_VERSION_DIR)/usr/lib/libruby.$(MAJOR).dylib
+ 	ed - $(FW_VERSION_DIR)/usr/lib/ruby/$(VERSION)/$(SYSSTRING)/rbconfig.rb < $(SRCROOT)/patches/fix_rbconfig.ed
+-	(cd $(FW_VERSION_DIR)/usr/lib/ruby/$(VERSION)/$(SYSSTRING) && sed -E -i '' "s/-arch (ppc|ppc64|i386|x86_64)//g" rbconfig.rb && patch -p0 < $(SRCROOT)/patches/rbconfig.diff)
++	(cd $(FW_VERSION_DIR)/usr/lib/ruby/$(VERSION)/$(SYSSTRING) && sed -E -i '' "s/-arch (ppc|ppc64|i386|x86_64)//g" rbconfig.rb && patch -l -p0 < $(SRCROOT)/patches/rbconfig.diff)
+ 	$(LN) -fsh usr/lib/libruby.dylib $(FW_VERSION_DIR)/Ruby
+ 	(cd $(FW_VERSION_DIR) && for i in `find usr/lib/ruby/1.8/ -name "*.h"`; do $(LN) -fs ../$$i Headers/`basename $$i`; done)
+ 	$(MKDIR) $(DSTROOT)/usr/bin

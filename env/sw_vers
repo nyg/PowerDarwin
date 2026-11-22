@@ -1,0 +1,8 @@
+#!/bin/sh
+case $1 in
+   -productName) echo "Mac OS X" ;;
+   -productVersion) echo 10.5.8 ;;
+   -buildVersion) echo 9L30 ;;
+   "") printf 'ProductName:\tMac OS X\nProductVersion:\t10.5.8\nBuildVersion:\t9L30\n' ;;
+   *) echo "usage: sw_vers [-productName|-productVersion|-buildVersion]" >&2; exit 1 ;;
+esac

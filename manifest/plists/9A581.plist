@@ -4511,6 +4511,9 @@
 					xnu,
 				);
 			};
+			environment = {
+				RC_ARCHS = "ppc ppc64 i386 x86_64";
+			};
 			version = 6;
 		};
 		TargetConfig = {
@@ -7465,6 +7468,9 @@
 					gcc,
 				);
 			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
 			version = 5465;
 		};
 		gcc_42 = {
@@ -7538,6 +7544,9 @@
 					SystemStubs,
 					gcc,
 				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
 			};
 			version = 5531;
 		};
@@ -11049,6 +11058,7 @@
 					system_cmds,
 					tcsh,
 					text_cmds,
+					vim,
 					xnu,
 				);
 				header = (
@@ -11405,6 +11415,22 @@
 			version = 14;
 		};
 		python = {
+			dependencies = {
+				build = (
+					CF,
+					OpenSSL,
+					SQLite,
+					autoconf,
+					bzip2,
+					expat,
+					libedit,
+					libffi,
+					ncurses,
+					perl,
+					tcl,
+					zlib,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
 			};
@@ -11685,8 +11711,21 @@
 			version = 30;
 		};
 		ruby = {
+			dependencies = {
+				build = (
+					CommonCrypto,
+					CoreOSMakefiles,
+					OpenSSL,
+					libedit,
+					libiconv,
+					libutil,
+					ncurses,
+					zlib,
+				);
+			};
 			environment = {
 				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_NONARCH_CFLAGS = "-pipe";
 			};
 			version = 67;
 		};
@@ -11773,12 +11812,14 @@
 		samba = {
 			dependencies = {
 				build = (
+					CF,
 					DirectoryService,
 					DiskArbitration,
 					Kerberos,
 					LDAPFramework,
 					Libm,
 					Libsystem,
+					Security,
 					awk,
 					bash,
 					bootstrap_cmds,
@@ -11822,10 +11863,12 @@
 					xnu,
 				);
 				lib = (
+					CF,
 					DirectoryService,
 					Kerberos,
 					LDAPFramework,
 					Libsystem,
+					Security,
 					configd,
 					dyld,
 					libgcc,
@@ -11839,6 +11882,10 @@
 					SystemStubs,
 					gcc,
 				);
+			};
+			environment = {
+				PRINT_LIBS = "-framework CoreFoundation -framework Security";
+				RC_RELEASE = Darwin;
 			};
 			version = 187;
 		};
