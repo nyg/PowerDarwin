@@ -54,13 +54,13 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 
 ## Build it
 
-A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub or archive.org over TLS. Sources come from [apple-oss-distributions](https://github.com/apple-oss-distributions) by tag, and the 14 projects with no tag there from the archived opensource.apple.com tarballs. A PowerPC Mac running Leopard with Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`.
+A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub or archive.org over TLS. Sources come from [apple-oss-distributions](https://github.com/apple-oss-distributions) by tag; the 14 projects with no tag there come, when a step needs one, from the archived opensource.apple.com tarballs. A PowerPC Mac running Leopard with Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`.
 
-1. `scripts/fetch-sources` and `scripts/fetch-roots` download the sources and Roots into `sources/` and `roots/` and check their hashes.
+1. `scripts/fetch-sources` downloads the 372 projects that have a tag into `sources/`, and `scripts/fetch-sources autozone SQLite` the two archived ones built so far. Four more tarballs are downloaded by hand, as [the book](docs/src/method/sources-and-roots.md) tells; until they are there, the script's last check names them. `scripts/fetch-roots` downloads the Roots into `roots/`. Both check the hashes in `manifest/`.
 2. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md#d2), [D25](DEVIATIONS.md#d25)).
 3. `scripts/stage-sources <host> <project>...` unpacks each project's source into `~/9L30/Sources` as `<project>-<version>`, applies its patches and touches the files listed in its `touch` file. `<project>=<version>` stages another version, or a project from `replacements/`.
 4. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
-5. `scripts/prepare-buildroot <host>` puts the build-environment workarounds of DEVIATIONS.md into the build environment, one step per workaround. A step already in place is left alone, a step whose input is not built yet says so and waits, and `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later.
+5. `scripts/prepare-buildroot <host>` puts the build-environment workarounds of DEVIATIONS.md into the build environment, one step per workaround. A step already in place is left alone, a step whose input is not built yet says so and waits, and `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later. darwinbuild mounts the build environment at its first build, so run step 6 once, for any project, before this one.
 6. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>`. Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
 7. A failure is fixed by rule 2 and listed in DEVIATIONS.md.
 
@@ -69,7 +69,7 @@ A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub
 No image is published yet: build one, then install it.
 
 1. On the build machine, `scripts/make-test-image` writes the image as `/private/var/tmp/darwin9-step1.dmg`, an Apple-partitioned HFS+ disk of 1.6 GB, and a raw copy as `darwin9-step1.cdr`. Root's password is the DES hash in `~/9L30/root-password.hash` (`openssl passwd -crypt -stdin`); without that file, root cannot log in.
-2. To try it in QEMU, copy the raw image to the current Mac and run `scripts/boot-qemu <image> [boot-args]`; the guest's SSH port is forwarded to port 2222.
+2. To try it in QEMU, copy the raw image to the current Mac and run `scripts/boot-qemu <image> [boot-args]`. Without boot-args it boots to the single-user shell (`-v -s`); with `-v` it boots to the login prompt, and the guest's SSH port is forwarded to port 2222.
 3. To install it on a PowerPC Mac, make an empty HFS+ partition of at least 2 GB, then, from Leopard on the same Mac:
    ```
    hdiutil convert /private/var/tmp/darwin9-step1.dmg -format UDZO -o darwin9-asr.dmg
