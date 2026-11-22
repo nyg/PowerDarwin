@@ -191,7 +191,7 @@ The four chips sit on the U4's I²C bus, which our IOI2CFamily drives ([Step 7](
 
 ### Temperatures as integers
 
-Every temperature in OpenSMU is in 16.16 fixed point: an integer whose upper 16 bits hold whole degrees and lower 16 bits fractions of a degree, so that 65,536 is 1 °C, and a negative temperature is negative. Apple's drivers report temperatures the same way: Leopard's IORegistry gives the processor's highest allowed temperature, 85 °C, as 5,570,560. OpenSMU is compiled with `-msoft-float`, as Xcode compiles most of Apple's kexts, and uses no floating point; fixed point lets integers carry fractions.
+Every temperature in OpenSMU is in 16.16 fixed point: an integer whose upper 16 bits hold whole degrees and lower 16 bits fractions of a degree, so that 65,536 is 1 °C, and a negative temperature is negative. Apple's drivers report temperatures the same way: on the iMac, Leopard's IORegistry gives the processor's highest allowed temperature, 85 °C, as 5,570,560. OpenSMU is compiled with `-msoft-float`, as Xcode compiles most of Apple's kexts, and uses no floating point; fixed point lets integers carry fractions.
 
 The three kinds of sensor each have their own format. `readSensor` turns each into 16.16:
 

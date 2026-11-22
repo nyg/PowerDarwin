@@ -6,7 +6,7 @@
 - What libSystem is, why every program on the system needs it, and why it was the first thing built after the kernel.
 - Which programs a single-user shell needs, and how they were tried in a chroot before anything was booted.
 - How our kextcache made the driver cache, and how QEMU's `mac99` first booted our kernel and programs to a root shell.
-- Five failures in full: a shell that read `#` as a comment, three closed libraries, and a debug-symbol tool that crashed on every binary.
+- Five failures in full: a shell that read `#` as a comment, three libraries that could not be built, and a debug-symbol tool that crashed on every binary.
 
 ## The goal
 
@@ -112,9 +112,9 @@ Apple's bash 76.2 already carries `bash32-001` to `bash32-017`, applied to its `
 
 The fix, [D20](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d20), changes no file. [patches/bash-76.2/touch](https://github.com/nyg/PowerDarwin/blob/master/patches/bash-76.2/touch) lists `bash/parse.y`, and `scripts/stage-sources` touches every file a project's `touch` file lists after unpacking it. bison 2.3 in the build environment then regenerates `y.tab.c`. After the second build, `` x=`echo 'a #b'` `` gave `a #b`, and ncurses built.
 
-### Three closed libraries inside libSystem (D12, D13, D15)
+### Three libraries libSystem could not get from source (D12, D13, D15)
 
-Three of libSystem's ingredients are not in Apple's published sources. The first is DTrace, the tracing framework. Libc declares 18 probes for `plockstat`, a tool that measures lock contention in threaded programs. To use them, Libc's build runs `dtrace -h` to turn the probe definitions into a header, and the linker loads `libdtrace.dylib` to record the probe sites. On Leopard both are closed and lean on other closed frameworks, which the build environment does not have:
+Three of libSystem's ingredients cannot be built from Apple's published sources. The first is DTrace, the tracing framework. Libc declares 18 probes for `plockstat`, a tool that measures lock contention in threaded programs. To use them, Libc's build runs `dtrace -h` to turn the probe definitions into a header, and the linker loads `libdtrace.dylib` to record the probe sites. DTrace's source is published, as the project dtrace 48.1, but both lean on the closed Foundation and Symbolication frameworks, which the build environment does not have:
 
 ```text
 dyld: Library not loaded: …/Foundation.framework/Versions/C/Foundation

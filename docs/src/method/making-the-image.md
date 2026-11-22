@@ -141,7 +141,7 @@ Open Firmware usually finds the boot loader without a path. The volume header na
 
 ## Checking every file
 
-Rule 5 says that the image holds only what the project builds or its scripts write ([The rules](rules.md)). [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image) proves it for each image. Like `make-test-image`, it runs on the build machine itself, where the image and the Roots are:
+Rule 5 says that the image holds only what the project builds or its scripts write ([The rules](rules.md)). [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image) proves it for an image. Like `make-test-image`, it runs on the build machine itself, where the image and the Roots are:
 
 ```text
 check-image <image.dmg> <build folder> [project...]
@@ -173,5 +173,5 @@ The iMac gets the `.dmg` itself. Leopard, on one partition of the iMac's disk, c
 
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) and [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image).
 - Deviations: [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89), [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113).
-- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Layout", for the test password's hash file.
+- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Install it", for the test password's hash file.
 - [The boot chain](../background/boot-chain.md), for what Open Firmware and BootX do with the blessed folder and the driver cache.

@@ -10,7 +10,7 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 - The [Internet Archive](https://web.archive.org/), whose Wayback Machine still serves darwinbuild's Roots and the opensource.apple.com tarballs that GitHub lacks.
 - Andrew-R, whose [darwinbuild work on Darwin 9 for PowerPC](https://forums.macrumors.com/threads/building-with-darwinbuild-for-darwin9-ppc-in-2026-wip.2485638/) built 100 of its projects on a Leopard PowerPC Mac in 2026.
 - [barracuda156](https://github.com/barracuda156) and the [macos-powerpc](https://github.com/macos-powerpc) organisation, who keep darwinbuild and Apple's projects building for PowerPC.
-- NetBSD's macppc drivers, [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`fancontrol.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/fancontrol.c), whose SMU protocol and fan zones OpenSMU follows, and FreeBSD's [`onyx.c`](https://github.com/freebsd/freebsd-src/blob/main/sys/dev/sound/macio/onyx.c), whose codec settings OpenOnyx uses.
+- NetBSD's macppc drivers, [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`fancontrol.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/fancontrol.c), whose SMU protocol and fan zones OpenSMU follows, FreeBSD's [`onyx.c`](https://github.com/freebsd/freebsd-src/blob/main/sys/dev/sound/macio/onyx.c), whose codec settings OpenOnyx uses, and Linux's [`smu.c`](https://github.com/torvalds/linux/blob/master/drivers/macintosh/smu.c) and [`windfarm_pm121.c`](https://github.com/torvalds/linux/blob/master/drivers/macintosh/windfarm_pm121.c), read for facts about the SMU and the fans.
 - [PureDarwin](https://github.com/PureDarwin/PureDarwin), which built bootable Darwin 9 systems for Intel machines.
 - [QEMU](https://www.qemu.org/) and [OpenBIOS](https://github.com/openbios/openbios), whose `mac99` machine tests each image before it reaches a real Mac.
 
@@ -25,7 +25,7 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 ## Hardware
 
 - iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10.
-- QEMU `mac99`: tested, Steps 1 to 4 and 6.
+- QEMU `mac99`: tested, Steps 1 to 4 and 6, and the CDs and USB disks of Step 9.
 - Other PowerPC Macs that Leopard supports: untested.
 
 [hardware/](hardware/) has a page per machine, with the drivers it needs and which of them are closed.

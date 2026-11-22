@@ -35,7 +35,7 @@ The project builds the versions of `9L30`, and nothing else, for two reasons.
 - It is the last Leopard, so it holds every fix Apple made to it. Leopard is also the last Mac OS X that runs on PowerPC: 10.6 is for Intel Macs only.
 - Exact versions make every result comparable. When our build of a project imports the same symbols and has the same sections as Apple's binary of the same version, the build is right; if the versions differed, a difference could come from either.
 
-The third reason is rule 1 of the project: "Projects and versions are those of darwinbuild's `9L30` build list (`manifest/9L30.tsv`)." A project changes version only to take Apple's own fix from a later release, or to build the nearest version Apple published when it never published 9L30's. [The rules](rules.md) explains it with the other four.
+Rule 1 of the project makes it a requirement: "Projects and versions are those of darwinbuild's `9L30` build list (`manifest/9L30.tsv`)." A project changes version only to take Apple's own fix from a later release, or to build the nearest version Apple published when it never published 9L30's. [The rules](rules.md) explains it with the other four.
 
 ## Projects and versions
 

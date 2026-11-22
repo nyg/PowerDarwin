@@ -137,7 +137,7 @@ Last, the running systems are compared. `kextstat` on the image against Leopard'
 
 ## Where each step was proved
 
-Every step's goal names the machine it is proved on. Steps 1 and 2 name both QEMU and the iMac; from Step 3 on, the goals are the iMac's, and QEMU tests what it can.
+Step 1's goal names both QEMU and the iMac, and Step 2's keeps them; from Step 3 on, the goals are the iMac's, and QEMU tests what it can.
 
 | Step | QEMU's `mac99` | iMac G5 |
 |---|---|---|

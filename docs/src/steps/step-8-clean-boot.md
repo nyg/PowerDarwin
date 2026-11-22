@@ -184,7 +184,7 @@ Two of a boot's errors came from files that launchd's startup reads and the imag
 
 ## What is left in the log
 
-After the third boot of the sixteenth test, `/var/log/system.log` held, besides informational lines, only these:
+After the sixteenth test, the third boot of that image, `/var/log/system.log` held, besides informational lines, only these:
 
 | Line | Source |
 |---|---|
@@ -230,6 +230,6 @@ The image held 12,232 files, all from the project's builds except eleven that `m
 
 - [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81) (the `IOPMU` part), [D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), new in this step; [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), widened to `rc.common` and `hostconfig`; [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40) and [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), behind lines that remain or went.
 - [replacements/OpenSMU/OpenSMU.cpp](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenSMU/OpenSMU.cpp) (`IOPMU`), [patches/ntp-37.3/0001-ntpd-wrapper-wait-for-dns.patch](https://github.com/nyg/PowerDarwin/blob/master/patches/ntp-37.3/0001-ntpd-wrapper-wait-for-dns.patch), [patches/pam-32.1/0003-auth-without-pam-securityserver.patch](https://github.com/nyg/PowerDarwin/blob/master/patches/pam-32.1/0003-auth-without-pam-securityserver.patch), [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) (`SystemVersion.plist`, `rc.common`, `hostconfig`, `/etc/localtime`, the installer job, IOATAPIProtocolTransport).
-- README.md, "Status", the Step 8 part.
+- README.md, "Steps": Step 8's goal.
 - In AppleMacRISC4PE-204.0.9: `MacRISC4CPU.cpp`. In AppleMacRISC2PE-187.0.5: `MacRISC2CPU.cpp`. In configd-212.2: `Plugins/InterfaceNamer/ifnamer.c`. In ntp-37.3: `ntpd-wrapper` and `patches/NLS_EAP.patch`. In system_cmds-433.8: `zic.tproj/Makefile` and `auditd.tproj/rc.audit`. In launchd-258.25: `launchd/src/launchctl.c`, `rc.common` and `hostconfig`. In kext_tools-117.4: `watchvol.c`. In xnu-1228.15.4: `libsa/kext.cpp`.
 - Commit `fd34289`, which reached the step.

@@ -42,7 +42,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **bison, `y.tab.c`**: bison turns a grammar (`parse.y`) into a C parser (`y.tab.c`). `make` makes the parser again only when the grammar is newer, which D20 relies on. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
-**`bitrot`**: the kind of deviation for a dead URL or a vanished host tool. See [The rules](../method/rules.md).
+**`bitrot`**: the kind of deviation for what worked when Apple built Leopard and no longer does: a dead URL, or a tool that has changed. See [The rules](../method/rules.md).
 
 **`bless`**: the command that blesses a folder, puts BootX in it and sets `boot-device`. See [the boot chain](../background/boot-chain.md).
 

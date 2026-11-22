@@ -265,7 +265,7 @@ Without `-s`, or after the single-user shell exits, launchctl brings the system 
 5. Start BootCache, which reads ahead the blocks that the last boot read.
 6. Load the jobs of `/System/Library/LaunchDaemons` and `/Library/LaunchDaemons` into launchd.
 
-Each job is a property list that says what to run and when: at load, kept alive, or on demand, when a client connects to the job's socket or Mach service. launchd starts them as their property lists say, in parallel. The first multi-user boot test in QEMU describes the same steps: `launchctl bootstrap -S System`, which checks the root volume, mounts it read-write and loads the LaunchDaemons.
+Each job is a property list that says what to run and when: at load, kept alive, or on demand, when a client connects to the job's socket or Mach service. launchd starts them as their property lists say, in parallel. The first multi-user boot test in QEMU showed the same steps: `launchctl bootstrap -S System`, which checks the root volume, mounts it read-write and loads the LaunchDaemons.
 
 ## getty and login
 

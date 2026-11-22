@@ -70,7 +70,7 @@ Each platform driver also starts the drivers of its processors (`MacRISC2CPU`, `
 
 ### Both on the image
 
-Both platform drivers are open, and the image carries both: AppleMacRISC2PE, which runs in QEMU, and AppleMacRISC4PE, which runs on the iMac. Each finds nothing to match on the other machine: the tenth boot test in QEMU added AppleMacRISC4PE and noted that `mac99` "is a MacRISC2 machine, so the kext has nothing to match there".
+Both platform drivers are open, and the image carries both: AppleMacRISC2PE, which runs in QEMU, and AppleMacRISC4PE, which runs on the iMac. Each finds nothing to match on the other machine: the tenth boot test in QEMU added AppleMacRISC4PE, which found nothing to match on `mac99`, a MacRISC2 machine.
 
 ## The slices of a fat binary
 

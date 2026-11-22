@@ -41,6 +41,6 @@ A guide for coding agents working in this repo. The project's goal, rules and st
 
 ## Commits and documents
 
-- Commits follow Conventional Commits (`feat:`, `fix:`, `build:`, `docs:`, `chore:`), subject line only, one step of progress each.
+- Commits follow Conventional Commits (`feat:`, `fix:`, `build:`, `test:`, `docs:`, `chore:`), subject line only, one step of progress each.
 - Keep out of git: serial numbers, the platform UUID, volume UUIDs, MAC addresses, `ioreg -l` and `nvram` dumps (git ignores `reference/*/ioreg-l.txt` and `reference/*/nvram.txt`), test passwords (git ignores `images/`), and photo metadata (strip it with `exiftool -all=`).
 - Documents have one line per paragraph or list item. The book follows [docs/STYLE.md](docs/STYLE.md).

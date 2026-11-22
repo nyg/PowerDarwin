@@ -153,7 +153,7 @@ The fix is in the build environment, rule 2's first choice ([The rules](../metho
 
 SmartCardServices' install phase does not only install what it builds. It also copies binaries that its source tarball carries ready-made: three kexts (`CM4040.kext`, `CRYPTOCardPCCard.kext` and `SCR24X_Apple_Driver.kext`), four reader bundles in `/usr/libexec/SmartCardServices/drivers/`, and `pkcs11.shlb`. They are vendors' drivers for particular card readers, and no source for them is published.
 
-Rule 5 had said only that the image holds no Apple binary. Commit `4ac9c86` widened it to what it says now: "The final image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." `make-test-image` removes the three kexts, the reader bundles and `pkcs11.shlb` from the image.
+Rule 5 had said only that the image holds no Apple binary. Commit `4ac9c86` widened it to what it says now: "The image holds only what is built from open source or written by this repo's scripts: no Apple binary, and no prebuilt binary that a source carries." `make-test-image` removes the three kexts, the reader bundles and `pkcs11.shlb` from the image.
 
 ### Dropping D26 and D45
 
