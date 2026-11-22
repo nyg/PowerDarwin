@@ -9,15 +9,20 @@
 enum {
    kMaxFans = 4,
    kMaxZones = 6,
-   kMaxZoneFans = 3,
    kLocationLength = 32
 };
 
 struct OpenSMUZone {
    const char *sensor;
-   const char *fans[kMaxZoneFans];
+   const char *fan;
    SInt32 minCelsius;
    SInt32 maxCelsius;
+};
+
+struct OpenSMURubberBand {
+   const char *fan;
+   const char *reference;
+   UInt32 belowRPM;
 };
 
 struct OpenSMUFan {
@@ -60,6 +65,8 @@ private:
 
    const OpenSMUZone *fZones;
    UInt32 fZoneCount;
+   const OpenSMURubberBand *fRubberBands;
+   UInt32 fRubberBandCount;
    OpenSMUSensor fSensors[kMaxZones];
    OpenSMUFan fFans[kMaxFans];
    UInt32 fFanCount;
@@ -75,6 +82,7 @@ private:
 
    IOReturn readPartition(UInt8 id, UInt8 *buffer, UInt8 length);
    bool startFanControl(IOService *provider);
+   OpenSMUFan *findFan(const char *location);
    static void fanThread(void *smu);
    void controlFans(void);
    bool bindSensors(void);

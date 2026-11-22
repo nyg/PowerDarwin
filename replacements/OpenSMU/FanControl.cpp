@@ -31,28 +31,42 @@ enum {
    kLimitMarginCelsius = 5,
    kDiodePartition = 0x18,
    kDiodePartitionLength = 8,
+   kSensorTreePartition = 0x25,
+   kSensorTreePartitionLength = 8,
+   kThermalModelOffset = 4,
    kOldFanCommandLength = 14,
    kI2CRetries = 2
 };
 
 static const UInt8 kMAX6690ExtendedRegister[] = { 0x11, 0x10 };
 
-// Leopard's thermal profile drives the HDD fan from the disk and GPU, the ODD fan from the
-// optical drive and the north bridge, and keeps the CPU fan within 500 rpm of the ODD fan.
+#define COUNT(array) (sizeof(array) / sizeof((array)[0]))
+
+// Thermal model 2 (the 17-inch) of AppleMacRISC4PE 186.3.1's PowerMac12_1_ThermalProfile: its PID
+// targets for the disk, GPU, optical drive and north bridge (55, 90, 50 and 85 C) lie in these zones,
+// and its rubber band keeps the CPU fan's target no lower than the ODD fan's minus 500 rpm.
 static const OpenSMUZone kPowerMac12_1Zones[] = {
-   { "CPU T-Diode", { "CPU Fan" }, 65, 80 },
-   { "HD Temp", { "HDD Fan" }, 50, 60 },
-   { "GPU Temp", { "HDD Fan" }, 85, 95 },
-   { "ODD Temp", { "ODD Fan", "CPU Fan" }, 45, 55 },
-   { "NB Temp", { "ODD Fan", "CPU Fan" }, 85, 95 }
+   { "CPU T-Diode", "CPU Fan", 65, 80 },
+   { "HD Temp", "HDD Fan", 50, 60 },
+   { "GPU Temp", "HDD Fan", 85, 95 },
+   { "ODD Temp", "ODD Fan", 45, 55 },
+   { "NB Temp", "ODD Fan", 85, 95 }
+};
+
+static const OpenSMURubberBand kPowerMac12_1RubberBands[] = {
+   { "CPU Fan", "ODD Fan", 500 }
 };
 
 static const struct {
    const char *model;
+   SInt32 thermalModel;
    const OpenSMUZone *zones;
-   UInt32 count;
+   UInt32 zoneCount;
+   const OpenSMURubberBand *rubberBands;
+   UInt32 rubberBandCount;
 } kModels[] = {
-   { "PowerMac12,1", kPowerMac12_1Zones, sizeof(kPowerMac12_1Zones) / sizeof(kPowerMac12_1Zones[0]) }
+   { "PowerMac12,1", 2, kPowerMac12_1Zones, COUNT(kPowerMac12_1Zones),
+      kPowerMac12_1RubberBands, COUNT(kPowerMac12_1RubberBands) }
 };
 
 static bool dataEquals(OSObject *object, const char *string)
@@ -126,18 +140,24 @@ bool OpenSMU::startFanControl(IOService *provider)
    OSIterator *children;
    IORegistryEntry *child;
    UInt8 partition[kDiodePartitionLength];
+   UInt8 sensorTree[kSensorTreePartitionLength];
+   SInt32 thermalModel = -1;
    OpenSMUFan *fan;
-   UInt32 i, j, k, reg, length;
+   UInt32 i, reg, length;
 
-   for (i = 0; root && i < sizeof(kModels) / sizeof(kModels[0]); i++)
-      if (dataEquals(root->getProperty("model"), kModels[i].model)) {
+   if (readPartition(kSensorTreePartition, sensorTree, sizeof(sensorTree)) == kIOReturnSuccess)
+      thermalModel = sensorTree[kThermalModelOffset];
+   for (i = 0; root && i < COUNT(kModels); i++)
+      if (dataEquals(root->getProperty("model"), kModels[i].model) && kModels[i].thermalModel == thermalModel) {
          fZones = kModels[i].zones;
-         fZoneCount = kModels[i].count;
+         fZoneCount = kModels[i].zoneCount;
+         fRubberBands = kModels[i].rubberBands;
+         fRubberBandCount = kModels[i].rubberBandCount;
       }
    if (root)
       root->release();
    if (!fZones) {
-      IOLog("OpenSMU: no fan zones for this model, the SMU keeps the fans\n");
+      IOLog("OpenSMU: no fan zones for this model and thermal model %ld, the SMU keeps the fans\n", (long)thermalModel);
       return false;
    }
 
@@ -170,21 +190,33 @@ bool OpenSMU::startFanControl(IOService *provider)
       children->release();
 
    for (i = 0; i < fZoneCount; i++)
-      for (j = 0; j < kMaxZoneFans && fZones[i].fans[j]; j++) {
-         for (k = 0; k < fFanCount && strcmp(fFans[k].location, fZones[i].fans[j]); k++)
-            ;
-         if (k == fFanCount) {
-            IOLog("OpenSMU: no %s in the device tree, the SMU keeps the fans\n", fZones[i].fans[j]);
-            return false;
-         }
+      if (!findFan(fZones[i].fan)) {
+         IOLog("OpenSMU: no %s in the device tree, the SMU keeps the fans\n", fZones[i].fan);
+         return false;
+      }
+   for (i = 0; i < fRubberBandCount; i++)
+      if (!findFan(fRubberBands[i].fan) || !findFan(fRubberBands[i].reference)) {
+         IOLog("OpenSMU: no %s or %s in the device tree, the SMU keeps the fans\n", fRubberBands[i].fan,
+            fRubberBands[i].reference);
+         return false;
       }
 
    fReadI2CFunction = OSSymbol::withCString(kReadI2Cbus);
    if (!fReadI2CFunction || !IOCreateThread(fanThread, this))
       return false;
-   IOLog("OpenSMU: %lu fans, %lu zones, CPU diode slope 0x%04lx offset %ld\n", (unsigned long)fFanCount,
-      (unsigned long)fZoneCount, (unsigned long)fDiodeSlope, (long)fDiodeOffset);
+   IOLog("OpenSMU: thermal model %ld, %lu fans, %lu zones, CPU diode slope 0x%04lx offset %ld\n", (long)thermalModel,
+      (unsigned long)fFanCount, (unsigned long)fZoneCount, (unsigned long)fDiodeSlope, (long)fDiodeOffset);
    return true;
+}
+
+OpenSMUFan *OpenSMU::findFan(const char *location)
+{
+   UInt32 i;
+
+   for (i = 0; i < fFanCount; i++)
+      if (!strcmp(fFans[i].location, location))
+         return &fFans[i];
+   return 0;
 }
 
 void OpenSMU::fanThread(void *smu)
@@ -383,10 +415,9 @@ void OpenSMU::publishState(void)
 
 void OpenSMU::controlFans(void)
 {
-   const OpenSMUZone *zone;
-   OpenSMUFan *fan;
+   OpenSMUFan *fan, *reference;
    const char *failure, *where;
-   UInt32 cycle, i, j, k, rpm;
+   UInt32 cycle, i, k, rpm;
    bool bound;
 
    for (cycle = 0; ; cycle++) {
@@ -419,16 +450,16 @@ void OpenSMU::controlFans(void)
       for (k = 0; k < fFanCount; k++)
          fFans[k].targetRPM = failure ? fFans[k].maxRPM : fFans[k].minRPM;
       for (i = 0; !failure && i < fZoneCount; i++) {
-         zone = &fZones[i];
-         for (j = 0; j < kMaxZoneFans && zone->fans[j]; j++)
-            for (k = 0; k < fFanCount; k++) {
-               fan = &fFans[k];
-               if (strcmp(fan->location, zone->fans[j]))
-                  continue;
-               rpm = zoneRPM(zone, fSensors[i].temperature, fan);
-               if (rpm > fan->targetRPM)
-                  fan->targetRPM = rpm;
-            }
+         fan = findFan(fZones[i].fan);
+         rpm = zoneRPM(&fZones[i], fSensors[i].temperature, fan);
+         if (rpm > fan->targetRPM)
+            fan->targetRPM = rpm;
+      }
+      for (i = 0; !failure && i < fRubberBandCount; i++) {
+         fan = findFan(fRubberBands[i].fan);
+         reference = findFan(fRubberBands[i].reference);
+         if (reference->targetRPM > fan->targetRPM + fRubberBands[i].belowRPM)
+            fan->targetRPM = min(reference->targetRPM - fRubberBands[i].belowRPM, fan->maxRPM);
       }
 
       if (failure && !fFailsafe)
