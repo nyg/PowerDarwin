@@ -96,7 +96,7 @@ Rule 5 already holds for such an image: every file is built from source or writt
 
 ### A second build machine
 
-Every image so far was built on one build machine. A rebuild from scratch on another would show that the scripts repeat the build.
+Every image so far was built on one build machine, which runs Sorbet Leopard, a community update of Leopard 10.5.8. A rebuild from scratch on another, with an unmodified Leopard 10.5.8, would show that the scripts repeat the build, and would settle the comparisons with Leopard's binaries, which are provisional until then ([How testing is done](../method/testing.md)).
 
 ## A map of the open items
 

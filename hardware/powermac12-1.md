@@ -4,7 +4,7 @@ Tested: PowerDarwin reaches Steps 1 to 10 on this model. FireWire, the microphon
 
 ## Drivers
 
-The drivers Leopard 10.5.8 loads on this model, matched to the 9L30 projects that build them. Raw data: [reference/imacg5/](../reference/imacg5/).
+The drivers Leopard loads on this model, matched to the 9L30 projects that build them. They were listed under Sorbet Leopard, a community update of Leopard 10.5.8, so the list is provisional until it is repeated on an unmodified Leopard 10.5.8. Raw data: [reference/imacg5/](../reference/imacg5/).
 
 A driver's `CFBundleVersion` encodes its project version: `2.0.4d9` is project 204.0.9, `1.7.2f1` is 172.3.1. Every driver below whose project is listed carries exactly that project's 9L30 version, except `AppleGPIO` and `MacIOGPIO` (`1.3.0d0`, while 9L30 lists `AppleGPIO` 131.0.0).
 
