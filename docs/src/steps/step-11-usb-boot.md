@@ -52,7 +52,7 @@ From the sources:
 - IOUSBMassStorageClass 208.0.1 marks itself `OSBundleRequired` `Local-Root`: it is needed to boot from a local disk.
 - `make-test-image` builds the driver cache with `kextcache -l`, which takes the kexts that a boot from a local disk requires, as its manual page says. So the cache is built to the right rule; whether every kext on the USB chain is marked for it is still to be checked.
 
-In QEMU, USB disks work on its EHCI controller, while its OHCI model stops about 90 seconds after boot ([Step 9](step-9-disks-and-devices.md)).
+In QEMU's `mac99`, USB disks work on its EHCI controller, while its OHCI model stops about 90 seconds after boot ([Step 9](step-9-disks-and-devices.md)).
 
 ## The plan
 

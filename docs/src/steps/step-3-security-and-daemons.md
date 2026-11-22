@@ -2,9 +2,9 @@
 
 ## What you will learn
 
-- What Security.framework is, why so much of Darwin links it, and how its 32 parts were built in spite of headers that depend on each other in circles.
+- What Security.framework is, why so much of Darwin links it, and how 28 of its 32 parts were built in spite of headers that depend on each other in circles.
 - Where the open CF-Lite falls short of Leopard's CoreFoundation, and how each missing function was backported, borrowed or stood in for.
-- How a parser that needs Java at build time was made without Java on the build machine.
+- How a parser that needs Java 6 at build time was made on another Mac, since neither the build environment nor Leopard's PowerPC Java can run it.
 - What configd, its plug-ins and the System Configuration dynamic store do, and what notifyd and DiskArbitration add.
 - How a stream that silently stayed empty kept configd from starting.
 
@@ -18,7 +18,7 @@ Neither half of that is a single program. The network is configured by configd a
 
 ### Security.framework
 
-Security.framework is Mac OS X's library for cryptography, certificates, keychains, code signing and authorisation. It follows CDSA, the Common Data Security Architecture: a core, CSSM, to which plug-in modules attach, such as a cryptographic service provider (CSP) that does the arithmetic, data stores for keychains, and modules for certificates and trust. Apple publishes it as 32 separate projects, mostly named `libsecurity_…`, each making a static library, and a `Security` project that links them into the framework.
+Security.framework is Mac OS X's library for cryptography, certificates, keychains, code signing and authorisation. It follows CDSA, the Common Data Security Architecture: a core, CSSM, to which plug-in modules attach, such as a cryptographic service provider (CSP) that does the arithmetic, data stores for keychains, and modules for certificates and trust. Apple publishes it as 32 separate projects, mostly named `libsecurity_…`, most making a static library, and a `Security` project that links those into the framework.
 
 ### configd and the dynamic store
 
@@ -32,7 +32,7 @@ notifyd is the server behind `notify(3)`: programs post named notifications, suc
 
 All on 20 November 2026, in this order:
 
-1. Security's 32 parts and the framework, after their headers.
+1. 28 of Security's 32 parts and the framework, after the headers of all 32.
 2. CF again, four times, each time with one more piece ([D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54), [D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56), [D57](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d57), [D62](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d62)).
 3. SystemConfiguration.framework, from configd 212.2: for all four architectures, its `ppc` slice exporting the same 667 symbols as Apple's 10.5.8 binary.
 4. DiskArbitration 183: the framework, exporting the same 132 symbols as Apple's on `ppc`, and `diskarbitrationd`, `disktool` and `autodiskmount`.
@@ -80,7 +80,7 @@ Neither ANTLR nor Java is among 9L30's published sources, and Leopard's own Java
 
 Apple's later Security-55471, from OS X 10.9, ships ANTLR 2.7.7, which is public domain, in `libsecurity_codesigning/antlr2`: `antlr.jar` and the C++ runtime's source. [D49](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d49) uses it in three pieces, in [env/antlr2/](https://github.com/nyg/PowerDarwin/blob/master/env/antlr2/) and [env/java](https://github.com/nyg/PowerDarwin/blob/master/env/java):
 
-1. `env/antlr2/generate` runs on a current Mac with Java 6 or later. The jar's classes are version 50, which the PowerPC Java 1.5 of Leopard refuses. It unpacks 55471's ANTLR and 36924's grammar, runs `antlr.Tool` on the grammar, and puts the generated parser into a folder named after the grammar's checksum, as `cksum` prints it, with the runtime's headers and sources beside it.
+1. `env/antlr2/generate` runs on a current Mac with Java 6 or later. The jar's classes are in Java 6's format, class version 50, which Leopard's PowerPC Java 1.5 refuses. It unpacks ANTLR from Security-55471 and the grammar from libsecurity_codesigning 36924, the version 9L30 lists, runs `antlr.Tool` on the grammar, and puts the generated parser into a folder named after the grammar's checksum, as `cksum` prints it, with the runtime's headers and sources beside it.
 2. `env/antlr2/build` runs inside the build environment and compiles the runtime, without the Windows-only `dll.cpp`, as Apple's own project leaves it out, into `/usr/local/lib/libantlr2c++.a` for all four architectures.
 3. `env/java` goes into the build environment as `/usr/bin/java`. It is not Java: it reads the arguments the build passes, finds the grammar among them, computes its `cksum`, and copies the parser made beforehand for that grammar into the `-o` folder.
 
@@ -169,7 +169,7 @@ A release build compiles assertions out. So the call did nothing, reported the b
 - [D47](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d47): libsecurity_utilities gets SmartCardServices as a header dependency, for PCSC's headers.
 - [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48): every Security part gets the dependencies it really has, as above; configd and DiskArbitration get CF, IOKitUser and Security.
 - [D50](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d50): libsecurity_authorization drops an unused Carbon include and compiles its `CFNotificationCenter` calls only with Apple's closed CF; a session no longer passes keyboard input changes on to SecurityAgent.
-- [D51](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d51): Security and its CSP are built in Apple's own `Darwin` configuration, without the unpublished CryptKit and comcryption, so the CSP has no FEE or ASC algorithms.
+- [D51](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d51): Security and its CSP are built in Apple's own `Darwin` configuration, without the unpublished CryptKit and comcryption, so the CSP has no FEE (CryptKit's elliptic-curve cryptography) or ASC (Apple Secure Compression) algorithms.
 - [D52](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d52): libsecurity_keychain drops an include of `CFNotificationCenter.h` from which it uses nothing.
 - [D53](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d53): DirectoryServiceMIG copies its MIG headers from the per-architecture folder the build machine's Xcode writes; backported from DirectoryService-621.
 - [D55](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d55): the build-time program that makes Security's error-message strings uses CoreFoundation instead of the closed Foundation; the strings have Apple's text, in big-endian UTF-16.

@@ -48,7 +48,7 @@ Apple's AppleMacRISC4PE 204.0.9, the platform driver of the G5 Macs, names every
 | `PowerMac8,1`, `PowerMac8,2` | iMac G5 | SMU | AppleMacRISC4PE | `SMU_Neo2_PlatformPlugin` |
 | `PowerMac9,1` | single-processor Power Mac G5 with an SMU | SMU | AppleMacRISC4PE | `SMU_Neo2_PlatformPlugin` |
 | `PowerMac11,2` | dual-core Power Mac G5 (PowerPC 970MP) | SMU | AppleMacRISC4PE | `PowerMac11_2_PlatformPlugin` |
-| `PowerMac12,1` | iMac G5 (iSight) | SMU | AppleMacRISC4PE | `SMU_Neo2_PlatformPlugin` |
+| `PowerMac12,1` | iMac G5 (iSight) | SMU | AppleMacRISC4PE | `SMU_Neo2_PlatformPlugin`, with `PowerMac12_1_PlatformPlugin` on top |
 
 The Mac names in the G5 rows are Linux's, from its Kconfig and the table of models in [`arch/powerpc/platforms/powermac/feature.c`](https://github.com/torvalds/linux/blob/master/arch/powerpc/platforms/powermac/feature.c). Its Kconfig names the older chip, the Cuda, only on Macs that Leopard does not support (the first iMacs, the blue and white G3, the "Yikes" G4), so every Mac Leopard runs on has a PMU or an SMU. AppleMacRISC4PE's source handles both: its `MacRISC4PE.cpp` has a branch for a device-tree node named `smu` and another for one named `pmu`.
 
@@ -58,7 +58,7 @@ Leopard drives the PMU with ApplePMU and the SMU with AppleSMU, and Apple publis
 
 Which chip a Mac has therefore decides what the project must write. For the iMac G5's SMU, the project wrote OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), which keeps the clock, restarts, powers off and drives the fans. QEMU's `mac99` has a PMU, for which no open driver exists yet; [What's next](../steps/whats-next.md) lists one.
 
-The fans are a second closed piece on the G5s. Leopard's platform plug-ins, the drivers in the table's last column, run the fans from the sensors; all of them are closed. Without them, the iMac's SMU runs its fans on its own, loudly, until OpenSMU's fan loop takes over ([Step 7](../steps/step-7-fans.md)).
+The fans are a second closed piece on the G5s. Leopard's platform plug-ins, the drivers in the table's last column, run the fans from the sensors; all of them are closed. Tiger's AppleMacRISC4PE 186.3.1 publishes the iMac's plug-in and thermal profile, from which OpenSMU takes its values ([OpenSMU](../synthesis/opensmu.md)). Without a plug-in, the iMac's SMU runs its fans on its own, loudly, until OpenSMU's fan loop takes over ([Step 7](../steps/step-7-fans.md)).
 
 ## Platform drivers
 
@@ -82,7 +82,7 @@ A Mach-O file can hold several builds of the same program, one slice per process
 | `ppc7400` | the G4's PowerPC 7400 and later | G4, G5 | `/bin/sh`, `libSystem.B.dylib`, `dyld` |
 | `ppc64` | 64-bit PowerPC | G5 | `libSystem.B.dylib`, `dyld` |
 
-The examples come from the builds of 19 November 2026: our `mach_kernel` is `i386 ppc`, `/bin/sh` is `ppc7400 i386` like Leopard's, and `libSystem.B.dylib` and `/usr/lib/dyld` are `ppc7400 ppc64 i386 x86_64`. The `i386` and `x86_64` slices are for Intel Macs, which Leopard also supports. The image needs only the PowerPC ones, but darwinbuild sets the build's architectures to `ppc i386`, as Apple's build lists do, and some projects add their 64-bit slices themselves. On the iMac under Leopard, `sysctl hw.cpusubtype` prints 100, Mach-O's number for the PowerPC 970: a G5 runs `ppc7400` and `ppc` code, and 64-bit `ppc64` code. [darwinbuild](../method/darwinbuild.md) shows how the build chooses the slices.
+The examples come from the builds of 19 November 2026: our `mach_kernel` is `i386 ppc`, `/bin/sh` is `ppc7400 i386`, and `libSystem.B.dylib` and `/usr/lib/dyld` are `ppc7400 ppc64 i386 x86_64`. The `i386` and `x86_64` slices are for Intel Macs, which Leopard also supports. The image needs only the PowerPC ones, but darwinbuild sets the build's architectures to `ppc i386`, as Apple's build lists do, and some projects add their 64-bit slices themselves. On the iMac under Leopard, `sysctl hw.cpusubtype` prints 100, Mach-O's number for the PowerPC 970: a G5 runs `ppc7400` and `ppc` code, and 64-bit `ppc64` code. [darwinbuild](../method/darwinbuild.md) shows how the build chooses the slices.
 
 ## QEMU's mac99
 
@@ -104,7 +104,7 @@ QEMU's `mac99` runs OpenBIOS, an open-source Open Firmware, which builds its dev
 
 ### What it can and cannot test
 
-QEMU runs on any current computer, can be reset at will, and can be typed into and photographed through its monitor ([How testing is done](../method/testing.md)). The kernel, the userland, launchd's startup, the console login and the network stack of Steps 1 to 4 were proved there first, through QEMU's ATA disk, its USB keyboard and its `sungem` card, which our AppleGMACEthernet drives. So were Step 9's CDs and USB disks, plugged in while QEMU runs.
+QEMU runs on any current computer, can be reset at will, and can be typed into and photographed through its monitor ([How testing is done](../method/testing.md)). The kernel, the userland, launchd's startup, the console login and the network stack of Steps 1 to 4 were proved there first, through QEMU's ATA disk, its USB keyboard and its `sungem` card, which our AppleGMACEthernet drives. So were Step 9's CDs and USB disks, plugged in while QEMU runs, the USB disks on an EHCI controller added for the test, since QEMU's OHCI model stops about 90 seconds after boot ([Step 9](../steps/step-9-disks-and-devices.md)).
 
 It cannot test what it does not imitate, and that is most of what makes a G5 Mac a G5 Mac:
 
@@ -124,9 +124,9 @@ The iMac G5 (`PowerMac12,1`) is the worked example of real hardware in this book
 
 - The processor is a PowerPC 970FX, a G5: the device tree's `cpu-version` property starts with `0x003c`, the number Linux's [processor table](https://github.com/torvalds/linux/blob/master/arch/powerpc/kernel/cpu_specs_book3s_64.h) gives the 970FX. It is a 64-bit processor running Darwin 9's 32-bit kernel.
 - The U4 north bridge (`u4@0,f8000000`, model `AAPL,U4`) holds the memory controller, the DART, an MPIC interrupt controller, an I²C controller with four temperature sensors on it, a PCI Express bridge to the graphics chip, and the HyperTransport link to the K2 (`ht@0,f2000000`).
-- The K2 I/O controller (`mac-io`, model `AAPL,K2-Keylargo`), behind HyperTransport and three PCI-to-PCI bridges, holds the SATA controller of the internal disk (`k2-s-ata`), an ATA controller for the optical drive (`shasta-ata`), GMAC Ethernet, FireWire, a second MPIC, the GPIO lines, an I²C controller and the I²S audio bus. On the same PCI buses sit a NEC USB controller (two OHCI and one EHCI, `pci1033,35` and `pci1033,e0`) and the AirPort card, a Broadcom chip (`pci14e4,4318`). Bluetooth is a USB device.
+- The K2 I/O controller (model `AAPL,K2-Keylargo`) sits behind HyperTransport and appears to software as several PCI devices on three PCI-to-PCI bridges: `mac-io`, which holds a second MPIC, the GPIO lines, an I²C controller and the I²S audio bus, and beside it the SATA controller of the internal disk (`k2-sata-root`), the ATA controller for the optical drive (`ata-6`, compatible `shasta-ata`, the name AppleKauaiATA logs), GMAC Ethernet and FireWire. On the same PCI buses sit a NEC USB controller (two OHCI and one EHCI, `pci1033,35` and `pci1033,e0`) and the AirPort card, a Broadcom chip (`pci14e4,4318`). Bluetooth is a USB device.
 - The SMU (`smu@0,0`) keeps the clock, switches the power, reads the processor's temperature and runs the three fans. Other drivers reach it through the K2: AppleK2 hands it the address of its command buffer and AppleGPIO rings its doorbell, the GPIO line `smu-doorbell` ([Step 5](../steps/step-5-clock-and-power.md)).
-- The graphics chip is ATI's, `ATY,RV370` in the device tree, on PCI Express.
+- The graphics chip is ATI's RV370 (its `model` property) on PCI Express, in a node named `ATY,Aphrodite2Parent` whose `compatible` names it by its PCI numbers.
 - The boot ROM and NVRAM are one flash chip, `nvram@0,fff04000`.
 
 ### Its device tree
@@ -139,7 +139,7 @@ flowchart TB
     U4 --> DART[dart]
     U4 --> MPIC1[mpic]
     U4 --> I2C1[i2c] --> TEMP["temp-monitor@90, @92, @98, @9c"]
-    ROOT --> PCIE["pci: PCI Express"] --> GPU["ATY,Aphrodite2: graphics"]
+    ROOT --> PCIE["pci: PCI Express"] --> GPU["ATY,Aphrodite2Parent: graphics"]
     ROOT --> HT["ht: HyperTransport"]
     HT --> B1["pci@1"] --> ENET["ethernet@F"]
     HT --> B2["pci@2"]
@@ -179,7 +179,7 @@ The same, as a table, with the project each driver comes from:
 | SMU, clock, power, fans | `OpenSMU` | OpenSMU | ours ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), in place of the closed AppleSMU and platform plug-ins |
 | FireWire | none | Apple's `AppleFWOHCI` is closed | closed |
 | Graphics acceleration | none | Apple's `ATIRadeon9700` is closed | closed |
-| AirPort, Bluetooth | none | Apple's `AirPortBrcm43xx`, `IO80211Family`, `IOBluetoothFamily` are closed | closed |
+| AirPort, Bluetooth | none | Apple's `AppleAirPortBrcm4311`, `IO80211Family`, `IOBluetoothFamily` are closed | closed |
 
 A single-user shell needs the rows from the processor down to SATA, and USB for the keyboard; [Step 1, part 2](../steps/step-1-drivers-and-bootx.md) tells how they were built and how the share of ours grew until every file on the image came from the project's builds. The screen of a single-user shell is the firmware's framebuffer, which the kernel keeps without a graphics driver: Leopard's own driver cache leaves IOGraphics out.
 

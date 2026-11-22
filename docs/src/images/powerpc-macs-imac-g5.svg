@@ -45,18 +45,18 @@
 <rect x="565" y="333" width="160" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
 <text x="645.0" y="354.0" text-anchor="middle" font-size="12.5">USB: OHCI, EHCI</text>
 <text x="645.0" y="371.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">IOUSBFamily</text>
-<rect x="35" y="398" width="255" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
-<text x="162.5" y="419.0" text-anchor="middle" font-size="12.5">mac-io: MPIC, GPIO, I²C, I²S</text>
-<text x="162.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleKeyLargo, AppleGPIO, AppleI2S</text>
-<rect x="300" y="398" width="200" height="50" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
-<text x="400.0" y="419.0" text-anchor="middle" font-size="12.5">Audio: PCM3052 codec</text>
-<text x="400.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleOnboardAudio, OpenOnyx</text>
-<rect x="510" y="398" width="95" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
-<text x="557.5" y="419.0" text-anchor="middle" font-size="12.5">FireWire</text>
-<text x="557.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleFWOHCI</text>
-<rect x="615" y="398" width="110" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
-<text x="670.0" y="419.0" text-anchor="middle" font-size="12.5">AirPort</text>
-<text x="670.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AirPortBrcm43xx</text>
+<rect x="35" y="398" width="240" height="50" rx="4" fill="#3c9a5f" fill-opacity="0.22" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="155.0" y="419.0" text-anchor="middle" font-size="12.5">mac-io: MPIC, GPIO, I²C, I²S</text>
+<text x="155.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleKeyLargo, AppleGPIO, AppleI2S</text>
+<rect x="285" y="398" width="190" height="50" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
+<text x="380.0" y="419.0" text-anchor="middle" font-size="12.5">Audio: PCM3052 codec</text>
+<text x="380.0" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleOnboardAudio, OpenOnyx</text>
+<rect x="485" y="398" width="85" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="527.5" y="419.0" text-anchor="middle" font-size="12.5">FireWire</text>
+<text x="527.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleFWOHCI</text>
+<rect x="580" y="398" width="145" height="50" rx="4" fill="#d9534f" fill-opacity="0.20" stroke="#8a8a8a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="652.5" y="419.0" text-anchor="middle" font-size="12.5">AirPort</text>
+<text x="652.5" y="436.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">AppleAirPortBrcm4311</text>
 <rect x="35" y="490" width="255" height="50" rx="4" fill="#4a7fd9" fill-opacity="0.28" stroke="#8a8a8a" stroke-width="1.5"/>
 <text x="162.5" y="511.0" text-anchor="middle" font-size="12.5">SMU: clock, power, fans</text>
 <text x="162.5" y="528.0" text-anchor="middle" font-size="11" font-family="Menlo, Consolas, monospace">OpenSMU</text>

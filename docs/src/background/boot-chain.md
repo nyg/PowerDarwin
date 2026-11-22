@@ -10,7 +10,7 @@
 
 ## The whole chain
 
-Booting a PowerPC Mac with Darwin 9 is a relay of six programs, each of which loads or starts the next and then hands over:
+Booting a PowerPC Mac with Darwin 9 is a relay, each stage loading or starting the next and then handing over; IOKit, part of the kernel, is drawn on its own:
 
 ```mermaid
 sequenceDiagram
@@ -183,7 +183,7 @@ Ours prints `Darwin Kernel Version 9.8.0: Thu Nov 19 03:13:42 PST 2026; root:xnu
 
 Then it starts IOKit. IOKit makes a registry entry for each node of the device tree, then links in the kexts that BootX loaded and matches them. The first match is the platform driver against the root node: AppleMacRISC4PE on the iMac, AppleMacRISC2PE in QEMU ([PowerPC Macs](powerpc-macs.md)). The platform driver creates nubs for the nodes below the root, the bridges' drivers match those, and matching runs down the tree, bus by bus, until the disk controllers have found their disks and the storage drivers their partitions ([Hardware and boot basics](hardware-basics.md) shows the stack for the iMac's root disk).
 
-At this time, too, ApplePlatformExpert asks for the clock and waits up to 30 seconds for a clock driver; without one, as on every PowerPC Mac without Apple's ApplePMU or AppleSMU, the kernel logs `RTC did not show up` and starts at 1970 ([Step 5](../steps/step-5-clock-and-power.md)).
+At this time, too, ApplePlatformExpert asks for the clock and waits up to 30 seconds for a clock driver; without one, as in QEMU, and on the iMac before OpenSMU, the kernel logs `RTC did not show up` and starts at 1970 ([Step 5](../steps/step-5-clock-and-power.md)).
 
 ### The root device
 
@@ -195,7 +195,7 @@ Waiting on <dict ID="0"><key>IOProviderClass</key><string ID="1">IOResources</st
 
 When matching finds it, the kernel logs the partition's whole path in the registry, `Got boot device = IOService:/MacRISC4PE/ht@0,f2000000/AppleMacRiscHT/...`, then `BSD root: disk0s4`, mounts it read-only and starts process 1.
 
-If no driver ever publishes the partition, because a driver of its stack is missing, the kernel waits 60 seconds (`ROOTDEVICETIMEOUT`), logs `Still waiting for root device`, shows the kernel's `noroot` icon on a graphical boot, and goes on waiting. The image met it in the fourth boot test in QEMU, when the plug-ins of Apple's IOATAFamily were missing. On the iMac, the stack needs Panther's IOATABlockStorage ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)), whose loading prints a notice of its own before the root is found: `Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.`
+If no driver ever publishes the partition, because a driver of its stack is missing, the kernel waits 60 seconds (`ROOTDEVICETIMEOUT`), logs `Still waiting for root device`, shows the kernel's `noroot` icon on a graphical boot, and goes on waiting. The image met it in the fourth boot test in QEMU, when the plug-ins of Apple's IOATAFamily were missing. In QEMU and on the iMac, the stack needs Panther's IOATABlockStorage ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)), whose loading prints a notice of its own before the root is found: `Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.`.
 
 ## Kexts and the driver cache
 
@@ -273,7 +273,7 @@ On Leopard, the console's login is loginwindow, the graphical login, which is cl
 
 getty opens the console, prints its banner, `Darwin/BSD (localhost) (console)`, and the prompt, `login:`, and waits.
 
-When a user name is typed, getty runs `login`, which checks the password through PAM, the pluggable authentication modules: `pam_unix` compares it with the account's hash, read from `/etc/master.passwd` in Step 2 and, once DirectoryService runs, from its local directory. The image has no `passwd` command, since it needs closed code ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), so `make-test-image` writes the hash of a test password, kept outside the repo, into root's entry in both. login then moves into a security session of its own through `pam_launchd`, which needs securityd ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45), dropped once securityd was built in Step 6), and starts root's shell. That is Step 2's goal ([Step 2](../steps/step-2-console-login.md)).
+When a user name is typed, getty runs `login`, which checks the password through PAM, the pluggable authentication modules: `pam_unix` compares it with the account's hash, read from `/etc/master.passwd` in Step 2 and, once DirectoryService runs, from its local directory. The image has no `passwd` command, since it needs closed code ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), so `make-test-image` writes the hash of a test password, kept outside the repo, into root's entry in both. In Step 2, before securityd existed, [D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45) made `pam_launchd` optional, and root's shell stayed in launchd's System session. Since Step 6, login moves into a security session of its own through `pam_launchd`, which needs securityd, and then starts root's shell. Logging in on the console is Step 2's goal ([Step 2](../steps/step-2-console-login.md)).
 
 ## The daemons that follow
 

@@ -37,7 +37,7 @@ InterfaceNamer gives each interface its BSD name, `en0` for the first Ethernet p
 
 On Leopard, accounts and groups do not live in `/etc/master.passwd`. They live in directories served by DirectoryService: the local directory on the machine, and network directories such as LDAP servers or Active Directory. The local directory is a folder of property lists, one per record, under `/var/db/dslocal/nodes/Default`; root's is `users/root.plist`. When DirectoryService runs, Libinfo asks it for every user and group, so `getpwnam` in a login now reads root's record from there ([Step 2](step-2-console-login.md) shows the path without it).
 
-DirectoryService's daemon is built with all its plug-ins, and they bring in a whole stack of other projects: OpenLDAP's LDAP.framework for its LDAP plug-in, Cyrus SASL, whose headers it includes, the password server's own framework, SQLite for the local directory's plug-in, and, under LDAP and SASL, Kerberos. So the projects that a single local login needs are many more than it uses.
+DirectoryService's daemon is built with all its plug-ins, and they bring in a whole stack of other projects: OpenLDAP's LDAP.framework for its LDAP plug-in, Cyrus SASL, whose headers it includes, the password server's own framework, SQLite for the local directory's plug-in, and, under LDAP and SASL, Kerberos. Kerberos is a network login protocol built on tickets; Cyrus SASL is a library through which a protocol such as LDAP chooses a login method; LDAP is the protocol of network directories; the password server is Mac OS X Server's store of passwords. So the projects that a single local login needs are many more than it uses.
 
 ### An SSH login
 
@@ -71,8 +71,8 @@ On 21 November 2026, after part 1:
 
 - IONetworkingFamily 47.3 and AppleGMACEthernet 159.3.1: each exports and imports the same symbols as Apple's 10.5.8 kext.
 - network_cmds (`ifconfig`, `ping`, `netstat`, `route` and 20 more, each importing exactly what Apple's does), OpenSSL 0.9.7, ipsec's `libipsec`, libresolv and tcp_wrappers.
-- bootp 170.1: `IPConfiguration.bundle`, `ipconfig` and the BSDP client, without the DHCP server.
-- The directory stack: Kerberos, tcl, SQLite, Cyrus SASL from passwordserver_sasl and passwordserver_saslkerberos, PasswordServer.framework from DSPasswordServerFramework, LDAP.framework from LDAPFramework, then DirectoryService and its daemon. `/usr/sbin/DirectoryService` imports 857 of the 864 symbols Apple's does, and none other.
+- bootp 170.1: `IPConfiguration.bundle`, `ipconfig` and the BSDP client, which looks for NetBoot servers, without the DHCP server.
+- The directory stack: Kerberos, tcl, SQLite, Cyrus SASL from passwordserver_sasl and passwordserver_saslkerberos, PasswordServer.framework from DSPasswordServerFramework, LDAP.framework from LDAPFramework, then DirectoryService and its daemon. `/usr/sbin/DirectoryService` imports 857 of the 864 symbols of the reference system's DirectoryService, a later 514.29, and none other.
 - OpenSSH 95.1.5, which is OpenSSH 5.1p1: its tools import exactly Apple's symbols, but `sshd` lacks Apple's import of `puts`, and `ssh` of `puts` and `putchar`; its `sshd_config` is identical to Apple's.
 
 make-test-image copies their Roots into the image, writes the test password's hash into root's record in the local directory as well as into `master.passwd`, and sets `Disabled` to false in `ssh.plist`, as turning on Remote Login does on Leopard.
@@ -110,7 +110,7 @@ The kqueue itself is plain BSD, so [D79](https://github.com/nyg/PowerDarwin/blob
 pthread_create( &watchThread, &attributes, FileChangeThread, (void *) (intptr_t) fKqueue );
 ```
 
-and the callback becomes `FileChangeThread`, which loops forever on `kevent()` and, for each changed file, does what the callback did: it empties the cache of that file's record type, and for users and groups the membership cache too. The daemon then imports four fewer `CFFileDescriptor` calls than Apple's, and `kCFAllocatorSystemDefault`, which only those used.
+and the callback becomes `FileChangeThread`, which loops forever on `kevent()` and, for each changed file, does what the callback did: it empties the cache of that file's record type, and for users and groups the membership cache too. The daemon then imports four fewer `CFFileDescriptor` calls than Apple's, and `kCFAllocatorSystemDefault`, which only those used. The other two of the seven missing imports are distributed-notification calls that 514.29 added.
 
 ### An account that looked expired (D80)
 
@@ -160,7 +160,7 @@ and `pam_strerror` spells that "User account has expired". The console was not a
 
 ### In QEMU
 
-The first network boot test added the network drivers and the Roots from network_cmds to OpenSSH. AppleGMACEthernet matched QEMU's card and printed `UniNEnet: Ethernet address 52:54:00:12:34:56`, QEMU's default address. InterfaceNamer named it `en0` only once its 60-second wait for IOKit to go quiet ended: some service stayed busy, which [Step 8](step-8-clean-boot.md) traces to the processor's driver. IPConfiguration then got `10.0.2.15` from QEMU's DHCP server, configd wrote `nameserver 10.0.2.3` to `/etc/resolv.conf`, `ping` reached the gateway, and `ifconfig` reported `100baseTX <full-duplex>`. `launchctl load -w /System/Library/LaunchDaemons/ssh.plist` made launchd listen on port 22, and a current OpenSSH client got OpenSSH 5.1's banner. Logins failed for want of DirectoryService: sshd's unprivileged child stopped at `setgid _sshd 75: No such file or directory`, since inside its chroot it could not read `/etc/master.passwd`.
+The first network boot test added the network drivers and the Roots from network_cmds to OpenSSH. AppleGMACEthernet matched QEMU's card and printed its Ethernet address, QEMU's default one. InterfaceNamer named it `en0` only once its 60-second wait for IOKit to go quiet ended: some service stayed busy, which [Step 8](step-8-clean-boot.md) traces to the processor's driver. IPConfiguration then got `10.0.2.15` from QEMU's DHCP server, configd wrote `nameserver 10.0.2.3` to `/etc/resolv.conf`, `ping` reached the gateway, and `ifconfig` reported `100baseTX <full-duplex>`. `launchctl load -w /System/Library/LaunchDaemons/ssh.plist` made launchd listen on port 22, and a current OpenSSH client got OpenSSH 5.1's banner. Logins failed for want of DirectoryService: sshd's unprivileged child stopped at `setgid _sshd 75: No such file or directory`, since inside its chroot it could not read `/etc/master.passwd`.
 
 The second network boot test added the directory stack. launchd started DirectoryService on demand, root logged in on the console through it, and `id` listed root's groups from the local directory. After D80, about three minutes after power-on, a current OpenSSH client on the host logged in as root through QEMU's port forward, without anyone touching the guest's console, and ran `uname -a` (`Darwin Kernel Version 9.8.0 … root:xnu-1228.15.4.obj/RELEASE_PPC`), `id`, `ifconfig en0` and `cat /etc/resolv.conf`. Of the image's 9,946 files, all came from our builds except six: the four of Step 2, `root.plist` and `ssh.plist`. Step 3 was reached in QEMU.
 
@@ -168,13 +168,13 @@ The second network boot test added the directory stack. launchd started Director
 
 The fifth boot test on the iMac G5 restored the same image onto `Darwin9`, started it with `-v`, and plugged its Ethernet port into a network with a DHCP server. Our IONetworkingFamily 1.6.1 and AppleGMACEthernet 1.5.9f1 loaded, and `en0` came up at `1000baseT <full-duplex,flow-control>`. IPConfiguration got an address from the router by DHCP, and configd made the router the name server, as `scutil --dns` showed.
 
-From another Mac on the network, a current OpenSSH client logged in as root, without anyone touching the iMac's console, and ran `uname -a`, `netstat -rn`, whose default route went through the router, and `ping` to the router, in 0.3 ms, and to `www.apple.com`, whose name resolved through it. `launchctl list` showed configd, notifyd, kextd, diskarbitrationd, DirectoryService, getty and `com.openssh.sshd` running. Step 3 was reached in QEMU and on the iMac G5.
+From another Mac on the network, a current OpenSSH client logged in as root, without anyone touching the iMac's console, and ran `uname -a`, `netstat -rn`, whose default route went through the router, and `ping` to the router, in 0.3 ms, and to `www.apple.com`, whose name resolved through it. `launchctl list` showed configd, notifyd, kextd, diskarbitrationd, DirectoryService, getty and `com.openssh.sshd` running. Step 3 was reached in QEMU and on the iMac.
 
 ## What is still missing
 
 - The clock read 31 December 1969, since nothing sets it without AppleSMU; ntpd comes in [Step 4](step-4-everyday-commands.md), the hardware clock in [Step 5](step-5-clock-and-power.md).
 - SSH logins get no security session of their own until [Step 6](step-6-securityd.md), where launchproxy's `SessionCreate()` starts to succeed.
-- The 60-second wait before `en0` is named remains until [Step 8](step-8-clean-boot.md) on the iMac, and for good in QEMU.
+- The 60-second wait before `en0` is named remains until [Step 8](step-8-clean-boot.md) on the iMac, and in QEMU until an open driver for its PMU exists ([What's next](whats-next.md)).
 - sshd's account phase skips what `pam_securityserver` checks ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)); there is no DHCP server, `bootpd` ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and no Wi-Fi support in the DHCP client ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)).
 - `grep`, `ps`, `less` and `vi` are not built yet: [Step 4](step-4-everyday-commands.md) adds them.
 

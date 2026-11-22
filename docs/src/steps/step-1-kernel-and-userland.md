@@ -6,7 +6,7 @@
 - What libSystem is, why every program on the system needs it, and why it was the first thing built after the kernel.
 - Which programs a single-user shell needs, and how they were tried in a chroot before anything was booted.
 - How our kextcache made the driver cache, and how QEMU's `mac99` first booted our kernel and programs to a root shell.
-- Four failures in full: a shell that read `#` as a comment, two closed libraries, and a debug-symbol tool that crashed on every binary.
+- Five failures in full: a shell that read `#` as a comment, three closed libraries, and a debug-symbol tool that crashed on every binary.
 
 ## The goal
 
@@ -40,13 +40,13 @@ The parts that matter most in this book:
 
 - Libc: the C library proper, `printf`, `malloc`, threads. Libsyscall, part of xnu's source, adds the stubs that turn a call such as `read()` into a system call; Libsystem merges the two into one `libc`.
 - Libinfo: user, group and host lookups such as `getpwnam`. On Leopard it asks DirectoryService, or reads `/etc` files when DirectoryService is not running ([Step 2](step-2-console-login.md)).
-- libdyld and liblaunch: the calls by which a program talks to dyld, such as `dlopen`, and to launchd.
+- libdyldapis and liblaunch: the calls by which a program talks to dyld, such as `dlopen`, and to launchd.
 
 dyld itself is not part of libSystem. It is `/usr/lib/dyld`, the dynamic linker: the kernel maps it into every program that uses libraries, and dyld then finds and loads `libSystem.B.dylib` and every other library the program names.
 
 ### The programs
 
-The kernel starts `/sbin/launchd` as process 1. launchd runs `launchctl`, which sees `-s`, prints the single-user banner and starts `/bin/sh`, a bash. The user then runs the disk tools: `fsck` to check the volume, `mount` to make it writable.
+The kernel starts `/sbin/launchd` as process 1. launchd runs `launchctl`, launchd's command-line tool, which also does the system's setup at boot: it sees `-s`, prints the single-user banner and starts `/bin/sh`, a bash. The user then runs the disk tools: `fsck` to check the volume, `mount` to make it writable.
 
 ```mermaid
 flowchart TD
@@ -64,15 +64,15 @@ flowchart TD
     libSystem --> dyld["dyld loads them all"]
 ```
 
-launchctl is the odd one: it links IOKit and CoreFoundation, Apple's C library of strings, collections and property lists, which needs ICU and the Objective-C runtime. CF-Lite, the open part of CoreFoundation, is what Apple publishes as the CF project; Leopard's own CoreFoundation is larger and closed ([What Darwin is](../background/what-darwin-is.md)).
+launchctl is the odd one: it links IOKit and CoreFoundation, Apple's C library of strings, collections and property lists, which needs ICU, the Unicode library `libicucore`, and the Objective-C runtime. CF-Lite, the open part of CoreFoundation, is what Apple publishes as the CF project; Leopard's own CoreFoundation is larger and closed ([What Darwin is](../background/what-darwin-is.md)).
 
 ## What was built
 
 darwinbuild built each project on the build machine, inside a BuildRoot filled with the Roots of its dependencies: Apple's prebuilt ones at first, ours as they were built ([darwinbuild](../method/darwinbuild.md)). Most of this chapter's failures come from that environment, not from the code being built. In order, on 19 November 2026:
 
 1. `bootstrap_cmds`, `file_cmds` and `shell_cmds`, small command projects.
-2. xnu 1228.15.4, in 22.5 minutes, on the third attempt: a fat `mach_kernel` for `i386` and `ppc` of 10,354,156 bytes, against 10,367,028 for Apple's, which announces itself as `Darwin Kernel Version 9.8.0: Thu Nov 19 03:13:42 PST 2026; root:xnu-1228.15.4.obj/RELEASE_PPC`.
-3. libSystem's parts, then Libsystem, for `ppc7400`, `ppc64`, `i386` and `x86_64`. Its `ppc` slice exported the same 4,084 symbols as Leopard's, but for the quarantine functions, which the fifth build added, and one version string.
+2. xnu 1228.15.4, in 22.5 minutes, on the third attempt: a `mach_kernel` of 10,354,156 bytes, against 10,367,028 for Apple's, built as a [fat binary](../method/darwinbuild.md), one file with one copy, or slice, per architecture, here `i386` and `ppc`. It announces itself as `Darwin Kernel Version 9.8.0: Thu Nov 19 03:13:42 PST 2026; root:xnu-1228.15.4.obj/RELEASE_PPC`.
+3. libSystem's parts, then Libsystem, with four slices: `ppc7400` (the G4 and later PowerPC processors), `ppc64`, `i386` and `x86_64`. Its `ppc7400` slice exported the same 4,084 symbols as Leopard's, but for the quarantine functions, which the fifth build added, and one version string.
 4. dyld 97.1, a four-way `/usr/lib/dyld`.
 5. The rest of the shell's world: libiconv, bsm, libutil, libedit, libgcc, ncurses and bash; launchd and diskdev_cmds, which holds the disk tools.
 6. For launchctl: IOKitUser, which makes IOKit.framework, CF, ICU, objc4, autozone, libstdcxx and zlib.
@@ -108,13 +108,13 @@ Our bash had read the `#` inside the single quotes inside the backquotes as the 
 check_comment = (flags & P_COMMAND) && qc != '`' && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0;
 ```
 
-Apple's bash 76.2 already carries `bash32-001` to `bash32-017`, applied to its `parse.y`. But bash does not compile `parse.y` directly: bison turns the grammar into a C file, `y.tab.c`, and the source ships that file ready-made. `make` regenerates `y.tab.c` only when `parse.y` is newer. When Apple applied the patches, `parse.y` became newer and was regenerated; GitHub's tarball gives every file the same time, so `make` saw nothing to do and compiled the old, unpatched parser.
+Apple's bash 76.2 already carries `bash32-001` to `bash32-017`, applied to its `parse.y`. But bash does not compile `parse.y` directly: bison turns the grammar into a C file, `y.tab.c`, and the source ships that file ready-made. `make` regenerates `y.tab.c` only when `parse.y` is newer. When Apple applied the patches, `parse.y` became newer and `y.tab.c` was regenerated; GitHub's tarball gives every file the same time, so `make` saw nothing to do and compiled the old, unpatched parser.
 
 The fix, [D20](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d20), changes no file. [patches/bash-76.2/touch](https://github.com/nyg/PowerDarwin/blob/master/patches/bash-76.2/touch) lists `bash/parse.y`, and `scripts/stage-sources` touches every file a project's `touch` file lists after unpacking it. bison 2.3 in the build environment then regenerates `y.tab.c`. After the second build, `` x=`echo 'a #b'` `` gave `a #b`, and ncurses built.
 
-### Two closed libraries inside libSystem (D12, D13)
+### Three closed libraries inside libSystem (D12, D13, D15)
 
-Two of libSystem's ingredients are not in Apple's published sources. The first is DTrace, the tracing framework. Libc declares 18 probes for `plockstat`, a tool that measures lock contention in threaded programs. To use them, Libc's build runs `dtrace -h` to turn the probe definitions into a header, and the linker loads `libdtrace.dylib` to record the probe sites. On Leopard both are closed and lean on other closed frameworks, which the build environment does not have:
+Three of libSystem's ingredients are not in Apple's published sources. The first is DTrace, the tracing framework. Libc declares 18 probes for `plockstat`, a tool that measures lock contention in threaded programs. To use them, Libc's build runs `dtrace -h` to turn the probe definitions into a header, and the linker loads `libdtrace.dylib` to record the probe sites. On Leopard both are closed and lean on other closed frameworks, which the build environment does not have:
 
 ```text
 dyld: Library not loaded: …/Foundation.framework/Versions/C/Foundation
@@ -125,7 +125,7 @@ The first comes from `dtrace` in Libc's build, the second from Libsystem's final
 
 The second is the sandbox library. Libsystem links `-lsandbox`, Leopard's closed library behind `sandbox_init`, by which a program asks the kernel to restrict itself. Nothing in the build environment provides `libsandbox.a`, so [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13) adds a new one, in [replacements/sandbox/](https://github.com/nyg/PowerDarwin/blob/master/replacements/sandbox/), with the same seven exported symbols. Its `sandbox_init` always fails, with `ENOTSUP` and the message `sandbox is not available in this Darwin build`: a program that asks for a sandbox learns that it has none, instead of believing it is restricted.
 
-Quarantine, the closed library that marks downloaded files, went the same way. [env/quarantine.h](https://github.com/nyg/PowerDarwin/blob/master/env/quarantine.h) gives copyfile do-nothing stubs ([D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8)). But darwinbuild installs our libSystem into the build environment, where Apple's own tools then run on it, and they call the library's 35 functions. ncurses' install failed in Apple's `tar`:
+The third is quarantine, the closed library that marks downloaded files, and it went the same way. [env/quarantine.h](https://github.com/nyg/PowerDarwin/blob/master/env/quarantine.h) gives copyfile do-nothing stubs ([D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8)). But darwinbuild installs our libSystem into the build environment, where Apple's own tools then run on it, and they call the library's 35 functions. ncurses' install failed in Apple's `tar`:
 
 ```text
 dyld: Symbol not found: __qtn_file_alloc  Referenced from: /usr/bin/tar  Expected in: /usr/lib/libSystem.B.dylib
@@ -194,7 +194,7 @@ The third boot test added kext_tools, and the image's `Extensions.mkext` came fr
 
 - BootX and all 38 drivers were Leopard's. [Part 2](step-1-drivers-and-bootx.md) replaces them, and proves the step on the iMac.
 - The image's `/etc` was empty: no `passwd`, no `ttys`, no accounts. The `files` project fills it in [Step 2](step-2-console-login.md).
-- The kernel's objects carry no CTF type data for DTrace, since `ctfconvert`, from the dtrace project, was not in the build environment; no `.dSYM` debug bundle was made either ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)).
+- The kernel's objects carry no CTF data, the compact type descriptions DTrace reads, since `ctfconvert`, from the dtrace project, was not in the build environment; no `.dSYM` debug bundle was made either ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)).
 - libSystem has no plockstat probes, no working sandbox and no quarantine; by [Step 8](step-8-clean-boot.md), the sandbox stub's only trace in the system log is `update`'s failed `sandbox_init`.
 - launchd runs no `/Library/StartupItems` ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)), and IOKit has no HID event system ([D22](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d22)).
 - kextcache and kextd link DiskArbitration, not built yet, which [Step 2](step-2-console-login.md) meets at boot.

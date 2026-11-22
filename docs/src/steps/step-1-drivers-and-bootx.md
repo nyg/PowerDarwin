@@ -85,7 +85,7 @@ make-test-image copies the BootX Root into the image, and `bless --bootinfo` cop
 
 ### The iMac's own drivers
 
-The iMac needs drivers QEMU never loads: AppleK2SATARoot and AppleK2SATA for its SATA controller, AppleMacRISC4PE for the G5 platform, AppleFlashNVRAM, AppleI2C and IOGraphics. All but AppleMacRISC4PE import and export the same symbols as Apple's, except IOGraphics' IONDRVSupport, which lacks two classes for old ATI cards that are not in the published source. IOGraphics stays out of the driver cache, as it does from Leopard's: its `OSBundleRequired` is `Safe Boot`, which `kextcache -l` leaves out, and a single-user shell keeps the firmware's framebuffer. The ninth to eleventh tests booted QEMU to the same shell with these drivers on the image.
+The iMac needs drivers QEMU never loads: AppleK2SATARoot and AppleK2SATA for its SATA controller, AppleMacRISC4PE for the G5 platform, AppleFlashNVRAM, AppleI2C and IOGraphics. All but AppleMacRISC4PE import and export the same symbols as Apple's, except IOGraphics' IONDRVSupport, which imports one symbol fewer and lacks the 37 exports of two classes for old ATI cards that are not in the published source. IOGraphics stays out of the driver cache, as it does from Leopard's: its `OSBundleRequired` is `Safe Boot`, which `kextcache -l` leaves out, and a single-user shell keeps the firmware's framebuffer, the plain screen memory Open Firmware sets up, which the console writes into. The ninth to eleventh tests booted QEMU to the same shell with these drivers on the image.
 
 ## What broke and how it was fixed
 
@@ -97,13 +97,13 @@ AppleMacRISC4PE is the platform driver of G5 Macs. Among other things it drives 
 MacRISC4PE.cpp:183: error: 'kUniNRevision3_2_1' was not declared in this scope
 ```
 
-and 68 other undeclared names in `MacRISC4PE.cpp`, `MacRISC4CPU.cpp` and `U3.cpp`: 66 register offsets, bit masks, shifts and version tests, and three local variables of `U3.cpp`, `syndromes`, `upperSyndrome` and `lowerSyndrome`, assigned but never declared. No header of the published source defines the constants. 15 are in the `U3.h` of AppleMacRISC4PE 101.2.3, from Mac OS X 10.2.7, whose later versions dropped them, and 2 are in AppleMacRISC2PE's `UniN.h`. The other 49 are mostly for ECC, the memory's error correction, and for the DART, the north bridge's table that translates the addresses devices use for DMA. Linux defines 13 of them with the same values in `cpc925_edac.c`, its driver for IBM's CPC925, which Apple calls the U3, and its `dart.h` has the DART's exception register of each bridge. Apple's source export removed them, as it removed a declaration from IOUSBFamily ([D35](#a-declaration-removed-by-apples-source-export-d35)).
+and 68 other undeclared names in `MacRISC4PE.cpp`, `MacRISC4CPU.cpp` and `U3.cpp`: 66 register offsets, bit masks, shifts and version tests, and three local variables of `U3.cpp`, `syndromes`, `upperSyndrome` and `lowerSyndrome`, assigned but never declared. No header of the published source defines the constants. 15 are in the `U3.h` of AppleMacRISC4PE 101.2.3, from Mac OS X 10.2.7, whose later versions dropped them, and 2 are in AppleMacRISC2PE's `UniN.h`. The other 49 are mostly for ECC, the memory's error correction, and for the DART, the north bridge's table that translates the addresses devices use for DMA. Linux defines 13 of them with the same values in `cpc925_edac.c`, its driver for IBM's CPC925, which Apple calls the U3, and its `dart.h` has the DART's exception register of each bridge. Apple's source export removed them, as it removed a declaration from IOUSBFamily ([D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), below).
 
 [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)'s [patch](https://github.com/nyg/PowerDarwin/blob/master/patches/AppleMacRISC4PE-204.0.9/0001-define-u3-and-u4-registers.patch) adds all 66 to `U3.h` and declares the three locals.
 
 The 15 values that 101.2.3's `U3.h` defines are the same in the patch, and so is `kUniNSave` from `UniN.h`; `kUniNVSPSoftReset` is `0x10`, where `UniN.h`, written for the older UniNorth bridges, has `0x170`. Where the code only uses some bits together, the patch orders them as the matching exception bits.
 
-With the patch, the kext built in 10 seconds, and it was compared with Apple's function by function ([How testing is done](../method/testing.md)). 116 of its 123 functions are the same, and 2 more differ only in the line number a `panic` message quotes. The other 5 are shorter than Apple's, because the published source leaves parts of them out: the model name passed to the kernel for panic logs, and steps taken only on a U3, on a U3 Heavy, or before sleep on a PCI-X bridge. The iMac G5 has a U4, and a HyperTransport bridge that is not PCI-X, so only the model name in panic logs applies to it.
+With the patch, the kext built in 10 seconds, and it was compared with Apple's function by function ([How testing is done](../method/testing.md)). 116 of its 123 functions are the same, and 2 more differ only in the line number a `panic` message quotes. The other 5 are shorter than Apple's, because the published source leaves parts of them out: the model name passed to the kernel for panic logs, and steps taken only on a U3, on a U3 Heavy, or before sleep on a PCI-X bridge. The iMac has a U4, and a HyperTransport bridge that is not PCI-X, so only the model name in panic logs applies to it.
 
 ### Panther's disk driver for Leopard (D40)
 
@@ -115,7 +115,7 @@ IOATABlockStorage is the driver that turns block reads and writes into ATA comma
 UserClientLib/ATASMARTLib.h:39:52: error: IOKit/storage/ata/IOATAStorageDefines.h: No such file or directory
 ```
 
-and with only that fixed, the kext found Leopard's copy of the same header in Kernel.framework, placed there earlier from the SDK for IOATAPIProtocolTransport ([D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36)), which lacks a type Panther's code uses:
+and with only that fixed, the kext found Leopard's copy of the same header in Kernel.framework, the folder of headers for code that runs in the kernel, placed there earlier from the SDK for IOATAPIProtocolTransport ([D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36)), which lacks a type Panther's code uses:
 
 ```text
 IOATABlockStorageDriver.h:159: error: 'IOATAPowerState' does not name a type
@@ -123,7 +123,7 @@ IOATABlockStorageDriver.h:159: error: 'IOATAPowerState' does not name a type
 
 So 130.3.1's headers are built first and copied into the build environment, as with IOBDStorageFamily's in part 1. IOATAPIProtocolTransport, rebuilt against Panther's header, compiles to the same code.
 
-The result is plainly Panther's: `IOATABlockStorage.kext` version 1.3.0 with the driver class `IOATABlockStorageDriver`, where Apple's 2.0.6 has `AppleATADiskDriver`; 468 imported symbols against 522, 215 exported against 337, 40,316 bytes of `ppc` code against 70,280; and Panther's `ATASMARTLib.plugin` inside. It declares no kernel dependency, which Leopard's loader accepts with a notice at every boot:
+The result is plainly Panther's: `IOATABlockStorage.kext` version 1.3.0 with the driver class `IOATABlockStorageDriver`, where Apple's 2.0.6 has `AppleATADiskDriver`; 468 imported symbols against 522, 215 exported against 337, 40,316 bytes of `ppc` code against 70,280; and Panther's `ATASMARTLib.plugin` inside. It declares no kernel dependency in its `OSBundleLibraries`, the list of kernel interfaces a kext needs, which Leopard's loader accepts with a notice at every boot:
 
 ```text
 Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.

@@ -18,11 +18,11 @@ It would take a kext like OpenSMU ([Step 5](step-5-clock-and-power.md)): the PMU
 
 ### FireWire
 
-FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 32 pure virtual functions cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
+FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 33 pure virtual functions, which a subclass must write, cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers, the steady streams of audio and video devices. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
 
 ### The GPU
 
-Leopard's GPU driver, `ATIRadeon9700`, is closed, and without it the iMac's GPU and north bridge run some 5 to 9 °C warmer at idle than under Leopard ([Step 7](step-7-fans.md)). The screen itself comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either.
+Leopard's GPU driver, `ATIRadeon9700`, is closed, and without it the iMac's GPU and north bridge run some 5 to 10 °C warmer at idle than under Leopard ([Step 7](step-7-fans.md)). The screen itself comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either.
 
 ### What Step 9 leaves
 
@@ -40,10 +40,10 @@ The image is built for PowerPC Macs, not for one model, but only the iMac has ru
 
 - its platform driver, AppleMacRISC2PE or AppleMacRISC4PE, both built here;
 - a driver for its power controller: OpenSMU for an SMU, or the open PMU driver above;
-- on an SMU Mac, its own fans, sensors and temperatures in OpenSMU, which today knows only the iMac's ([OpenSMU](../synthesis/opensmu.md));
+- on an SMU Mac, its own fans, sensors and temperatures in OpenSMU, which today knows only the 17-inch iMac G5's, thermal model 2 ([OpenSMU](../synthesis/opensmu.md));
 - drivers for its own chips, such as its Ethernet, disk controller and sound codec, each open, closed, or to be written.
 
-For temperatures, Tiger's AppleMacRISC4PE releases publish the iMac G5's platform plug-in and thermal profile under the APSL; whether they hold other models' is not checked.
+For temperatures, Tiger's AppleMacRISC4PE 186.3.1 publishes, under the APSL, thermal profiles for `PowerMac8,1`, `PowerMac9,1`, `PowerMac11,2`, `PowerMac12,1` and the PowerBook G4, and platform plug-ins for `PowerMac7,2`, `PowerMac11,2`, `PowerMac12,1`, `RackMac3,1` and the PowerBook G4; whether OpenSMU's zones can be built from them is not checked. They also open a path to Apple's own fan control: if OpenSMU published the SMU's SDB partitions as `sdb-partition-*` properties and `AppleSMUDevice` nubs for the fans and sensors, as AppleSMU does, Tiger's IOPlatformPluginFamily and its `SMU_Neo2` and `PowerMac12_1` plug-ins could be built for Leopard and run in place of OpenSMU's zones. Not tried.
 
 ### QEMU
 
@@ -69,7 +69,7 @@ A `deferred` deviation turns a feature off until the open project it needs is bu
 
 ### Darwin 10 for PowerPC
 
-Darwin 10, Snow Leopard's, dropped PowerPC. Others have started on it: macos-powerpc's darwinbuild has a `Darwin10` branch that adds PowerPC to the `10A432` build list, and a group built a Snow Leopard kernel for PowerPC from `xnu-1504.9.37` ([the history](../background/history.md)). This project could serve as a base: its method and rules, its deviations as a list of what to expect, its open drivers, and Panther's stand-ins. It would take a Darwin 10 build list with PowerPC, a toolchain for it, and every deviation checked again.
+Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Others have started on it: macos-powerpc's darwinbuild has a `Darwin10` branch that adds PowerPC to the `10A432` build list, and a group built `10A432`'s kernel, `xnu-1456.1.26`, for PowerPC from source ([the history](../background/history.md)). This project could serve as a base: its method and rules, its deviations as a list of what to expect, its open drivers, and Panther's stand-ins. It would take a Darwin 10 build list with PowerPC, a toolchain for it, and every deviation checked again.
 
 ## Distribution
 
@@ -112,8 +112,10 @@ Some items help others: the PMU driver would serve both QEMU and the older Macs,
 ## Where to look
 
 - README.md: "Status".
-- DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), and the `closed-*` rows, among them [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95).
-- [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): NetBSD's `pmu.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
+- DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), the `closed-*` rows, among them [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
+- [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): NetBSD's `pmu.c`, FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
 - In AppleMacRISC2PE-187.0.5: `MacRISC2CPU.cpp`, the wait for `ApplePMU`.
+- In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
+- In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the userland folder and the test password.
 - [What stays closed, and why](../synthesis/what-stays-closed.md).

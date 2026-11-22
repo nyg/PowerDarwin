@@ -62,7 +62,7 @@ Each box holds three kinds of code. Unmarked names are open: built by the projec
 
 ## The kernel: xnu
 
-Darwin's kernel is xnu. Its source, xnu 1228.15.4 for Darwin 9.8, has a folder for each of its parts: `osfmk` for Mach, `bsd` for the BSD layer, `iokit` for IOKit, `libkern` for the C++ runtime and the kernel's own library, `pexpert` for the platform expert, and `security` for the MAC framework, the hooks on which security policies such as the sandbox attach. They are one program, `mach_kernel`, running in kernel mode in one address space ([Hardware and boot basics](hardware-basics.md) explains the modes).
+Darwin's kernel is xnu. Its source, xnu 1228.15.4 for Darwin 9.8, has a folder for each of its parts: `osfmk` for Mach, `bsd` for the BSD layer, `iokit` for IOKit, `libkern` for the C++ runtime and the kernel's own library, `pexpert` for the platform expert, and `security` for the MAC (mandatory access control) framework, the hooks on which security policies such as the sandbox attach. They are one program, `mach_kernel`, running in kernel mode, the processor's mode in which every instruction and every page of memory is allowed, and in one address space, a single map of virtual addresses onto memory ([Hardware and boot basics](hardware-basics.md#memory) explains both).
 
 ### Mach
 
@@ -87,13 +87,13 @@ The BSD layer holds the virtual file system, with HFS+, Mac OS X's file system, 
 
 IOKit is xnu's framework for drivers. It is object-oriented and written in a restricted subset of C++, without exceptions, multiple inheritance, templates or C++'s runtime type information, for which libkern has its own ([IOKit Fundamentals](https://developer.apple.com/library/archive/documentation/DeviceDrivers/Conceptual/IOKitFundamentals/Features/Features.html)). Every driver is a C++ object, an instance of a class that derives from one of IOKit's families, such as `IOATAController` for ATA controllers or `IOEthernetController` for Ethernet.
 
-IOKit keeps every device and every driver in the IORegistry, a tree of objects that starts from the device tree that Open Firmware hands the kernel. A device appears in it as a nub; drivers are matched to nubs by the personalities in their `Info.plist`, and stack on each other, from the controller to the file system ([Hardware and boot basics](hardware-basics.md) shows matching and a driver stack). `ioreg` prints the registry on a running system.
+IOKit keeps every device and every driver in the IORegistry, a tree of objects. The registry starts from the device tree, the description of the hardware that Open Firmware, the firmware of PowerPC Macs, hands the kernel ([Hardware and boot basics](hardware-basics.md#the-device-tree), [the boot chain](boot-chain.md#open-firmware)). A device appears in it as a nub, the object that stands for the device and to which a driver attaches. Drivers are matched to nubs by the personalities in their `Info.plist`, short descriptions of the devices each driver can drive, and stack on each other, from the controller to the file system ([Hardware and boot basics](hardware-basics.md#matching) shows matching and a driver stack). `ioreg` prints the registry on a running system.
 
-Drivers come in kexts, kernel extensions: bundles that hold the driver's code and its `Info.plist`, in `/System/Library/Extensions`. Those needed to reach the root disk are loaded at boot from the driver cache, and the others later, by kextd, as devices appear ([the boot chain](boot-chain.md)).
+Drivers come in kexts, kernel extensions: bundles that hold the driver's code and its `Info.plist`, in `/System/Library/Extensions`. Those needed to reach the root disk are loaded at boot from the driver cache, one file that holds them all, which the boot loader reads with the kernel; the others are loaded later, by kextd, as devices appear ([the boot chain](boot-chain.md#kexts-and-the-driver-cache)).
 
 ### The platform expert
 
-The platform expert is the small part of xnu, with a platform driver for each family of Macs, that knows how a given model is built: how its interrupts are wired, how it reads its clock, how it restarts and switches off. [PowerPC Macs](powerpc-macs.md) describes the platform drivers, and [Step 5](../steps/step-5-clock-and-power.md) the clock and power hooks that the SMU's driver fills in.
+The platform expert is the small part of xnu, with a platform driver for each family of Macs, that knows how a given model is built: how its interrupts are wired, how it reads its clock, how it restarts and switches off. [PowerPC Macs](powerpc-macs.md) describes the platform drivers. On an iMac G5 (`PowerMac12,1`), the project's reference machine, the clock and the power go through the SMU, its power controller ([PowerPC Macs](powerpc-macs.md#power-controllers-the-pmu-and-the-smu)), and [Step 5](../steps/step-5-clock-and-power.md) shows the hooks that the SMU's driver fills in.
 
 ## Above the kernel
 
@@ -144,15 +144,15 @@ Some open projects call into closed code: a framework that is not published, a t
 Many drivers are closed, and several of them are ones a PowerPC Mac needs:
 
 - ApplePMU and AppleSMU, the drivers of the power controllers, which keep the clock, restart and power off every PowerPC Mac ([PowerPC Macs](powerpc-macs.md));
-- the platform plug-ins that run the G5s' fans;
-- the graphics drivers' acceleration (`ATIRadeon9700` on an iMac G5, `PowerMac12,1`, the project's reference machine), AirPort, Bluetooth, and the FireWire controller driver, `AppleFWOHCI`;
+- Leopard's platform plug-ins that run the G5s' fans; Tiger's, in AppleMacRISC4PE 186.3.1, are published, and give OpenSMU its sensors, targets and rubber band, the rule that keeps the CPU fan no more than 500 rpm slower than the optical drive's fan ([OpenSMU](../synthesis/opensmu.md));
+- the graphics drivers' acceleration (`ATIRadeon9700` on the iMac), AirPort, Bluetooth, and the FireWire controller driver, `AppleFWOHCI`;
 - the sandbox and firewall policies, and the disk-image driver.
 
 Two open driver projects are missing from Apple's publications at the versions Leopard ships: IOATABlockStorage 200.1.8, through which the iMac's disk is reached, and IOSCSIArchitectureModelFamily 200.3.6, which CDs and USB disks need ([README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), rule 2). [What stays closed](../synthesis/what-stays-closed.md) lists every closed piece the project met, with what its absence costs.
 
 ## What the project adds
 
-Where a system without a closed piece would not work, the project writes its own, or builds an older open version in its place. DEVIATIONS.md calls these rows `closed-replacement`, and the book calls their code "ours":
+Where a system without a closed piece would not work, the project writes its own, or builds an older open version in its place. DEVIATIONS.md files these, with smaller stand-ins such as header copies, under the kind `closed-replacement`. The book calls the new code "ours"; Panther's drivers stay Apple's open code:
 
 - OpenSMU, a new kext in place of AppleSMU, which keeps the clock, restarts, powers off and drives the fans of the iMac ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](../synthesis/opensmu.md));
 - OpenOnyx, in place of the codec plug-in that Apple published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94));

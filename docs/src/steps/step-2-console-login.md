@@ -82,7 +82,7 @@ sequenceDiagram
     L->>L: becomes root, runs -sh
 ```
 
-pam_uwtmp records the login, so that `who` lists it. pam_launchd moves the login into the security session that launchd made for getty; until Security was built, it could not.
+pam_uwtmp records the login, so that `who` lists it. pam_launchd moves the login into the security session that launchd made for getty; until [Step 6](step-6-securityd.md) built securityd, it could not.
 
 ## What was built
 
@@ -188,7 +188,7 @@ With no driver to power off the machine, the kernel's threads keep running, and 
 
 In QEMU's `mac99`, the first multi-user boot test was booted with `-v` only. launchd ran `launchctl bootstrap -S System`, which checked the root volume with `fsck -p`, mounted it read-write and loaded the LaunchDaemons, and getty printed `Darwin/BSD (localhost) (console)` and `login:`. After D45, root logged in: with DirectoryService not running, Libinfo read `/etc/master.passwd`, pam_unix checked the password, and pam_uwtmp recorded the login, which `who` listed. After D46, `id -G` and `groups` listed root's 11 groups. Of the image's 7,624 files, all came from our builds except four: the generated `com.apple.Boot.plist` and `Extensions.mkext`, the edited `master.passwd`, and `com.apple.getty.plist`, copied from system_cmds' source. Step 2 was reached in QEMU.
 
-On the iMac, the third boot test on it restored the same image onto `Darwin9` and started it from Open Firmware with `setenv boot-args -v` and `boot sata/k2-sata@0/@0:4,\\:tbxi`. After the 30-second wait for the clock that [Step 5](step-5-clock-and-power.md) removes, it printed `Darwin/BSD (localhost) (console)` and `login:`, and root logged in to `-sh` in `/var/root`. Step 2 was reached in QEMU and on the iMac G5.
+On the iMac, the third boot test on it restored the same image onto `Darwin9` and started it from Open Firmware with `setenv boot-args -v` and `boot sata/k2-sata@0/@0:4,\\:tbxi`. After the 30-second wait for the clock that [Step 5](step-5-clock-and-power.md) removes, it printed `Darwin/BSD (localhost) (console)` and `login:`, and root logged in to `-sh` in `/var/root`. Step 2 was reached in QEMU and on the iMac.
 
 ## What is still missing
 

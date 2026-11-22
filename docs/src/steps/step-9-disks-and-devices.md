@@ -1,13 +1,13 @@
 # Step 9: disks and devices
 
-> Draft: Step 9 is reached for the internal volumes, USB disks, `bless` and sound; CDs were mounted in QEMU only. This chapter will be rewritten when the step is reached in full.
+> Draft: Step 9 is reached for the internal volumes, USB disks, `bless` and sound; CDs were mounted in QEMU's `mac99` only. This chapter will be rewritten when the step is reached in full.
 
 ## What you will learn
 
 - How a disk travels from its controller to a folder in `/Volumes`: the driver stack, the SCSI family in its middle, and DiskArbitration at its end.
 - Why Panther's SCSI family can stand in for Leopard's unpublished one, and how that was checked.
 - Why DiskArbitration mounts nothing removable on a system without loginwindow, and the setting that changes it.
-- How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for four boot tests.
+- How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for five boot tests.
 - Why FireWire disks are left out of the step, and what is still missing: a CD test on the iMac.
 
 ## The goal
@@ -57,7 +57,7 @@ The risk is that the transports were written for Leopard's family. A transport i
 
 Then the other side: does each transport find in 139.0.2 every symbol it imports? [scripts/check-family-imports](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-family-imports) reads the family's source for its definitions and lists the imports that none matches. Leopard's IOATAPIProtocolTransport and IOUSBMassStorageClass import nothing Panther's lacks. IOFireWireSerialBusProtocolTransport imports `IOSCSIProtocolServices::stop`, which 139.0.2 declares and never defines; it is an inherited vtable entry, which the kernel's linker fills from the superclass, as it does for 139.0.2's own vtable.
 
-Panther's kexts are version 1.3.9. IOUSBMassStorageClass 208.0.1 asks for 2.0.7 and is refused, so [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86) lowers that to 1.0.0, as Apple's own 2.0.1 asked. Built, it imports the same symbols as Leopard's.
+Panther's kexts are version 1.3.9. IOUSBMassStorageClass 208.0.1 asks for 2.0.7 and is refused, so [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86) lowers that to 1.0.0, as Apple's own 2.0.1 asked. Built, it imports every symbol Leopard's 2.0.8 does but `_kOSBooleanTrue`.
 
 ### File systems and the console user
 
@@ -84,18 +84,19 @@ flowchart TB
     P[openplay] --> E[IOAudioFamily engine]
     E --> D[AppleDBDMAAudio: DMA]
     D --> I[I2S] --> C[PCM3052 codec]
-    O[OpenOnyx] -->|"I2C: registers, reset"| C
+    O[OpenOnyx] -->|"I2C: registers"| C
+    O -->|"GPIO: reset line"| C
     C --> S[speakers, headphones]
 ```
 
 ### Closed and missing parts
 
 - IOAudioFamily made one call into the closed `OSvKernDSPLib`, `vDSP_vadd`, to add two buffers of samples; [D87](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d87) replaces it with a loop. It exports the same 739 functions as Leopard's.
-- AppleOnboardAudio uses a codec name and a count that no source defines (`PlatformInterfaceI2C.h:48: error: 'kCodec_NumberOfTypes' was not declared in this scope`, [D90](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d90)), calls a function no source defines ([D93](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d93)), and needed its dependencies and CoreAudio's SDK headers to build ([D88](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d88), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)). Its DSP sources are empty.
+- AppleOnboardAudio uses a codec name and a count that no source defines (`PlatformInterfaceI2C.h:48: error: 'kCodec_NumberOfTypes' was not declared in this scope`, [D90](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d90)), calls a function no source defines ([D93](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d93)), and needed its dependencies and CoreAudio's SDK headers to build ([D88](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d88), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)). Its DSP sources, the code that processes the samples on the processor before the DMA engine reads them, are empty.
 - `AppleOnyxAudio`, the plug-in for the iMac's codec, is published as a 15-line stub. The project wrote its own, OpenOnyx ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), under the MIT licence, with the list of registers and their first values copied from FreeBSD's `onyx.c` under its BSD licence.
 - Nothing on the image plays sound without CoreAudio, so the project also wrote `openplay` ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)), which does what CoreAudio's lowest layer does: it registers a buffer with the engine through IOAudioFamily's published interface and writes a tone or a WAV file into it a little ahead of the hardware.
 
-### Four silent boots
+### Five silent boots
 
 The eighteenth boot test on the iMac G5 stopped at `Sound assertion "1" failed in "AppleOnboardAudio/PlatformInterfaceI2C_PlatformFunction.cpp" at line 193`. AppleOnboardAudio had waited 10 seconds for the codec's I²C driver, IOI2CFamily's `IOI2CDevice`, which never started. Its personality, the `Info.plist` entry that tells IOKit which device a driver takes, is in `AppleIOI2CAudioCodec.kext`, a kext with no code by design, which `make-test-image` had removed with the stub plug-ins. Kept, it let OpenOnyx log `OpenOnyx: PCM3052 codec set up`, and the registry matched Leopard's: the output selector at `'ispk'`, the internal speakers, moving to `'line'` when headphones went in and back within 5 seconds when they came out.
 
@@ -110,7 +111,8 @@ On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test
 ## What is still missing
 
 - A CD on the iMac: the drive is found, and CDs were mounted in QEMU only.
-- Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further. The DSP does not run.
+- Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further.
+- AppleOnboardAudio's DSP, whose sources are empty.
 
 ## Where to look
 
@@ -118,4 +120,4 @@ On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test
 - Patches: [IOUSBMassStorageClass-208.0.1](https://github.com/nyg/PowerDarwin/blob/master/patches/IOUSBMassStorageClass-208.0.1/), [IOAudioFamily-169.4.5](https://github.com/nyg/PowerDarwin/blob/master/patches/IOAudioFamily-169.4.5/), [AppleOnboardAudio-258.3.1](https://github.com/nyg/PowerDarwin/blob/master/patches/AppleOnboardAudio-258.3.1/), [bless-63.2](https://github.com/nyg/PowerDarwin/blob/master/patches/bless-63.2/).
 - Replacements: [replacements/OpenOnyx/](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenOnyx/), [replacements/OpenPlay/](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenPlay/).
 - Scripts: [make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) (`autodiskmount.plist`, the kexts kept and removed), [boot-qemu](https://github.com/nyg/PowerDarwin/blob/master/scripts/boot-qemu) (the USB disk), [check-family-imports](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-family-imports).
-- Commits `da709b8` and `9885fd1`.
+- Commits `160662e`, which defined the step, `15152ff`, which left FireWire disks out of its goal, `da709b8`, which reached it for the internal volumes, USB disks and `bless`, and `9885fd1`, which brought the sound.

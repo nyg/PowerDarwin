@@ -93,7 +93,7 @@ The translation is done by the processor, not by software: its MMU, the memory m
 
 When a program uses an address that has no translation, the MMU stops the instruction and calls the kernel, which either maps the page (it was swapped out, or not yet touched) or ends the program with a fault, `Segmentation fault` or `Bus error`.
 
-Firmware and boot loaders usually run with the MMU off, at physical addresses. BootX turns translation off just before it jumps to the kernel, and the kernel turns it on again with its own tables.
+Firmware and boot loaders often run at physical addresses, but Apple's Open Firmware runs with translation on, so BootX turns it off just before it jumps to the kernel, and the kernel turns it on again with its own tables.
 
 ### Kernel and user mode
 
@@ -150,7 +150,7 @@ In IOKit, Darwin's driver framework, the kernel's handler does almost nothing it
 
 Not every device has an interrupt, and not every wait is worth one. Polling is the other way: the driver reads a status again and again until it changes, usually with a short pause between reads. It is simple and costs the processor time, so drivers poll only for short waits or where no interrupt exists.
 
-OpenSMU, the project's driver for the iMac's system management unit, polls: after it rings the SMU's doorbell, it asks every 100 microseconds whether the reply is there, for at most 2 seconds ([Step 5](../steps/step-5-clock-and-power.md)).
+OpenSMU, the project's driver for the iMac's SMU, the small processor that keeps its clock and switches its power ([PowerPC Macs](powerpc-macs.md#power-controllers-the-pmu-and-the-smu)), polls: after it rings the SMU's doorbell, a GPIO line that tells the SMU a command waits ([GPIO](#gpio), below), it asks every 100 microseconds whether the reply is there, for at most 2 seconds ([Step 5](../steps/step-5-clock-and-power.md)).
 
 ### DMA
 
@@ -171,12 +171,12 @@ The project met this in OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/m
 
 1. writes the command, its length and its data into the page;
 2. flushes the page from the processor's cache, so the SMU reads the new command;
-3. hands the SMU the page's physical address, and checks that the address fits in 32 bits, since the SMU takes a 32-bit address;
+3. hands the SMU the page's physical address, which `OpenSMU::start` checked fits in 32 bits when it allocated the page, since the SMU takes a 32-bit address;
 4. rings the doorbell and polls for the reply;
 5. flushes the page again, so the processor reads the SMU's reply and not its own old copy;
 6. checks that the reply's first byte is the command with every bit inverted.
 
-That is DMA, a physical address, the 4 GB line, cache flushes and polling in one short function. [Step 5](../steps/step-5-clock-and-power.md) tells the story in full, and [OpenSMU](../synthesis/opensmu.md) describes the protocol.
+That is DMA, a physical address, cache flushes and polling in one short function, with the 4 GB line checked once at start. [Step 5](../steps/step-5-clock-and-power.md) tells the story in full, and [OpenSMU](../synthesis/opensmu.md) describes the protocol.
 
 ### The IOMMU
 
@@ -192,7 +192,7 @@ Where Darwin uses this: [Step 5](../steps/step-5-clock-and-power.md) and [OpenSM
 
 PCI is the main bus of PowerPC Macs and of most computers since the mid-1990s. Every PCI device has a configuration space, a small set of standard registers that say what it is: a vendor number, a device number and a class (disk controller, network, display, bridge). The firmware, and later the kernel, walk the bus at boot, read each device's configuration space, and give the device the ranges of physical addresses its registers will answer on. Nothing on PCI is found by guessing.
 
-The device tree names a PCI device by these numbers when it has nothing better. The iMac's graphics chip appears as `pci1002,5b62`, vendor `0x1002` (ATI) and device `0x5b62`, and its PCI-to-PCI bridges as `pci106b,53` and `pci106b,54`, vendor `0x106b` (Apple). A driver can ask to match on these numbers.
+The device tree lists these numbers in a PCI device's `compatible` property, as `pci<vendor>,<device>`, and uses them as the node's name only when it has no better one. The iMac's graphics chip lists `pci1002,5b62`, vendor `0x1002` (ATI) and device `0x5b62`, and its first two PCI-to-PCI bridges `pci106b,53` and `pci106b,54`, vendor `0x106b` (Apple). A driver can ask to match on these numbers.
 
 PCI Express, a later and faster form of PCI, keeps the same configuration space with a different wire. On the iMac, the graphics chip sits on PCI Express from the U4.
 
@@ -270,7 +270,7 @@ flowchart BT
 
 Below the SATA controller, three more layers reach it: the platform driver, AppleMacRISC4PE, then the HyperTransport bridge, AppleMacRiscHT, then a PCI-to-PCI bridge, IOPCI2PCIBridge. When Leopard boots, its kernel logs the whole path, from the platform driver to the partition, in one line that starts `Got boot device = IOService:/MacRISC4PE/ht@0,f2000000/AppleMacRiscHT/pci@3/IOPCI2PCIBridge/k2-sata-root@C/AppleK2SATARoot/k2-sata@0/AppleK2SATA/ATADeviceNub@0/`. Each name in it is a nub or a driver, alternately.
 
-The layers are separate kexts, and on the image they come from separate projects: IOATAFamily, IOStorageFamily and the rest. That is why a missing piece anywhere stops the whole boot. In the fourth boot test in QEMU, the image lacked the plug-ins that Apple's `IOATAFamily.kext` carries, IOATABlockStorage among them, and the kernel stopped at `Still waiting for root device`. On the iMac, the layer that turns ATA commands into blocks is Panther's IOATABlockStorageDriver, since Leopard's was never published ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)).
+The layers are separate kexts, and on the image they come from separate projects: IOATAFamily, IOStorageFamily and the rest. That is why a missing piece anywhere stops the whole boot. In the fourth boot test in QEMU, the image lacked the plug-ins that Apple's `IOATAFamily.kext` carries, IOATABlockStorage among them, and the kernel stopped at `Still waiting for root device`. In QEMU and on the iMac, the layer that turns ATA commands into blocks is Panther's IOATABlockStorageDriver, since Leopard's was never published ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)).
 
 Where Darwin uses this: [The boot chain](boot-chain.md) for how matching finds the root disk at boot; [Step 1, part 2](../steps/step-1-drivers-and-bootx.md) for the drivers of this stack, built one by one.
 
