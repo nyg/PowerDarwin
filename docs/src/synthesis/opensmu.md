@@ -30,7 +30,7 @@ Rule 5 keeps every Apple binary off the image ([The rules](../method/rules.md)).
 
 ### What OpenSMU is
 
-OpenSMU is a new kext, under the MIT licence, in [replacements/OpenSMU/](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenSMU/), recorded in DEVIATIONS.md as [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), a `closed-replacement`. It grew in four steps: the clock, restart and power-off for Step 5 (commit `46f349e`), the fans for Step 7 (`3fe1c44`, then `d6316f8` for the LM75 readings), the `IOPMU` resource for Step 8 (`fd34289`), and, after Step 7's tests, Apple's pairs of sensor and fan, the rubber band and the thermal-model check, not yet boot-tested ([below](#what-the-tests-showed-and-what-is-still-to-test)).
+OpenSMU is a new kext, under the MIT licence, in [replacements/OpenSMU/](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenSMU/), recorded in DEVIATIONS.md as [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), a `closed-replacement`. It grew in four steps: the clock, restart and power-off for Step 5 (commit `46f349e`), the fans for Step 7 (`3fe1c44`, then `d6316f8` for the LM75 readings), the `IOPMU` resource for Step 8 (`fd34289`), and, after Step 7's tests, Apple's pairs of sensor and fan, the rubber band and the thermal-model check, boot-tested in Step 10 ([below](#what-the-tests-showed-and-what-is-still-to-test)).
 
 | File | What it holds |
 |---|---|
