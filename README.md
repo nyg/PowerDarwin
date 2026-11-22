@@ -111,10 +111,13 @@ pnpm run deploy
 
 ## Licence
 
-- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/`, the replacements in `replacements/` (each with its own copy of the licence), the book in `docs/`, the Worker in `worker/` and the other documents.
+- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/` but the two below, the replacements in `replacements/` (each with its own copy of the licence, and OpenOnyx's with the BSD notice of the FreeBSD table it copies), the book in `docs/`, the Worker in `worker/` and the other documents.
+- `env/ditto` is darwinbuild's `ditto.sh` with one change, under darwinbuild's BSD licence from Apple, and `env/quarantine.h` holds the stubs of copyfile's `copyfile.c` with three additions, under the APSL 2.0. Each file says so in its first lines.
 - `docs/src/count.js` is GoatCounter's script, under the ISC licence, as its first lines state.
 - Each patch in `patches/` changes another project's source, so its changes are under the licence of the files it changes, as that project's source states: the APSL, version 2.0 or 1.1, for most of Apple's projects, and the licences of bash, gcc, Kerberos, ntp, Python, Ruby, Samba and the others for theirs. Its first line gives its deviation and the date of the change. A file that a patch adds is this project's, under the MIT licence, unless its notice says otherwise: the one that `patches/CF-476.19/0003-string-transform-and-forced-preferences.patch` adds comes from swift-corelibs-foundation, under the Apache License 2.0 with Runtime Library Exception.
 - [LICENSES/](LICENSES/) holds the texts of the APSL 2.0 and 1.1, and of the Apache License 2.0 with Swift's Runtime Library Exception.
-- `manifest/plists/` holds darwinbuild's Darwin 9 build lists, under darwinbuild's BSD licence from Apple, with this project's changes to `9A581.plist`.
+- `manifest/plists/` holds darwinbuild's Darwin 9 build lists, under darwinbuild's BSD licence from Apple, in [manifest/plists/LICENSE](manifest/plists/LICENSE), with this project's changes to `9A581.plist`.
 - `reference/` holds listings and logs captured from Leopard, kept as records of what Apple's system does.
 - The book quotes short excerpts of Apple's and others' sources, each under its own licence, with the project, version and file it comes from.
+
+PowerDarwin is an independent project, not affiliated with, endorsed or sponsored by Apple Inc. Apple, Mac, Mac OS, iMac and Power Mac are trademarks of Apple Inc., and PowerPC is a trademark of IBM; the other names belong to their owners.

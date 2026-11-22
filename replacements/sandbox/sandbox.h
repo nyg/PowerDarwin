@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 #ifndef _SANDBOX_H_
 #define _SANDBOX_H_
 

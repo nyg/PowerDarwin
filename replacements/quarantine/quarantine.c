@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT */
+
 #include <stddef.h>
 
 typedef struct qtn_file *qtn_file_t;

@@ -1,4 +1,5 @@
 #!/bin/sh
+# darwinbuild's ditto.sh (macosforge/darwinbuild, Darwin9 branch at 4848b7f), copyright Apple Inc., under the BSD licence in manifest/plists/LICENSE. Changed on 2026-11-22: given more than one source, it creates the destination folder.
 
 INDEX=0
 COUNT=$#

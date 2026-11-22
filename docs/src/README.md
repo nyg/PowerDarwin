@@ -56,3 +56,5 @@ Apple's last bootable Darwin was 8.0.1, in 2005; after that, Apple published sou
 - A deviation is any change from Apple's sources or build. Each has an ID, such as [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), and a row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md).
 - Commands, files and log lines are in `code`, and log lines are quoted exactly.
 - Each chapter starts with what you will learn and ends with where to look in the repo.
+
+PowerDarwin is an independent project, not affiliated with, endorsed or sponsored by Apple Inc. Apple, Mac, Mac OS, iMac and Power Mac are trademarks of Apple Inc., and PowerPC is a trademark of IBM; the other names belong to their owners.
