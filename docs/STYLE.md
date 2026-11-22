@@ -1,6 +1,6 @@
 # How the book is written
 
-Rules for anyone writing a chapter of the book in `docs/src/`. The pilot chapter, [Step 5](src/steps/step-5-clock-and-power.md), shows these rules applied.
+Rules for anyone writing a chapter of the book in `docs/src/`. [Step 5](src/steps/step-5-clock-and-power.md) shows these rules applied.
 
 ## Reader
 
@@ -22,7 +22,7 @@ The reader knows Unix: a shell, `make`, a C compiler, the split between a kernel
 - "Our" before a name means built by this project from Apple's source ("our kernel", "our AppleK2"); "Apple's" means Apple's own binary, as Leopard ships it. "Ours", as a label in tables and diagrams, means code the project wrote itself, such as OpenSMU.
 - The iMac is "an iMac G5 (`PowerMac12,1`)" at first mention in a chapter, then "the iMac". It is the reference machine, not the subject: no chapter names or describes the particular machine.
 - "QEMU's `mac99`", then "QEMU". "The build machine" for the Mac that runs darwinbuild. "The image" for the test disk image. "Darwin 9" for the system, `Darwin9` only for the partition of that name.
-- Numbers come from the project's own builds and tests, never measured again for the book. The project's build log is not in the repo, so the book states each fact it needs, and never sends the reader to that log. In prose, "30 seconds", "4 GB", "65 °C"; in tables, `s` and `rpm` are fine.
+- Numbers come from the project's own builds and tests, never measured again for the book. In prose, "30 seconds", "4 GB", "65 °C"; in tables, `s` and `rpm` are fine.
 - PowerPC assembly stays out.
 - No speculation about why Apple did something: say what the sources and binaries show.
 
@@ -36,7 +36,7 @@ The reader knows Unix: a shell, `make`, a C compiler, the split between a kernel
 
 - Other chapters: relative links to their `.md` file, such as `[the boot chain](../background/boot-chain.md)`.
 - Repo files: absolute GitHub links, `https://github.com/nyg/PowerDarwin/blob/master/<path>`, since the book is served apart from the repo.
-- Deviations: `[D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)`, an anchor that DEVIATIONS.md gets before the book is published.
+- Deviations: `[D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)`, the anchor of the deviation's row in DEVIATIONS.md.
 - Tests: by name in the prose ("the seventh boot test on the iMac G5"), never as a link.
 
 ## Diagrams and images
@@ -47,8 +47,8 @@ The reader knows Unix: a shell, `make`, a C compiler, the split between a kernel
 
 ## Glossary
 
-A chapter's writer does not edit `reference/glossary.md` or `SUMMARY.md`. New terms go to the glossary through whoever keeps the book together, with a one- or two-sentence definition and the chapter that explains them.
+A new term gets an entry in `reference/glossary.md`: a one- or two-sentence definition and the chapter that explains it.
 
 ## Kept out
 
-Serial numbers, UUIDs, MAC addresses, host names, network addresses, home folders, the test password, anything from `ioreg-l.txt` or `nvram.txt` beyond property and node names and values that every iMac G5 of the model shares (`u4@0,f8000000`, `pci1002,5b62`, `mac-boot`), and anything from the local `AGENTS.md`.
+Serial numbers, UUIDs, MAC addresses, host names, network addresses, home folders, the test password, and anything from `ioreg-l.txt` or `nvram.txt` beyond property and node names and values that every iMac G5 of the model shares (`u4@0,f8000000`, `pci1002,5b62`, `mac-boot`).
