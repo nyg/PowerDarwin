@@ -223,7 +223,7 @@ flowchart LR
 
 ## Andrew-R's patch
 
-In July 2026, Andrew-R described on MacRumors his own darwinbuild builds of Darwin 9 for PowerPC, 99 projects, with a patch to darwinbuild's `Darwin9` branch ([reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md)). His patch points the build lists, the sources and the Roots at a new host, macos-powerpc.org, in place of the dead macosforge sites, and changes the link darwinbuild makes for an alias project's source.
+In July 2026, Andrew-R described on MacRumors his own darwinbuild builds of Darwin 9 for PowerPC, 100 projects, with a patch to darwinbuild's `Darwin9` branch ([reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md)). His patch points the build lists, the sources and the Roots at a new host, macos-powerpc.org, in place of the dead macosforge sites, and changes the link darwinbuild makes for an alias project's source.
 
 This project does without it, and runs darwinbuild unchanged: the build lists are copied into `.build/` before `-init`, the sources are staged into `Sources/`, and the Roots into `Roots/.DownloadCache/`, so darwinbuild never needs a site at all. On 18 November 2026, macos-powerpc.org's `Roots/` folder was empty, so the Roots come from the Wayback Machine instead. The patch file carries no licence, so the repo keeps only its description and its SHA-256.
 

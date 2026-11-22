@@ -8,10 +8,10 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 
 - Apple, for publishing Darwin's sources ([apple-oss-distributions](https://github.com/apple-oss-distributions)) and darwinbuild ([macosforge/darwinbuild](https://github.com/macosforge/darwinbuild)), whose `Darwin9` branch builds every project here, unchanged.
 - The [Internet Archive](https://web.archive.org/), whose Wayback Machine still serves darwinbuild's Roots and the opensource.apple.com tarballs that GitHub lacks.
-- Andrew-R, whose [darwinbuild work on Darwin 9 for PowerPC](https://forums.macrumors.com/threads/building-with-darwinbuild-for-darwin9-ppc-in-2026-wip.2485638/) built 99 of its projects on a Leopard PowerPC Mac in 2026.
+- Andrew-R, whose [darwinbuild work on Darwin 9 for PowerPC](https://forums.macrumors.com/threads/building-with-darwinbuild-for-darwin9-ppc-in-2026-wip.2485638/) built 100 of its projects on a Leopard PowerPC Mac in 2026.
 - [barracuda156](https://github.com/barracuda156) and the [macos-powerpc](https://github.com/macos-powerpc) organisation, who keep darwinbuild and Apple's projects building for PowerPC.
 - NetBSD's macppc drivers, [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`fancontrol.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/fancontrol.c), whose SMU protocol and fan zones OpenSMU follows, and FreeBSD's [`onyx.c`](https://github.com/freebsd/freebsd-src/blob/main/sys/dev/sound/macio/onyx.c), whose codec settings OpenOnyx uses.
-- [PureDarwin](https://github.com/PureDarwin/PureDarwin), which built bootable Darwin 9 systems for Intel Macs.
+- [PureDarwin](https://github.com/PureDarwin/PureDarwin), which built bootable Darwin 9 systems for Intel machines.
 - [QEMU](https://www.qemu.org/) and [OpenBIOS](https://github.com/openbios/openbios), whose `mac99` machine tests each image before it reaches a real Mac.
 
 [RESOURCES.md](RESOURCES.md) lists everyone else's work this project draws on.

@@ -29,7 +29,7 @@ Steps 1 to 10 are reached; Step 9 lacks FireWire and the microphone, and its CDs
 
 ## What makes it different
 
-Apple's last bootable Darwin was 8.0.1, in 2005; after that, Apple published sources only. The earlier Darwin 9 builds we know of either target Intel Macs or stop before a bootable system ([the history](background/history.md)). This project:
+Apple's last bootable Darwin was 8.0.1, in 2005; after that, Apple published sources only. The earlier Darwin 9 builds we know of either target Intel machines or stop before a bootable system ([the history](background/history.md)). This project:
 
 - builds every file on the image from Apple's published sources, at the exact versions of Mac OS X 10.5.8;
 - changes those sources as little as possible, and lists every change with its reason;
