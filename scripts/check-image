@@ -1,0 +1,56 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: check-image <image.dmg> <build folder> <userland folder> [project...]
+
+Run on the build machine. Mounts the image read-only and lists every file on it
+whose MD5 matches no file of the userland folder and no file of the latest Root
+of each project in <build folder>/Roots (every project there if none is named)."
+
+[[ $# -ge 3 ]] || { echo "$usage" >&2; exit 1; }
+image=$1
+roots=$2/Roots
+userland=$3
+shift 3
+[[ -f $image ]] || { echo "no image at $image" >&2; exit 1; }
+[[ -d $roots ]] || { echo "no Roots folder at $roots" >&2; exit 1; }
+[[ -d $userland ]] || { echo "no userland folder at $userland" >&2; exit 1; }
+
+projects=("$@")
+if [[ $# -eq 0 ]]; then
+   for folder in "$roots"/*/; do
+      projects+=("$(basename "$folder")")
+   done
+fi
+
+latest() { ls -d "$roots/$1/$1"-*~* 2>/dev/null | sort -t~ -k2 -n | tail -1 || true; }
+
+work=$(mktemp -d /tmp/check-image.XXXXXX)
+mount=$(mktemp -d /tmp/check-image-mount.XXXXXX)
+cleanup() {
+   hdiutil detach "$mount" > /dev/null 2>&1 || true
+   rmdir "$mount" 2> /dev/null || true
+   rm -rf "$work"
+}
+trap cleanup EXIT
+
+hdiutil attach -readonly -nobrowse -mountpoint "$mount" "$image" > /dev/null
+
+{
+   sudo find "$userland" -type f -print0 | sudo xargs -0 md5 -r
+   for project in "${projects[@]}"; do
+      root=$(latest "$project")
+      if [[ -z $root ]]; then
+         echo "no Root of $project in $roots" >&2
+         continue
+      fi
+      sudo find "$root" -type f -print0 | sudo xargs -0 md5 -r
+   done
+} | awk '{ print $1 }' | sort -u > "$work/known.md5"
+
+sudo find "$mount" -type f -print0 | sudo xargs -0 md5 -r > "$work/image.md5"
+echo "$(wc -l < "$work/image.md5" | tr -d ' ') files on the image; not from the builds:"
+awk -v mount="$mount" '
+   NR == FNR { known[$1] = 1; next }
+   !($1 in known) { path = $0; sub(/^[^ ]+ /, "", path); print substr(path, length(mount) + 1) }
+' "$work/known.md5" "$work/image.md5"
