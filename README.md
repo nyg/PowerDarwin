@@ -36,7 +36,7 @@ On the iMac G5, the image boots cleanly: the network comes up without a 60-secon
 
 ## Step 9
 
-On the iMac G5, disks and devices work: DiskArbitration mounts the internal partitions, USB and FireWire disks and CDs as they appear, `bless` makes a partition the startup disk, and the sound driver comes up for the built-in audio.
+On the iMac G5, disks and devices work: DiskArbitration mounts the internal partitions, USB disks and CDs as they appear, `bless` makes a partition the startup disk, and the sound driver comes up for the built-in audio.
 
 ## Step 10
 
