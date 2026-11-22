@@ -5,6 +5,8 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 manifest="$root/manifest/9L30.tsv"
 sums="$root/manifest/9L30.sha256"
 export dest="$root/sources"
+record=
+[[ ${1:-} == --record ]] && { record=1; shift; }
 mkdir -p "$dest"
 
 fetch() {
@@ -34,9 +36,16 @@ fi | xargs -P 6 -n 3 bash -c 'fetch "$0" "$1" "$2"'
 
 cd "$dest"
 touch "$sums"
+unrecorded=0
 for file in *.tar.gz; do
    awk -v f="$file" '$2 == f { found = 1 } END { exit !found }' "$sums" && continue
-   shasum -a 256 "$file" >> "$sums"
-   echo "recorded the hash of $file"
+   if [[ -n $record ]]; then
+      shasum -a 256 "$file" >> "$sums"
+      echo "recorded the hash of $file"
+   else
+      echo "no recorded hash: $file (fetch-sources --record adds it to manifest/9L30.sha256)" >&2
+      unrecorded=1
+   fi
 done
-shasum -a 256 -c --quiet "$sums"
+shasum -a 256 -c --quiet "$sums" || exit 1
+exit $unrecorded
