@@ -9,7 +9,6 @@ Earlier work, tools and sources for building Darwin on PowerPC, as found on 2026
 - [barracuda156](https://github.com/barracuda156) (Sergey Fedorov) and the [macos-powerpc](https://github.com/macos-powerpc) organisation: [macos-powerpc/darwinbuild](https://github.com/macos-powerpc/darwinbuild), whose `Darwin10` branch adds ppc to `10A432` and replaces dead URLs (December 2024); build lists at `macos-powerpc.org/darwinbuild/plists/` (its `Roots/` folder was empty on 2026-11-18); forks of PureDarwin's Libsystem and XPC; [apple-libdispatch-powerpc](https://github.com/barracuda156/apple-libdispatch-powerpc); [powerpc-ports](https://github.com/macos-powerpc/powerpc-ports).
 - [alex-free](https://github.com/alex-free): tigerports, SDL2 for Panther and Leopard.
 - [10.6 Snow Leopard PowerPC – Development](https://forums.macrumors.com/threads/10-6-snow-leopard-powerpc-development.2439769/) (MacRumors): the group that built `10A432`'s kernel, `xnu-1456.1.26`, for PowerPC from source in May 2024; their 10.6.8 images run Apple's own 10.6.8 kernel, binary-patched. `xnu-1504.9.37`, sometimes attached to this work, is 10.6.7's kernel. Summary in [LowEndMac](https://lowendmac.com/2024/mac-os-x-snow-leopard-10-6-10-6-8-for-powerpc/).
-- [Sorbet Leopard](https://forums.macrumors.com/threads/sorbet-leopard-10-5-reinvigorated-updated.2300924/): a modified Leopard reporting `10.5.9` build `9L31b`; it is what the iMac G5 runs.
 
 ## Earlier attempts
 
