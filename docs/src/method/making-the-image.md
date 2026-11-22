@@ -3,27 +3,28 @@
 ## What you will learn
 
 - What the test image is: a disk image with an Apple Partition Map and one HFS+ volume, made by one script on the build machine.
-- In which order the script fills it: the userland, the kernel, the drivers and BootX, each from the latest Root of its project.
-- Which files it removes, which twelve it writes or edits, and why each is needed.
+- In which order the script fills it: the userland, the kernel, the headers, the drivers and BootX, each from the latest Root of its project.
+- Which files it removes, which 25 it writes or edits, and why each is needed.
 - How it makes the driver cache and blesses the volume, so that Open Firmware can start it.
 - How every other file on the image is checked against the project's builds, and how the image reaches QEMU and the test Mac, an iMac G5 (`PowerMac12,1`).
 
 ## One script
 
-The image is made by [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), run on the build machine itself, not over SSH from the current Mac as the staging scripts are, after the builds a test needs. It takes no arguments: it reads the latest Roots from the build folder, `~/9L30/Roots`, and writes the image to `/private/var/tmp/darwin9-step1.dmg`, a name that has stayed since Step 1. Everything it does is in that one file, about a hundred lines of shell, so that what goes into an image is in the repo, beside the test that used it.
+The image is made by [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), run on the build machine itself, not over SSH from the current Mac as the staging scripts are, after the builds a test needs. It takes no arguments: it reads the latest Roots from the build folder, `~/9L30/Roots`, and writes the image to `/private/var/tmp/darwin9-step1.dmg`, a name that has stayed since Step 1. Everything it does is in that one file, about 140 lines of shell, so that what goes into an image is in the repo, beside the test that used it.
 
-The script grew with the steps: each new boot test added a project's Root, a file it writes or a file it removes. What follows is the script as it is after Step 9.
+The script grew with the steps: each new boot test added a project's Root, a file it writes or a file it removes. What follows is the script as it is after Step 10.
 
 ```mermaid
 flowchart TD
-    A["create a 1 GB image:<br/>Apple Partition Map, HFS+"] --> B["copy the userland folder"]
+    A["create a 1,600 MB image:<br/>Apple Partition Map, HFS+"] --> B["copy the userland folder"]
     B --> C["copy the latest Root<br/>of each userland project"]
     C --> D["copy the Roots of<br/>xnu and kext_tools"]
-    D --> E["remove what must not<br/>be on the image"]
+    D --> D2["copy the headers of the header<br/>projects and CarbonHeaders 18.1"]
+    D2 --> E["remove what must not<br/>be on the image"]
     E --> F["copy the drivers of<br/>each kext project's Root"]
     F --> G["remove plug-ins that<br/>cannot load"]
     G --> H["copy BootX"]
-    H --> I["write or edit twelve files"]
+    H --> I["write or edit files"]
     I --> J["make the driver cache<br/>with our kextcache"]
     J --> K["bless the volume"]
     K --> L["convert to a raw image"]
@@ -32,11 +33,11 @@ flowchart TD
 ## The disk image
 
 ```sh
-hdiutil create -size 1g -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
+hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 ```
 
-`hdiutil` is Leopard's tool for disk images. `-layout SPUD` gives the image an Apple Partition Map with a single partition, the partition table that Open Firmware reads on PowerPC Macs ([the boot chain](../background/boot-chain.md)). `-fs HFS+J` formats that partition as journaled HFS+, the file system of Mac OS X, and names the volume `Darwin9`. The image holds 1 GB.
+`hdiutil` is Leopard's tool for disk images. `-layout SPUD` gives the image an Apple Partition Map with a single partition, the partition table that Open Firmware reads on PowerPC Macs ([the boot chain](../background/boot-chain.md)). `-fs HFS+J` formats that partition as journaled HFS+, the file system of Mac OS X, and names the volume `Darwin9`. The image holds 1,600 MB, up from 1 GB until Step 10, whose compilers and languages brought the files on it to 1.1 GB; it still fits the iMac's 2.1 GB `Darwin9` partition.
 
 `-owners on` matters. It makes Leopard honour the owners of the files on the image's volume, which it may otherwise ignore on a disk it did not start from. A system volume needs the real owners: `/etc/master.passwd` must belong to root, and launchctl skips a job file that root does not own (`Dubious ownership on file (skipping)`). With owners on, the owner and group of every file are kept as the Roots record them.
 
@@ -47,10 +48,22 @@ hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 The script copies, with `ditto`, which keeps owners, modes and links:
 
 1. The userland folder, `/private/var/tmp/step1-chroot` on the build machine. It is the folder of the first chroot tests: the Roots of Libsystem, Libm, dyld, bash, ncurses (without `usr/lib/libncurses.5.dylib`, the Apple binary its source carries), libiconv, libgcc, bsm, libutil, libedit, launchd, file_cmds, shell_cmds and diskdev_cmds, then IOKitUser, CF, ICU, objc4, autozone, libstdcxx and zlib, in one folder ([How testing is done](testing.md)). No script in the repo makes it yet.
-2. The latest Root of each project of its `userland_projects` list, in order: Libsystem, launchd, files, pam, system_cmds, CF, Security, configd, DirectoryService, OpenSSH, ntp, securityd, bless and others, 47 in all. A later Root replaces a file that an earlier one, or the userland folder, put there. That is how launchd's latest Root, linked with Security again, replaces the build without Security that the userland folder still holds from [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26).
+2. The latest Root of each project of its `userland_projects` list, in order: Libsystem, launchd, files, pam, system_cmds, CF, Security, configd, DirectoryService, OpenSSH, ntp, securityd, bless and others, then, since Step 10, Csu, SystemStubs, cctools, ld64, gcc, gcc_42, gcc_select, gnumake, perl, expat, libffi, python, ruby and samba, 61 in all. A later Root replaces a file that an earlier one, or the userland folder, put there. That is how launchd's latest Root, linked with Security again, replaces the build without Security that the userland folder still holds from [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26).
 3. The latest Roots of `xnu`, which holds the kernel, `/mach_kernel`, and its `System.kext`, and of `kext_tools`, which holds `kextd`, `kextload` and `kextcache`.
 
 "Latest" means the Root with the highest `~N` ([darwinbuild and the build machine](darwinbuild.md)), found by the same `latest` function as in the other scripts. The image therefore always holds the last build of each project, and the test records which that was.
+
+### The headers
+
+A compiler on the image needs the headers of every library it links ([Step 10](../steps/step-10-working-unix.md)). For each project of its `header_projects` list, the script copies only the `usr/include` folder of the latest Root: Libc_headers, architecture, Librpcsvc, Libsyscall, Libinfo, Libm, libdyld, launchd_libs, CommonCrypto, removefile, copyfile, Libnotify, bsm, mDNSResponder, cctools_ofiles and objc4, 16 in all. Their libraries, where they have any, are on the image already, as parts of libSystem or from the userland folder.
+
+CarbonHeaders has no 9L30 source, so the script installs CarbonHeaders 18.1, of Mac OS X 10.6, from its staged source with the project's own Makefile ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)):
+
+```sh
+make -s -C ~/9L30/Sources/CarbonHeaders-18.1 install DSTROOT=$carbon KERNEL_SYLINKS= DO_CARBON_CORE_FILES=install_carbon_core_headers
+```
+
+It copies the nine headers this installs into `/usr/include`, and `MacTypes.h` again into a `CarbonCore.framework` inside an otherwise empty `CoreServices.framework`, with the `Versions/Current` links a framework has, where CF's `CFBase.h` includes it ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16)).
 
 ### What it removes
 
@@ -64,6 +77,8 @@ Then the script removes what a Root installs and the image must not hold:
 | `com.apple.DirectoryServicesInstallDaemon.plist` | an installer's job with the same label as DirectoryService's own | launchd refuses the second (`com.apple.DirectoryServices: Already loaded`); Leopard's installed system has no such job |
 | `CM4040.kext`, `CRYPTOCardPCCard.kext`, `SCR24X_Apple_Driver.kext`, the bundles in `/usr/libexec/SmartCardServices/drivers` and `/Library/Application Support/Mozilla` | vendors' smart-card reader drivers and `pkcs11.shlb`, prebuilt in SmartCardServices' source | rule 6: prebuilt binaries |
 | `/usr/share/misc/bootblockdata` | 68k boot blocks, prebuilt in bless' source ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)) | rule 6 |
+| `/Developer` | Xcode's folder, where some of the toolchain's Roots install documentation | not part of the system |
+| `wininst-*.exe` in Python's `distutils` | Windows programs, prebuilt in Python's source, from which `distutils` makes Windows installers | rule 6 |
 
 ### The drivers
 
@@ -73,7 +88,7 @@ Last, it copies the BootX Root, which holds the boot loader in two forms in `/us
 
 ## The files it writes
 
-Twelve files on the image come from no Root: the script writes them, or edits a file a Root installed.
+Twenty-five files on the image come from no Root: the script writes them, or edits a file a Root installed.
 
 | File | What the script does | Why | Since |
 |---|---|---|---|
@@ -88,8 +103,12 @@ Twelve files on the image come from no Root: the script writes them, or edits a 
 | `/etc/rc.common`, `/etc/hostconfig` | copies them from launchd's source | SystemStarter's target installs them, and it is not built ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)); `rc.audit` reads `rc.common` at boot | Step 8 |
 | `/System/Library/CoreServices/SystemVersion.plist` | writes `Darwin`, `9.8`, `9L30` | launchctl reads it at boot and sets the kernel's `kern.osversion` from it; no project the image is built from installs it | Step 8 |
 | `/Library/Preferences/SystemConfiguration/autodiskmount.plist` | sets `AutomountDisksWithoutUserLogin` | DiskArbitration mounts removable disks only for a console user, whom only loginwindow registers; Apple's servers set the same | Step 9 |
+| `/usr/bin/dsymutil` | writes a script that exits 0 | gcc runs `dsymutil` after a one-step `-g` build, as `configure` scripts make, and Apple's is closed ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)) | Step 10 |
+| Nine headers in `/usr/include`, and `MacTypes.h` in `CarbonCore.framework` | installs them from CarbonHeaders 18.1 (above) | CarbonHeaders' 9L30 version has no source ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)) | Step 10 |
+| `/etc/smb.conf` | writes one share, `Shared`, of `/Users/Shared`, with `tdbsam` passwords, `opendirectory = no` and `use spnego = no` | passwords that `smbpasswd` sets, and a login that today's Mac clients can complete ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), [Step 10](../steps/step-10-working-unix.md)) | Step 10 |
+| `/System/Library/LaunchDaemons/smbd.plist` | sets `Disabled` to false | as turning on file sharing does; the script also removes `com.apple.smb.server.preferences.plist`, whose job would unload smbd ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)) | Step 10 |
 
-It also replaces the link `/etc/localtime`, which system_cmds points at US/Pacific, with a link to the build machine's own time zone, or to UTC if the image has no such zone ([Step 8](../steps/step-8-clean-boot.md)).
+It also makes `/Users/Shared`, writable by everyone with the sticky bit, as on Leopard, and replaces the link `/etc/localtime`, which system_cmds points at US/Pacific, with a link to the build machine's own time zone, or to UTC if the image has no such zone ([Step 8](../steps/step-8-clean-boot.md)).
 
 ### The test password
 
@@ -136,7 +155,7 @@ check-image <image.dmg> <build folder> <userland folder> [project...]
 
 The check compares contents, not names. A file from Leopard at the same path as ours would have a name the Roots know and a content they do not, and would be listed. Since `Roots/<project>/` holds only Roots that darwinbuild built here, and the downloaded Roots stay packed in `Roots/.DownloadCache/`, a file that passes came out of one of our builds.
 
-The only files it may list are the twelve of the table above. Most new images were checked this way: on 21 November 2026, for instance, all 12,301 files of the image came from our builds except the twelve that `make-test-image` writes or edits, of which `autodiskmount.plist` was new. At Step 1 the image held 6,763 files, with two not from builds, the boot plist and the driver cache. After Step 9 it holds 12,340 files, with the same twelve not from builds that the table lists.
+The only files it may list are the 25 of the table above. Most new images were checked this way: on 21 November 2026, for instance, all 12,301 files of the image came from our builds except the twelve that `make-test-image` writes or edits, of which `autodiskmount.plist` was new. At Step 1 the image held 6,763 files, with two not from builds, the boot plist and the driver cache. After Step 9 it held 12,340 files, with twelve not from builds. After Step 10 it holds 28,525, with the 25 that the table lists.
 
 ## From the image to the machines
 
@@ -154,6 +173,6 @@ The iMac gets the `.dmg` itself. Leopard, on one partition of the iMac's disk, c
 ## Where to look
 
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) and [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image).
-- Deviations: [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89), [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94).
+- Deviations: [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89), [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113).
 - [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Layout", for the test password's hash file.
 - [The boot chain](../background/boot-chain.md), for what Open Firmware and BootX do with the blessed folder and the driver cache.

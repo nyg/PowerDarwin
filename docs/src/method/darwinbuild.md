@@ -38,7 +38,7 @@ The build environment shares the host's kernel and daemons. The notes at the top
 
 The programs a build makes run on the build machine as soon as they are installed into the build environment, since later builds use them: our `/bin/sh` runs the build scripts of the projects built after bash, and Apple's `tar` runs on our libSystem. So the build machine must run PowerPC binaries natively.
 
-Rule 5 asks for the release's own toolchain: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1, the compilers, assembler and linkers of 10.5.8. They are projects of the build list like any other, and darwinbuild installs them into each build environment from their Roots. Xcode 3.1.4 is the last Xcode for Leopard, not the one Apple built 9L30 with ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23) shows one difference); the build uses only its `xcodebuild` and closed helpers, which darwinbuild points at the toolchain's own compilers (below).
+Rule 5 asks for the release's own toolchain: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1, the compilers, assembler and linkers of 10.5.8. They are projects of the build list like any other, and darwinbuild installs them into each build environment from their Roots: Apple's until Step 10, ours since, after a check that ours and Apple's give the same output for the same input ([Step 10](../steps/step-10-working-unix.md)). Xcode 3.1.4 is the last Xcode for Leopard, not the one Apple built 9L30 with ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23) shows one difference); the build uses only its `xcodebuild` and closed helpers, which darwinbuild points at the toolchain's own compilers (below).
 
 The build machine does not download. Leopard's TLS is too old for GitHub and archive.org, so the current Mac fetches and checks everything, and copies it across.
 
@@ -67,6 +67,8 @@ The build environment, the BuildRoot, is a sparse disk image, `.build/buildroot.
 ### darwinxref
 
 darwinxref is darwinbuild's database tool, a C program over an SQLite file. Once the build lists are loaded, it answers every question darwinbuild asks about a project: `darwinxref version xnu` prints `xnu-1228.15.4`, `darwinxref dependencies -build xnu` the projects xnu needs to build, `darwinxref environment xnu` the settings to build it with. It also records which files each Root installed. When a build list changes, `darwinxref loadIndex` reloads it.
+
+`darwinxref environment` also builds the compiler flags: `RC_CFLAGS` is `RC_NONARCH_CFLAGS` followed by one `-arch` for each processor of `RC_ARCHS`, and darwinxref rebuilds it so even when a build list sets `RC_CFLAGS` itself. Apple's build put the flags in the other order, which a diff in Ruby's build expects ([D105](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d105)).
 
 A project's entry in a build list names its dependencies by kind. This is part of xnu's, from `9A581.plist`:
 
@@ -141,7 +143,7 @@ latest() { ls -d $roots/$1/$1-*~* | sort -t~ -k2 -n | tail -1; }
 
 ## Fat binaries
 
-`9A581.plist` sets `RC_ARCHS = "ppc i386"` for every build, so most projects build each program twice, for PowerPC and for Intel, and join the two into one fat binary: a Mach-O file with one slice per processor, which `lipo -info` lists. Leopard's own binaries are built so, and our builds keep it, since our files are compared with Apple's of the same architectures. Some projects build more: libSystem, CoreFoundation and Security come out for `ppc7400 ppc64 i386 x86_64`, 32- and 64-bit on each processor (`ppc7400` is the G4's 32-bit PowerPC), as Apple's do. Where a project links one that is four-way, its entry in `9A581.plist` can set `RC_ARCHS` to all four ([D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74)). A PowerPC Mac uses only its own slice of each file.
+`9A581.plist` sets `RC_ARCHS = "ppc i386"` for every build, so most projects build each program twice, for PowerPC and for Intel, and join the two into one fat binary: a Mach-O file with one slice per processor, which `lipo -info` lists. Leopard's own binaries are built so, and our builds keep it, since our files are compared with Apple's of the same architectures. Some projects build more: libSystem, CoreFoundation and Security come out for `ppc7400 ppc64 i386 x86_64`, 32- and 64-bit on each processor (`ppc7400` is the G4's 32-bit PowerPC), as Apple's do. Where a project links one that is four-way, its entry in `9A581.plist` can set `RC_ARCHS` to all four ([D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74)), as for SystemStubs, whose `libSystemStubs.a` gcc links into every program ([D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110)). It can also set fewer: gcc and gcc_42 are built for `ppc` alone, so that the compilers are PowerPC only, without the Intel cross compilers that `ppc i386` adds ([D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)). A PowerPC Mac uses only its own slice of each file.
 
 ## darwinbuild's copy of Xcode
 
@@ -156,7 +158,7 @@ The copy leads to four deviations: two from settings Xcode derives from the rewr
 - `nmedit` is not among the tools darwinbuild links, and securityd's build runs `/XCD/loper/usr/bin/nmedit` ([D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82)).
 - Xcode's `copyplist` is a Ruby script, and the BuildRoot has no Ruby ([D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24)).
 
-darwinbuild also copies the host's `dsymutil`, which writes the separate debug-symbol files, into the BuildRoot, where it crashes on every binary ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). [env/dsymutil](https://github.com/nyg/PowerDarwin/blob/master/env/dsymutil) takes its place: it runs the real one and, when that fails, leaves a copy of the binary where the debug file would be, so that the build goes on.
+darwinbuild puts two more tools into the BuildRoot. When there is no `ditto`, it copies in a shell script of its own that stands in for Apple's closed one, and lacks one of its behaviours ([D99](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d99), below). It also copies the host's `dsymutil`, which writes the separate debug-symbol files, into the BuildRoot, where it crashes on every binary ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). [env/dsymutil](https://github.com/nyg/PowerDarwin/blob/master/env/dsymutil) takes its place: it runs the real one and, when that fails, leaves a copy of the binary where the debug file would be, so that the build goes on.
 
 ## Staging
 
@@ -184,7 +186,11 @@ Some fixes are files that darwinbuild does not put into the BuildRoot: a header 
 prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]
 ```
 
-Each step is named after its deviation, such as `D6` or `D82`, and `plist` copies `manifest/plists/9A581.plist` into `.build/` and reloads it with `darwinxref loadIndex`. With no step named, it runs them all.
+Each step is named after its deviation, such as `D6` or `D82`, and `plist` copies `manifest/plists/9A581.plist` into `.build/` and reloads it with `darwinxref loadIndex`; that one step carries every row that changes the build list, such as [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)'s and [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110)'s architectures. With no step named, it runs them all, in this order:
+
+```text
+plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82 D89 D94 D97 D98 D99
+```
 
 The script needs the BuildRoot mounted. `-init` only creates the disk image, and darwinbuild attaches it at its first build, so `prepare-buildroot` can run only after one darwinbuild run, and, once a restart of the build machine has detached the image, only after the next one; otherwise it stops with `no build environment at …/BuildRoot: run darwinbuild once to make and mount it`.
 
@@ -197,11 +203,12 @@ There, each step compares what it would install with what is in place, file by f
 - with `--check`, without changing anything, `missing` or `differs` for a file, and `<n> of <m> files differ or are missing` for a folder or a Root;
 - `waiting` when its input does not exist yet, because a project must first be built or staged, such as launchd's headers for D5; the script is simply run again after that build.
 
-Three steps build their files inside the BuildRoot, with its own compiler: the sandbox and quarantine stub libraries of [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13) and [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15), and D49's `libantlr2c++.a`. A step that is in place does nothing, so the script can be run again at any time: after the build that unblocks a waiting step, or after a build whose Roots may have overwritten a step's file.
+Three steps of Step 10 put in stand-ins for tools that the BuildRoot lacks or that differ from Apple's: [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace), which only writes headers whose DTrace probes do nothing ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)); [env/sw_vers](https://github.com/nyg/PowerDarwin/blob/master/env/sw_vers), which prints 10.5.8 and `9L30` for Perl's build ([D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98)); and [env/ditto](https://github.com/nyg/PowerDarwin/blob/master/env/ditto), darwinbuild's `ditto` script with the one change that Python's build needs ([D99](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d99)). Three steps build their files inside the BuildRoot, with its own compiler: the sandbox and quarantine stub libraries of [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13) and [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15), and D49's `libantlr2c++.a`. A step that is in place does nothing, so the script can be run again at any time: after the build that unblocks a waiting step, or after a build whose Roots may have overwritten a step's file.
 
 ```mermaid
 flowchart LR
-    BR[BuildRoot] --> UB["usr/bin<br/>arch D6, dsymutil D7,<br/>ruby D24, java D49, python D64"]
+    BR[BuildRoot] --> UB["usr/bin<br/>arch D6, dsymutil D7,<br/>ruby D24, java D49, python D64,<br/>sw_vers D98, ditto D99"]
+    BR --> US["usr/sbin<br/>dtrace D97"]
     BR --> UI["usr/include<br/>Carbon headers D73"]
     BR --> ULI["usr/local/include<br/>D8, D59, D94"]
     BR --> ULL["usr/local/lib<br/>stubs D13, D15, ANTLR D49"]
@@ -226,7 +233,7 @@ This project does without it, and runs darwinbuild unchanged: the build lists ar
 - Scripts: [stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources), [stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots), [prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot).
 - [env/](https://github.com/nyg/PowerDarwin/blob/master/env/), the files the build-environment deviations install.
 - [reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md).
-- Deviations: [D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1) to [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D25](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d25), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), and every row that `prepare-buildroot` names.
+- Deviations: [D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1) to [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D25](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d25), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), and every row that `prepare-buildroot` names, [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D99](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d99) the latest; [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100), [D105](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d105) and [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110) for `RC_ARCHS` and `RC_CFLAGS`.
 - Commit `3dbd3fd`, which added `prepare-buildroot`.
 - In darwinbuild's `Darwin9` branch: `darwinbuild/darwinbuild.in` (one build), `darwinbuild/darwinbuild.common` (`InstallRoot`, `Download`), `darwinbuild/installXcode31` (the copy of Xcode), `darwinxref/plugins/dependencies.c` (the kinds of dependency).
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md), "Tools".

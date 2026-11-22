@@ -20,6 +20,8 @@ The first test of our files, on 19 November 2026, was such a folder: the Roots o
 
 A chroot has a limit that matters on Darwin. Programs find launchd, and through it every other daemon, by Mach messages, not by paths, and a chroot does not change which launchd a program reaches: it is the build machine's own, running Leopard. A command that talks to launchd from inside the chroot would therefore ask Leopard's launchd to start or stop Leopard's jobs. Only commands that do not talk to launchd were run there. Our `launchd` itself refused, as it does whenever it is not process 1: `This program is not meant to be run directly.`
 
+Step 10 used a chroot of the image itself, on the build machine, so that the compiler, Perl, Python, Ruby and Samba's `smbd` ran on the image's own files, and the current Mac mounted the share that smbd served from there ([Step 10](../steps/step-10-working-unix.md)). It found two gaps in the image before any boot, `libSystemStubs.a` and CarbonCore's `MacTypes.h`.
+
 The BuildRoot is a chroot too, and every build tests the Roots installed in it. Our `/bin/sh` first showed its parser bug there, as ncurses failing to build ([D20](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d20)).
 
 ### QEMU's `mac99`
@@ -148,11 +150,12 @@ Every step's goal names the machine it is proved on. Steps 1 and 2 name both QEM
 | 7, fan control | no SMU | reached |
 | 8, a clean boot | tested, the 60-second wait remains | reached |
 | 9, disks and devices | CDs and USB disks tested | reached, but for CDs, mounted in QEMU only |
+| 10, a working Unix system | not tested; the same checks ran in a chroot of the image | reached |
 
 ## Where to look
 
 - Scripts: [boot-qemu](https://github.com/nyg/PowerDarwin/blob/master/scripts/boot-qemu), [qemu-type](https://github.com/nyg/PowerDarwin/blob/master/scripts/qemu-type), [ssh-root](https://github.com/nyg/PowerDarwin/blob/master/scripts/ssh-root), [cmp-binaries](https://github.com/nyg/PowerDarwin/blob/master/scripts/cmp-binaries), [cmp-disassembly](https://github.com/nyg/PowerDarwin/blob/master/scripts/cmp-disassembly), [check-family-imports](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-family-imports).
 - [reference/qemu-userland-test/](https://github.com/nyg/PowerDarwin/blob/master/reference/qemu-userland-test/): the screenshots of the first QEMU boots and `kextstat.txt`.
 - [Leopard's captures on the iMac](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/): what Leopard runs on the iMac.
-- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), the goals of Steps 1 to 9.
+- [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), the goals of Steps 1 to 10.
 - Deviations: [D20](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d20), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85).

@@ -1,14 +1,12 @@
 # Step 9: disks and devices
 
-> Draft: Step 9 is reached for the internal volumes, USB disks, `bless` and sound; CDs were mounted in QEMU's `mac99` only. This chapter will be rewritten when the step is reached in full.
-
 ## What you will learn
 
 - How a disk travels from its controller to a folder in `/Volumes`: the driver stack, the SCSI family in its middle, and DiskArbitration at its end.
 - Why Panther's SCSI family can stand in for Leopard's unpublished one, and how that was checked.
 - Why DiskArbitration mounts nothing removable on a system without loginwindow, and the setting that changes it.
 - How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for five boot tests.
-- Why FireWire disks are left out of the step, and what is still missing: a CD test on the iMac.
+- Why FireWire disks were left out of the step, and why CDs were mounted in QEMU's `mac99` only.
 
 ## The goal
 
@@ -108,9 +106,11 @@ In QEMU, the seventh multi-user boot test mounted an ISO 9660 CD at `/Volumes/D9
 
 On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test only to keep them read-only, mounted `Tiger` and `Leopard` at boot, and a USB key as soon as it was plugged in, with `nodev, nosuid, noowners` as Leopard does, reading 128 MB from it in 13.7 seconds. `bless --mount / --setOF` set `boot-device` to `sata/k2-sata@0/@0:4,\\:tbxi`, and `reboot` started Darwin 9 without the Startup Manager; `bless --mount /Volumes/Leopard --setOF` and `reboot` went back. The optical drive was found. The eighteenth to twenty-third tests brought the sound, as above. The last image held 12,340 files, all from the project's builds except the 12 that `make-test-image` writes.
 
+Step 9 was reached on the iMac for the internal volumes, USB disks, `bless` and sound. CDs were mounted in QEMU only, as the iMac's optical drive is unreliable.
+
 ## What is still missing
 
-- A CD on the iMac: the drive is found, and CDs were mounted in QEMU only.
+- A CD on the iMac: the drive is found, but it is unreliable, and CDs were mounted in QEMU only.
 - Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further.
 - AppleOnboardAudio's DSP, whose sources are empty.
 

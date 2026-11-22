@@ -116,7 +116,7 @@ QEMU's `mac99` runs OpenBIOS, an open-source Open Firmware. [scripts/boot-qemu](
 
 PowerPC Macs divide a disk with the Apple Partition Map. Block 0 of the disk holds a short header, with the signature `ER` and a table of driver descriptors; the map itself fills blocks 1 and on, one block per partition, the map's own entry usually first. IOStorageFamily 92.9's `IOApplePartitionScheme.h`, the header of the kernel's driver for the map, describes both. Each entry gives the partition's first block, its length, its name and its type: `Apple_partition_map` for the map, `Apple_HFS` for an HFS+ volume, `Apple_Free` for free space. Open Firmware reads the map to find a partition by number, which is what `:4` asks for.
 
-[scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) makes the test image with `hdiutil create -size 1g -layout SPUD -fs HFS+J -volname Darwin9`: a 1 GB disk with an Apple Partition Map and one HFS+ partition, journaled, named Darwin9. In QEMU the image is the whole disk, so the volume is partition 2, `disk0s2`. On the iMac, `asr` restores the same volume onto partition 4 of the internal disk, `disk0s4`, a partition named `Darwin9` ([How testing is done](../method/testing.md)).
+[scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) makes the test image with `hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9`: a 1,600 MB disk with an Apple Partition Map and one HFS+ partition, journaled, named Darwin9. In QEMU the image is the whole disk, so the volume is partition 2, `disk0s2`. On the iMac, `asr` restores the same volume onto partition 4 of the internal disk, `disk0s4`, a partition named `Darwin9` ([How testing is done](../method/testing.md)).
 
 ![The test image: block 0, partition 1 holding the Apple Partition Map, partition 2 holding the Darwin9 HFS+ volume, and in that volume the blessed folder System/Library/CoreServices with BootX, the kernel mach_kernel, the kexts and the driver cache Extensions.mkext](../images/boot-chain-disk-layout.svg)
 
@@ -289,6 +289,7 @@ While getty waits, launchd starts the rest of the system's daemons from their jo
 | sshd | started by launchd when a client connects to port 22 | [Step 3](../steps/step-3-network-and-ssh.md) |
 | syslogd, ntpd | the system log and the clock | [Step 4](../steps/step-4-everyday-commands.md) |
 | securityd | security sessions and keychains | [Step 6](../steps/step-6-securityd.md) |
+| smbd | Samba's file server, started by launchd when a client connects to port 139 or 445 | [Step 10](../steps/step-10-working-unix.md) |
 
 [Step 8](../steps/step-8-clean-boot.md) follows these daemons in a full boot, and explains the 60 seconds configd waited before naming `en0` until OpenSMU published `IOPMU`.
 

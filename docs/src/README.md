@@ -22,9 +22,10 @@ timeline
                      : Step 7, fan control
                      : Step 8, a clean boot
                      : Step 9, disks, bless and sound
+    A Unix system : Step 10, a working Unix system
 ```
 
-Steps 1 to 8 are reached, and Step 9 is reached but for CDs on the iMac. The image boots to a login prompt, brings up Ethernet and takes SSH logins, runs everyday commands, keeps the time, restarts and switches off, runs securityd, drives the iMac's fans as quietly as Leopard does, and boots with nothing in its log but what Apple's own files or the missing closed parts cause. It also mounts its disks and USB keys as they appear, makes a partition the startup disk with bless, and plays sound. Step 10 (a working Unix system, with its own compiler) and Step 11 (booting from a USB key) are defined.
+Steps 1 to 8 and Step 10 are reached, and Step 9 is reached but for CDs on the iMac. The image boots to a login prompt, brings up Ethernet and takes SSH logins, runs everyday commands, keeps the time, restarts and switches off, runs securityd, drives the iMac's fans as quietly as Leopard does, and boots with nothing in its log but what Apple's own files or the missing closed parts cause. It also mounts its disks and USB keys as they appear, makes a partition the startup disk with bless, and plays sound. It compiles and links C and C++ programs with the release's own compilers, built from source, runs Perl, Python and Ruby, and shares a folder with another Mac through Samba. Step 11 (booting from a USB key) is defined.
 
 ## What makes it different
 

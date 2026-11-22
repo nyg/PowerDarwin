@@ -47,6 +47,10 @@ From Step 9, on the iMac:
 - That key had a GUID partition map, the kind current Macs use. Open Firmware reads the Apple Partition Map ([the boot chain](../background/boot-chain.md)), and the image that `make-test-image` makes already has one (`hdiutil create -layout SPUD`), with the volume blessed and BootX in its blessed folder ([Making the image](../method/making-the-image.md)).
 - `bless --mount <volume> --setOF` sets `boot-device` for a volume on the internal disk, and the iMac restarts into it without the Startup Manager.
 
+From Step 10:
+
+- `make-test-image` now makes a 1,600 MB image, whose volume held 1.1 GB after that step ([Step 10](step-10-working-unix.md)), so the key, or the partition on it that receives the image, must be at least that large, as `Darwin9` must be ([How testing is done](../method/testing.md)).
+
 From the sources:
 
 - IOUSBMassStorageClass 208.0.1 marks itself `OSBundleRequired` `Local-Root`: it is needed to boot from a local disk.
@@ -61,7 +65,7 @@ The step's questions, in the order they come up:
 1. Getting the image onto a key with an Apple Partition Map, and blessed. The image is already such a disk, so it can be written to the key whole, or restored with `asr` onto a key partitioned for it; the choice is not made yet.
 2. Finding how the iMac's Open Firmware reaches a USB disk: which device path names the key, whether the Startup Manager lists it, and whether our `bless --setOF` writes a path that works for it.
 3. Checking that the driver cache holds every kext from the USB controller to the volume: IOUSBFamily with its EHCI driver, IOUSBMassStorageClass, the SCSI family and its block-device driver, IOStorageFamily. A missing one shows as `Still waiting for root device`, as in Step 1.
-4. Booting, and checking that the system is the same as from `Darwin9`: SSH, the clock, fans, sound and the rest of Steps 1 to 9.
+4. Booting, and checking that the system is the same as from `Darwin9`: SSH, the clock, fans, sound, the compiler, the languages, Samba and the rest of Steps 1 to 10.
 
 Whether QEMU can take part is open too: OpenBIOS would need to boot from USB, and the disk would need QEMU's EHCI controller.
 

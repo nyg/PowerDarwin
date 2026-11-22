@@ -132,7 +132,7 @@ So the image has no graphical login, and its console login is getty's `login:` p
 
 ### Pieces of open projects
 
-Some open projects call into closed code: a framework that is not published, a tool that is, but on top of Foundation. Where they do, the project turns the feature off or works around it, and records it. DEVIATIONS.md has 21 such rows, of the kind `closed-dependency`: a feature turned off because it needs closed Apple code. A few examples:
+Some open projects call into closed code: a framework that is not published, a tool that is, but on top of Foundation. Where they do, the project turns the feature off or works around it, and records it. DEVIATIONS.md has 26 such rows, of the kind `closed-dependency`: a feature turned off because it needs closed Apple code. A few examples:
 
 - Libc's dtrace probes need dtrace's tools, which need Foundation and the closed Symbolication framework ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12)).
 - launchd's SystemStarter, which runs the old start-up items, posts notifications through `CFNotificationCenter`, so it is not built ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)).

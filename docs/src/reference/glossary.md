@@ -94,11 +94,13 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **byte order**: the order in which a processor stores the bytes of a number. PowerPC Macs are big-endian (most significant byte first), x86 is little-endian. See [Hardware and boot basics](../background/hardware-basics.md).
 
+**`ByteRangeLocking.framework`**: a private, closed framework of Leopard's that Apple's Samba links; its `darwin_streams` module calls it only with `darwin_streams:brlm = yes` ([D107](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d107), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108)). See [Step 10](../steps/step-10-working-unix.md).
+
 **cache flush**: writing the processor's cached copy of some memory back to memory and dropping it, so that a device reading memory directly sees what the processor wrote, and the processor then reads what the device wrote. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **`callPlatformFunction`**: IOKit's call by which one driver asks another to perform a platform function. See [Step 5](../steps/step-5-clock-and-power.md).
 
-**CarbonHeaders**: the project of `AvailabilityMacros.h`, `TargetConditionals.h` and three other headers. Its `9L30` version has no source ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)); version 18.1 is on GitHub. See [Step 10](../steps/step-10-working-unix.md).
+**CarbonHeaders**: the project of `AvailabilityMacros.h`, `TargetConditionals.h`, `MacTypes.h` and other headers that many others include. Its `9L30` version has no source ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)); version 18.1, of Mac OS X 10.6, is on GitHub, and the image gets its nine headers ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)). See [Step 10](../steps/step-10-working-unix.md).
 
 **cause**: why a deviation was needed, as against its kind, what sort of change it is. Chapter 25 sorts every row by both. See [Kinds of deviation](../synthesis/kinds-of-deviation.md).
 
@@ -137,6 +139,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **configd, dynamic store**: the System Configuration daemon and its table of the machine's current network state, filled by its plug-ins and read by `scutil`. See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
 **configuration space**: the standard registers of a PCI device that say what it is (vendor, device, class) and where its registers are. See [Hardware and boot basics](../background/hardware-basics.md).
+
+**`configure`, autoconf**: the script with which many open projects test the system before they build, by compiling and linking small programs, often with `-g -O2`; autoconf generates it. See [Step 10](../steps/step-10-working-unix.md).
 
 **console user**: the user logged in at the graphical console, whom loginwindow registers. DiskArbitration waits for one before it mounts removable or external disks. See [Step 9](../steps/step-9-disks-and-devices.md).
 
@@ -180,7 +184,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **DiskArbitration, diskarbitrationd**: the framework and daemon that watch for disks, mount their volumes and tell other programs, such as kextd. See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
-**`ditto`**: Mac OS X's copying tool, which keeps owners, modes and links. `make-test-image` copies with it. See [Making the image](../method/making-the-image.md).
+**`ditto`**: Mac OS X's copying tool, which keeps owners, modes and links. `make-test-image` copies with it. Apple's is closed, and darwinbuild puts a shell-script stand-in for it in the build environment ([D99](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d99)). See [Making the image](../method/making-the-image.md).
 
 **DMA**: direct memory access, a device reading or writing the computer's memory by itself, without the processor. See [Hardware and boot basics](../background/hardware-basics.md).
 
@@ -196,9 +200,9 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`DSTROOT`**: the empty folder a project installs into during a build. darwinbuild keeps it as the project's Root. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
-**dsymutil, `.dSYM`**: the tool that collects a binary's debugging information into a separate `.dSYM` bundle. It crashes in the build environment ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
+**dsymutil, `.dSYM`**: Xcode's closed tool that collects a binary's debugging information into a separate `.dSYM` bundle; gcc runs it after a one-step `-g` build. It crashes in the build environment ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)), and on the image a script that exits 0 stands in for it ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). See [Step 1, part 1](../steps/step-1-kernel-and-userland.md) and [Step 10](../steps/step-10-working-unix.md).
 
-**DTrace, probe**: Leopard's tracing framework, and a marker compiled into a program that DTrace can switch on. `dtrace -h` turns a `.d` file into a header of probe macros. DTrace is closed at build time, so Libc's probes and `plockstat` are off. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md) and [Step 10](../steps/step-10-working-unix.md).
+**DTrace, probe**: Leopard's tracing framework, and a marker compiled into a program that DTrace can switch on. `dtrace -h` turns a `.d` file into a header of probe macros. DTrace's library needs closed frameworks, so Libc's probes and `plockstat` are off, and the probes of DirectoryService, Perl, Python and Ruby compile to nothing ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103)). See [Step 1, part 1](../steps/step-1-kernel-and-userland.md) and [Step 10](../steps/step-10-working-unix.md).
 
 **dyld**: the dynamic linker, which loads a program's libraries when it starts. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
@@ -207,6 +211,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **EHCI, OHCI**: the kinds of USB host controller, the chips that run a USB bus: EHCI for USB 2.0, OHCI for USB 1.1. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **ExpansionData, reserved slot**: Apple's ways of keeping an IOKit class's layout stable across versions: a pointer to a separate structure for members added later, and spare vtable slots for virtual functions added later. See [Step 9](../steps/step-9-disks-and-devices.md).
+
+**expat, libffi**: an XML parser and a library for calling C functions described at run time, which Python's `pyexpat` and `ctypes` use. See [Step 10](../steps/step-10-working-unix.md).
 
 **exports file**: a list of the only symbols a linked program or library keeps visible. Xcode's Jam-based targets apply it with `nmedit`. See [Step 6](../steps/step-6-securityd.md).
 
@@ -231,6 +237,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **four-character code**: a 32-bit number written as four characters, such as the file type `tbxi`. Its bytes read differently in each byte order. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **framework**: a bundle in `/System/Library/Frameworks` holding a library with its headers and resources. See [What Darwin is](../background/what-darwin-is.md).
+
+**gcc_select, gnumake**: the project that makes `cc`, `gcc`, `c++` and the other links to the default compiler, gcc 4.0, and the project of GNU Make 3.81, `make`. See [Step 10](../steps/step-10-working-unix.md).
 
 **getty**: the program that opens a terminal, prints `login:` and runs `login`. launchd starts it from system_cmds' `com.apple.getty.plist`. See [Step 2](../steps/step-2-console-login.md).
 
@@ -328,7 +336,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Libc, Libsyscall, Libinfo**: libSystem's C library, its system-call stubs (from xnu's source), and its user, group and host lookups. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
-**`Libc_headers`**: the build-list project that installs Libc's headers. Not yet built: the build environment uses a downloaded headers Root. See [Step 10](../steps/step-10-working-unix.md).
+**`Libc_headers`**: the build-list project that installs Libc's headers. Built in Step 10, for the image's `/usr/include`; until then the build environment used a downloaded headers Root. See [Step 10](../steps/step-10-working-unix.md).
 
 **libkern**: xnu's C++ runtime and kernel library, on which IOKit's classes are built. See [What Darwin is](../background/what-darwin-is.md).
 
@@ -393,6 +401,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **OpenBIOS**: the open-source Open Firmware that QEMU runs. See [PowerPC Macs](../background/powerpc-macs.md).
 
 **OpenDarwin**: the community Darwin project founded in April 2002 by the Internet Software Consortium and Apple. It released bootable Darwins 6 and 7 for PowerPC and Intel, and shut down in July 2006. See [Darwin's history](../background/history.md).
+
+**`opendirectory`**: an `smb.conf` setting of Apple's Samba, on by default, that hands passwords to directory services; with it, `smbpasswd` stores no NT hash. The image sets it to `no`. See [Step 10](../steps/step-10-working-unix.md).
 
 **Open Firmware**: the firmware of PowerPC Macs. It describes the hardware in the device tree, offers a Forth prompt, and boots from a device path. See [the boot chain](../background/boot-chain.md).
 
@@ -466,7 +476,9 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **quarantine, sandbox**: two closed libraries linked into Leopard's libSystem. The image has stubs that always fail ([D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15)). See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
-**`RC_ARCHS`**: the build setting naming the processors a project is built for, `ppc i386` unless the build list says otherwise. See [darwinbuild and the build machine](../method/darwinbuild.md).
+**`rbconfig.rb`**: Ruby's record of the flags and paths it was built with, which Apple's build edits with `rbconfig.diff` ([D104](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d104), [D105](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d105)). See [Step 10](../steps/step-10-working-unix.md).
+
+**`RC_ARCHS`**: the build setting naming the processors a project is built for, `ppc i386` unless the build list says otherwise, such as `ppc` alone for the compilers ([D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)). See [darwinbuild and the build machine](../method/darwinbuild.md).
 
 **`rc.common`, `hostconfig`**: shell files from launchd's source that boot scripts such as `rc.audit` read for settings. See [Step 8](../steps/step-8-clean-boot.md).
 
@@ -514,6 +526,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **slice**: one processor's build of a program inside a fat binary: `ppc`, `ppc7400` (G4 and later), `ppc64` (64-bit, G5), `i386`, `x86_64`. See [PowerPC Macs](../background/powerpc-macs.md).
 
+**`smb.conf`, `smbpasswd`**: Samba's configuration file, which `make-test-image` writes ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)), and the command that sets an account's Samba password. See [Step 10](../steps/step-10-working-unix.md).
+
 **SMU**: system management unit, a small processor on the logic board of G5 Macs such as the iMac G5, that keeps the clock, switches the power, reads sensors and drives fans. See [Step 5](../steps/step-5-clock-and-power.md).
 
 **Snow Leopard**: Mac OS X 10.6 (Darwin 10), August 2009, the first Mac OS X for Intel Macs only. See [Darwin's history](../background/history.md).
@@ -522,7 +536,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **S/PDIF**: a digital audio output. AppleOnboardAudio mutes the digital stream while no S/PDIF cable is in. See [Step 9](../steps/step-9-disks-and-devices.md).
 
-**SPNEGO**: the exchange in which an SMB client and server agree how to authenticate. See [Step 10](../steps/step-10-working-unix.md).
+**SPNEGO**: the exchange in which an SMB client and server agree how to authenticate. Samba 3.0.25b rejects the `mechListMIC` field that today's Mac client sends in it, so the image's `smb.conf` turns it off ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). See [Step 10](../steps/step-10-working-unix.md).
 
 **Startup Manager**: the boot menu that appears when Option is held at power-on, listing the volumes a Mac can start from. See [the boot chain](../background/boot-chain.md).
 
@@ -532,9 +546,13 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`sungem`**: QEMU's model of Apple's GMAC Ethernet chip, the iMac G5's own, driven by AppleGMACEthernet. See [PowerPC Macs](../background/powerpc-macs.md).
 
+**`sw_vers`**: the command that prints the system's name, version and build; Perl's build calls it, and a stand-in prints 10.5.8 and `9L30` in the build environment ([D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98)). See [Step 10](../steps/step-10-working-unix.md).
+
 **swift-corelibs-foundation**: Apple's open Foundation for Swift, with a CoreFoundation of its own, from which CFStringTransform comes ([D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56)). See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
 **Symbolication**: a private, closed framework of Leopard's that `libdtrace.dylib` needs. See [Step 10](../steps/step-10-working-unix.md) and [What stays closed](../synthesis/what-stays-closed.md).
+
+**`synchronize-preferences`**: Samba's tool, built from its `prefsync` source, that launchd runs whenever the SMB server's preferences file changes, and that turns file sharing on or off as Leopard's Sharing pane set it; the image removes the job that runs it ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). See [Step 10](../steps/step-10-working-unix.md).
 
 **syslogd**: the daemon that collects programs' and the kernel's messages and writes them to the files `/etc/syslog.conf` names. See [Step 4](../steps/step-4-everyday-commands.md).
 
@@ -544,7 +562,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **System session, `StandardIO` session**: launchd's session types for its root namespace and for a terminal or SSH login. See [Step 6](../steps/step-6-securityd.md).
 
-**SystemStubs**: Apple's static archive of `$LDBLStub` functions and `___stub_getrealaddr`, which pick at run time the `long double` version of a `libSystem` function on PowerPC. See [Step 4](../steps/step-4-everyday-commands.md).
+**SystemStubs**: Apple's static archive of `$LDBLStub` functions and `___stub_getrealaddr`, which pick at run time the `long double` version of a `libSystem` function on PowerPC. gcc links every program with it, so the image holds it since Step 10 ([D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110)). See [Step 4](../steps/step-4-everyday-commands.md).
 
 **`SystemVersion.plist`**: the file naming the system's product, version and build. launchctl sets `kern.osversion` from it. See [Step 8](../steps/step-8-clean-boot.md).
 
@@ -559,6 +577,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **thermal profile**: the data that gives a platform plug-in its sensors, fans and target temperatures. Leopard's `PowerMac12_1_ThermalProfile` is closed; Tiger's AppleMacRISC4PE 180.0.34 to 186.3.1 publish version 1.8.6f1. See [Step 7](../steps/step-7-fans.md).
 
 **Tiger**: Mac OS X 10.4 (Darwin 8), whose AppleMacRISC4PE 186.3.1 publishes the iMac G5's platform plug-in and thermal profile. See [Darwin's history](../background/history.md).
+
+**toolbox glue**: Python's Mac modules, such as `MacOS` and `_Res`, built on the closed Carbon; the image's Python is built without them ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)). See [Step 10](../steps/step-10-working-unix.md).
 
 **toolchain**: the compiler, assembler, linker and their tools. Rule 5 names the release's own: gcc 5465, gcc_42 5531, cctools 667.3, ld64 77.1. See [Step 10](../steps/step-10-working-unix.md).
 

@@ -77,7 +77,7 @@ DEVIATIONS.md records what was changed, with the error that called for it. With 
 
 These are the compilers, the assembler and the linkers of Mac OS X 10.5.8, as its build list names them. Two reasons hold the project to them. Apple's sources were written for those compilers, and a later compiler may reject code they accepted, or compile it differently. And the comparisons with Apple's binaries go down to the instructions: our AppleMacRISC4PE has 116 of its 123 functions the same instruction for instruction as Apple's, and a different compiler would not produce the same instructions.
 
-darwinbuild installs those four projects into every BuildRoot from their Roots, and links the tools of its copy of Xcode to them, so Xcode projects are compiled by the same compilers ([darwinbuild and the build machine](darwinbuild.md)). The build script at the top of each log prints the compiler's and the assembler's versions, so every log shows which ones a build used.
+darwinbuild installs those four projects into every BuildRoot from their Roots, and links the tools of its copy of Xcode to them, so Xcode projects are compiled by the same compilers ([darwinbuild and the build machine](darwinbuild.md)). Until Step 10 those Roots were Apple's; since then they are our builds of the four, which give the same output as Apple's for the same input, and which the image carries too ([Step 10](../steps/step-10-working-unix.md)). The build script at the top of each log prints the compiler's and the assembler's versions, so every log shows which ones a build used.
 
 ### Rule 6: no Apple binary on the image
 

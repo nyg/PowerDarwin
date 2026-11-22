@@ -27,8 +27,10 @@ block-beta
     columns 3
     p["Programs, daemons"] p1["loginwindow:<br/>getty's login"] p2["ReportCrash:<br/>none"]
     space p3["afplay:<br/>openplay, ours"] p4["WindowServer, Finder:<br/>none"]
+    space p5["Sharing pane:<br/>smb.conf, ours"] p6["dsymutil:<br/>a stub, ours"]
     f["Frameworks"] f1["full CoreFoundation:<br/>CF-Lite, backports"] f2["Foundation, Cocoa:<br/>features left out"]
     space f3["OpenDirectory:<br/>passwd, chpass, PAM module,<br/>bootpd left out"] f4["CoreAudio:<br/>openplay, ours"]
+    space f5["Symbolication:<br/>dtrace probes compiled out"] f6["Carbon, ByteRangeLocking:<br/>Python's Mac modules,<br/>Samba's locks left out"]
     l["System library"] l1["sandbox, quarantine: stubs, ours"]:2
     k["Kernel"] k1["xnu: all open"]:2
     d["Drivers"] d1["AppleSMU, plug-ins:<br/>OpenSMU, ours"] d2["disk and SCSI drivers:<br/>Panther's"]
@@ -61,16 +63,19 @@ Each driver that an iMac G5 (`PowerMac12,1`) loads under Leopard was mapped to i
 
 | Component | What it does on Leopard | Cost on the image | Stand-in |
 |---|---|---|---|
-| The full CoreFoundation | the whole of CF, of which CF-Lite is the open part | no `CFNotificationCenter` between processes: no SystemStarter ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)), no AppleRAID updates by kextd ([D28](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d28)); no private bridging header for CFOpenDirectory; managed preferences always off | CF-Lite with Apple's later fixes ([D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54), [D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56), [D62](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d62)); a thread in place of `CFFileDescriptor` ([D79](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d79)) |
+| The full CoreFoundation | the whole of CF, of which CF-Lite is the open part | no `CFNotificationCenter` between processes: no SystemStarter ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)), no AppleRAID updates by kextd ([D28](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d28)), no change notices from Samba's preference sync ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109)); no private bridging header for CFOpenDirectory; managed preferences always off | CF-Lite with Apple's later fixes ([D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54), [D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56), [D62](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d62)); a thread in place of `CFFileDescriptor` ([D79](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d79)) |
 | Foundation, Cocoa | the Objective-C libraries of Mac OS X's programs | `arch`, USB Prober, Kerberos' login agent and ticket viewer and DirectoryService's Objective-C plug-in library are not built | a build helper rewritten on CF ([D55](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d55)) |
 | OpenDirectory, with CFOpenDirectory | changes accounts and passwords, checks password policies | no `passwd` or `chpass`, no `pam_securityserver`, no `bootpd` | `pam_unix` checks passwords, and `make-test-image` writes root's hash ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)) |
-| Symbolication, which `libdtrace.dylib` needs, and dtrace's tools on Foundation | tracing | Libc's and DirectoryService's dtrace probes are off; Ruby does not build | empty probe macros ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75)) |
+| Symbolication, which `libdtrace.dylib` needs, and dtrace's tools on Foundation | tracing | no tracing: the dtrace probes of Libc, DirectoryService, Perl, Python and Ruby compile to nothing | empty probe macros ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103)), and a `dtrace` in the build environment that writes them ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)) |
 | The sandbox library | applies sandbox profiles | no sandbox; `update` logs its `sandbox_init` failure | a stub that always fails ([D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13)) |
 | The quarantine library | marks files that came from the network | no quarantine marks | stubs ([D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15)) |
 | CoreAudio | the sound interface for programs | no program but ours plays sound | `openplay`, through IOAudioFamily's own interface ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)); CoreAudio's SDK headers for building only ([D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)) |
 | IOKitUser's HID event system, published as empty files | carries input events, through `hidd` | no `hidd`; the HID drivers work without it | none ([D22](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d22), [D32](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d32)) |
 | CryptKit and comcryption | Security's FEE (elliptic-curve) and ASC (Apple Secure Compression) algorithms | the Apple CSP lacks those two | Apple's own `Darwin` configuration ([D51](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d51)) |
 | ApplicationServices, MediaKit, Carbon's HIToolbox, UserEventAgent | graphics, disk partitioning, the graphical toolkit, event agents | SCMonitor, the agent that offers to configure new interfaces, is not built ([D61](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d61)) | links and includes that used nothing are removed ([D27](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d27), [D50](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d50), [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)) |
+| Carbon and ApplicationServices, for Python | Python's Mac modules, its toolbox glue, and its Build Applet and Python Launcher | the 36 Mac modules of Apple's 99, such as `MacOS`, and the two applications are not built | Python's own `--disable-toolbox-glue` ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)) |
+| `ByteRangeLocking.framework`, private | byte-range locks that Samba's `darwin_streams` module takes with `darwin_streams:brlm = yes`, as Apple's `smb.conf` sets | none with the image's `smb.conf`, which leaves it off | Samba's own `RC_RELEASE = Darwin` switch, and a module linked without it ([D107](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d107), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108)) |
+| CarbonHeaders at Leopard's version, and CoreServices' copy of `MacTypes.h` | headers that many others include, such as `AvailabilityMacros.h` and `TargetConditionals.h` | the image's compiler sees Mac OS X 10.6's versions of them, which differ from Leopard's | the 9G55 Root's for building ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)); CarbonHeaders 18.1 on the image ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)) |
 | CoreServices' umbrella header, CFNetwork | Carbon's core services, network access | Security's two plug-ins for .Mac, Apple's online service of the time, are not built | two umbrella headers for building Kerberos ([D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67)) |
 | DiskImages | disk images | Security's FileVault part, in SecurityFoundation, is not built | none |
 | AppleSystemInfo | reads the serial number | `pam_serialnumber`, used only by Mac OS X Server's PAM files, is not built | none ([D41](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d41)) |
@@ -83,11 +88,13 @@ Each driver that an iMac G5 (`PowerMac12,1`) loads under Leopard was mapped to i
 |---|---|---|---|
 | loginwindow | the graphical login; registers the console user | no graphical login; DiskArbitration waits for a console user before mounting removable disks | getty's `login:` prompt ([Step 2](../steps/step-2-console-login.md)); `AutomountDisksWithoutUserLogin`, as on Apple's servers ([Step 9](../steps/step-9-disks-and-devices.md)) |
 | WindowServer, the Finder and the applications | the graphical system | none of it | none |
+| The Sharing preference pane | writes the SMB server's preferences file, from which Samba's `synchronize-preferences` turns file sharing on or off | without a stand-in, smbd is unloaded a minute after boot | `make-test-image` removes the preference job, enables `smbd.plist` and writes `smb.conf` ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)) |
+| `dsymutil`, Xcode's | collects a program's debugging information into a `.dSYM` bundle; gcc runs it after a one-step `-g` build | no `.dSYM` bundles; a two-step build keeps its debugging information in its object files | a script that exits 0 on the image ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)), a wrapper in the build environment ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)) |
 | ReportCrash | writes crash reports | no crash reports; launchd and configd log its absence, and console logins log `bootstrap_look_up(com.apple.ReportCrash) failure: Unknown service name (1102)` | none |
 
 ## Binaries inside published sources
 
-Three published sources carry binaries that cannot be rebuilt from them, and rule 6 keeps those off the image too ([The rules](../method/rules.md)): an Apple `libncurses.5.dylib` from 2006 in ncurses' source; SmartCardServices' prebuilt drivers for smart-card readers, three kexts, four bundles and `pkcs11.shlb`, which `make-test-image` leaves out; and bless's 68k boot blocks, `/usr/share/misc/bootblockdata`, which it leaves out as well ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)).
+Four published sources carry binaries that cannot be rebuilt from them, and rule 6 keeps those off the image too ([The rules](../method/rules.md)): an Apple `libncurses.5.dylib` from 2006 in ncurses' source; SmartCardServices' prebuilt drivers for smart-card readers, three kexts, four bundles and `pkcs11.shlb`, which `make-test-image` leaves out; bless's 68k boot blocks, `/usr/share/misc/bootblockdata`, which it leaves out as well ([D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91)); and Python's `wininst-*.exe`, Windows programs that its `distutils` installs, which it removes too.
 
 ## Closed tools that run the build
 
@@ -97,7 +104,7 @@ Rule 6 lets closed tools run the build, as long as nothing of theirs reaches the
 |---|---|
 | Leopard 10.5.8 on the build machine | runs darwinbuild, `hdiutil` and `kextload -n`, and is the reference against which our binaries are compared |
 | Xcode 3.1.4 | `xcodebuild` and its helpers, such as `copyplist`; `dsymutil`, wrapped ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)) |
-| darwinbuild's Roots | Apple's binaries of each project, the release's compilers among them (rule 5), which fill the BuildRoots until our builds replace them ([D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3)) |
+| darwinbuild's Roots | Apple's binaries of each project, which fill the BuildRoots until our builds replace them ([D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3)); the release's compilers among them (rule 5), until Step 10 built ours |
 | Xcode's `MacOSX10.5.sdk` | headers and link stubs of what was never published: the SCSI family's headers ([D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36)), CoreAudio's ([D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)) |
 | The 9G55 CarbonHeaders Root | CarbonCore's headers, for compiling only ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)) |
 | The build machine's Ruby 1.8.6 and Python 2.5.1 | Xcode's `copyplist` and a script of Kerberos ([D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D64](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d64)) |
@@ -105,13 +112,14 @@ Rule 6 lets closed tools run the build, as long as nothing of theirs reaches the
 
 ## What it costs, in sum
 
-On the iMac G5, the image is a Unix system with no graphical system: it boots, mounts its disks and USB keys, keeps time, restarts, switches off, runs its fans as quietly as Leopard, plays sound through `openplay`, and serves SSH logins over Ethernet. What the closed parts take away:
+On the iMac G5, the image is a Unix system with no graphical system: it boots, mounts its disks and USB keys, keeps time, restarts, switches off, runs its fans as quietly as Leopard, plays sound through `openplay`, serves SSH logins over Ethernet, compiles programs with the release's own toolchain, runs Perl, Python and Ruby, and shares a folder over SMB1. What the closed parts take away:
 
 - the graphical system and everything built on Foundation and Cocoa;
 - Wi-Fi, Bluetooth and FireWire;
 - sleep, and the GPU's power management, which leaves the iMac warmer;
 - `passwd`, password policies and a DHCP server, through OpenDirectory;
 - crash reports, the sandbox and the firewall;
+- DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
 - in QEMU, the clock, restart and power-off, through ApplePMU.
 
 Some of these could come back as open parts, on the model of OpenSMU and OpenOnyx: a PMU driver, a FireWire controller driver, the GPU's power settings, OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
