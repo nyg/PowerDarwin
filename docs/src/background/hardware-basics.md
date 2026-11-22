@@ -363,7 +363,7 @@ Where Darwin uses this: [PowerPC Macs](powerpc-macs.md) for the trees of the two
 
 ## Where to look
 
-- [reference/imacg5/kextstat.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/kextstat.txt), Leopard's list of the drivers an iMac G5 loads.
+- [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md), the drivers an iMac G5 loads, and [reference/imacg5/kextstat.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/kextstat.txt), Leopard's list of them.
 - [reference/imacg5/boot-kernel-log.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/boot-kernel-log.txt), Leopard's kernel log on the iMac, with the boot device's path.
 - [reference/qemu-userland-test/kextstat.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/qemu-userland-test/kextstat.txt), the drivers QEMU's `mac99` loads.
 - [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81) and [replacements/OpenSMU/OpenSMU.cpp](https://github.com/nyg/PowerDarwin/blob/master/replacements/OpenSMU/OpenSMU.cpp), the worked example of DMA, cache flushes and polling.

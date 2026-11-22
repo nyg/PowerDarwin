@@ -39,7 +39,7 @@ block-beta
 
 ## Drivers
 
-Each driver that an iMac G5 (`PowerMac12,1`) loads under Leopard was mapped to its project. These are the closed or unpublished ones, with QEMU's ApplePMU:
+[hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md) maps every driver that an iMac G5 (`PowerMac12,1`) loads under Leopard to its project. These are the closed or unpublished ones, with QEMU's ApplePMU:
 
 | Component | What it does on Leopard | Cost on the image | Stand-in |
 |---|---|---|---|
@@ -57,7 +57,7 @@ Each driver that an iMac G5 (`PowerMac12,1`) loads under Leopard was mapped to i
 | `AppleOnyxAudio`, published as a stub | AppleOnboardAudio's plug-in for the iMac's PCM3052 codec | without a stand-in, no codec and no sound | OpenOnyx ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)) |
 | AppleDBDMAAudio's DSP, published as empty sources | processing of the sound stream | the DSP does not run | none |
 
-`AppleOnboardDisplay`, `AppleIRController` and `IOI2CPulsar` are closed too. No step has needed them.
+[hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md) also lists `AppleOnboardDisplay`, `AppleIRController` and `IOI2CPulsar` as closed. No step has needed them.
 
 ## Frameworks and libraries
 
@@ -126,6 +126,7 @@ Some of these could come back as open parts, on the model of OpenSMU and OpenOny
 
 ## Where to look
 
+- [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): every driver of the iMac G5, open and closed.
 - [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md): the `closed-replacement` and `closed-dependency` rows, and the `deferred` rows around OpenDirectory.
 - [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rule 6, and "Status", whose last lines list the drivers with no published source.
 - [What Darwin is](../background/what-darwin-is.md), for the layers; [The rules](../method/rules.md), for rule 6; [Kinds of deviation](kinds-of-deviation.md), for the causes behind the rows; [What's next](../steps/whats-next.md), for what could be opened.

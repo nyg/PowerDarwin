@@ -120,7 +120,7 @@ That is why every step is proved on real hardware as well, here on an iMac G5.
 
 ### Its blocks
 
-The iMac G5 (`PowerMac12,1`) is the worked example of real hardware in this book: one model, with one board, which Leopard supports. Its device tree and Leopard's list of drivers on it show these blocks:
+The iMac G5 (`PowerMac12,1`) is the worked example of real hardware in this book: one model, with one board, which Leopard supports. Its device tree and Leopard's list of drivers on it ([hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md)) show these blocks:
 
 - The processor is a PowerPC 970FX, a G5: the device tree's `cpu-version` property starts with `0x003c`, the number Linux's [processor table](https://github.com/torvalds/linux/blob/master/arch/powerpc/kernel/cpu_specs_book3s_64.h) gives the 970FX. It is a 64-bit processor running Darwin 9's 32-bit kernel.
 - The U4 north bridge (`u4@0,f8000000`, model `AAPL,U4`) holds the memory controller, the DART, an MPIC interrupt controller, an I²C controller with four temperature sensors on it, a PCI Express bridge to the graphics chip, and the HyperTransport link to the K2 (`ht@0,f2000000`).
@@ -181,7 +181,7 @@ The same, as a table, with the project each driver comes from:
 | Graphics acceleration | none | Apple's `ATIRadeon9700` is closed | closed |
 | AirPort, Bluetooth | none | Apple's `AppleAirPortBrcm4311`, `IO80211Family`, `IOBluetoothFamily` are closed | closed |
 
-A single-user shell needs the rows from the processor down to SATA, and USB for the keyboard; [Step 1, part 2](../steps/step-1-drivers-and-bootx.md) tells how they were built and how the share of ours grew until every file on the image came from the project's builds. The screen of a single-user shell is the firmware's framebuffer, which the kernel keeps without a graphics driver: Leopard's own driver cache leaves IOGraphics out.
+A single-user shell needs the rows from the processor down to SATA, and USB for the keyboard ([hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md)); [Step 1, part 2](../steps/step-1-drivers-and-bootx.md) tells how they were built and how the share of ours grew until every file on the image came from the project's builds. The screen of a single-user shell is the firmware's framebuffer, which the kernel keeps without a graphics driver: Leopard's own driver cache leaves IOGraphics out ([hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md)).
 
 ## What each machine proves
 
@@ -197,6 +197,7 @@ A single-user shell needs the rows from the processor down to SATA, and USB for 
 
 ## Where to look
 
+- [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): the drivers the iMac G5 loads under Leopard, with their projects and whether each is open.
 - [reference/imacg5/kextstat.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/kextstat.txt), [loaded-kexts.tsv](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/loaded-kexts.tsv), [extensions.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/extensions.txt) and [boot-kernel-log.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/boot-kernel-log.txt): Leopard on the iMac.
 - [reference/qemu-userland-test/kextstat.txt](https://github.com/nyg/PowerDarwin/blob/master/reference/qemu-userland-test/kextstat.txt): the drivers QEMU's `mac99` loads.
 - [scripts/boot-qemu](https://github.com/nyg/PowerDarwin/blob/master/scripts/boot-qemu): how QEMU is started.

@@ -163,7 +163,7 @@ PowerDarwin first wrote its goal and rules (commit `55f21a1`). It then booted it
 - **Every change recorded, with its reason.** Each of the 113 deviations so far has a row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) with the change, the error it fixes, its kind, and the later Apple release with the same fix, if any.
 - **Open replacements for closed drivers.** OpenSMU keeps the clock, restarts, powers off and drives the fans of the iMac's SMU, in place of Apple's closed AppleSMU and platform plug-ins ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)); OpenOnyx drives its audio codec ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)).
 - **Scripts that repeat the build.** [scripts/](https://github.com/nyg/PowerDarwin/blob/master/scripts/) fetches the sources and Roots and checks their hashes, stages them on a PowerPC build machine, puts every build-environment workaround in place, makes the image and boots it in QEMU ([Method](../method/sources-and-roots.md)).
-- **A map of what stays closed.** The `closed-*` rows of DEVIATIONS.md say which closed piece each feature needs, and [What stays closed](../synthesis/what-stays-closed.md) gathers them.
+- **A map of what stays closed.** [The hardware pages](https://github.com/nyg/PowerDarwin/blob/master/hardware/README.md) and the `closed-*` rows of DEVIATIONS.md say which closed piece each feature needs, and [What stays closed](../synthesis/what-stays-closed.md) gathers them.
 
 ## Why it matters
 

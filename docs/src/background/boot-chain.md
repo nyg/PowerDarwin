@@ -212,7 +212,7 @@ A kext is a bundle, a folder such as `AppleK2SATA.kext`, with the driver's code 
 | `Safe Boot` | only in a safe boot, and then by kextd | no |
 | none | not at boot | no |
 
-In kext_tools 117.4's `kextcache_main.c`, `-l` takes `Root`, `Console` and `Local-Root` kexts. In BootX's `drivers.c`, a kext loaded from the folder must have `OSBundleRequired` and must not be `Safe Boot`. OpenSMU, for example, is `Root`, so it is in the cache and starts before the kernel first asks for the time ([Step 5](../steps/step-5-clock-and-power.md)). IOGraphics' kexts are `Safe Boot`, so they stay out, as they do in Leopard's own driver cache, and a single-user shell keeps the firmware's framebuffer.
+In kext_tools 117.4's `kextcache_main.c`, `-l` takes `Root`, `Console` and `Local-Root` kexts. In BootX's `drivers.c`, a kext loaded from the folder must have `OSBundleRequired` and must not be `Safe Boot`. OpenSMU, for example, is `Root`, so it is in the cache and starts before the kernel first asks for the time ([Step 5](../steps/step-5-clock-and-power.md)). IOGraphics' kexts are `Safe Boot`, so they stay out, as they do in Leopard's own driver cache, and a single-user shell keeps the firmware's framebuffer ([hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md)).
 
 ### The mkext
 
