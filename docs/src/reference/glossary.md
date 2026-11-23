@@ -78,6 +78,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **build alias**: a build-list entry that builds part of another project's source, such as `Libc_debug` from Libc or `launchd_libs` from launchd. See [Leopard 9L30](../method/sources-and-roots.md).
 
+**build order**: `manifest/build-order`, every darwinbuild run and `prepare-buildroot` step of an image, in the order `build-image` runs them. See [darwinbuild and the build machine](../method/darwinbuild.md).
+
 **build configuration**: a named set of Xcode settings for one project, chosen with `xcodebuild -configuration`. Security's `Darwin` configuration builds it without its closed parts ([D51](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d51)). See [Kinds of deviation](../synthesis/kinds-of-deviation.md).
 
 **`build-env`**: the kind of deviation that changes the build environment and no source. See [The rules](../method/rules.md).
@@ -321,6 +323,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **`kextload -n`**: links a kext against the running kernel without loading it, which shows that every symbol it imports exists. See [How testing is done](../method/testing.md).
 
 **KeyLargo, UniNorth**: the I/O controller and the north bridge of G4 Macs, and of QEMU's `mac99`. See [PowerPC Macs](../background/powerpc-macs.md).
+
+**kit**: `PowerDarwin-kit.tar`, the repo with every source, Root and generated file the build machine needs, which `download-kit` makes on a current computer. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
 **`kmod_info`, `KMOD_EXPLICIT_DECL`**: the structure naming a kext's identifier, version and start and stop routines, which the kernel's loader reads, and the macro that makes it. See [OpenSMU](../synthesis/opensmu.md).
 

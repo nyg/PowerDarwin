@@ -1,0 +1,275 @@
+stage CarbonHeaders 18.1
+build bootstrap_cmds
+prepare D4
+build file_cmds
+build -loadonly launchd
+build -headers -target=launchd_libs launchd_libs
+prepare D5
+build shell_cmds
+build -loadonly kext_tools
+build -loadonly IOKitUser
+prepare D6 D7
+build xnu
+build -loadonly Libsystem
+build Csu
+build keymgr
+build removefile
+prepare D8
+build copyfile
+build CommonCrypto
+build Libnotify
+build launchd_libs
+build -loadonly mDNSResponder
+build -loadonly Libinfo
+build Libm
+build project_makefiles
+prepare D9
+build UserNotification
+build Libinfo
+prepare D10
+build -target=SystemLibraries mDNSResponder
+build Libsyscall
+build libdyld
+build cctools_ofiles
+build Libc
+build Libc_debug
+build Libc_profile
+prepare D13 D14 D15
+build Libsystem
+build -loadonly libgcc
+build libiconv
+build bsm
+build libutil
+build libedit
+build bash
+build dyld
+build -loadonly launchd
+build -loadonly diskdev_cmds
+build libgcc
+build -headers IOBDStorageFamily
+prepare D18
+build bzip2
+prepare D19
+build ncurses
+build diskdev_cmds
+prepare D24
+build CF
+build IOKitUser
+build -target=embedded launchd
+build zlib
+build libstdcxx
+build autozone
+build objc4
+build ICU
+build CF
+build kext_tools
+build IOPCIFamily
+build IOStorageFamily
+build IOATAFamily
+build AppleMacRiscPCI
+build AppleMacRISC2PE
+build AppleKeyLargo
+build AppleMPIC
+build AppleCore99NVRAM
+build AppleVIA
+build KeyLargoATA
+build AppleFileSystemDriver
+build IOI2CFamily
+build AppleGPIO
+build -loadonly IOUSBFamily
+prepare D30
+build -headers IOHIDFamily
+build -headers IOUSBFamily
+build IOHIDFamily
+build IOUSBFamily
+build -headers IOCDStorageFamily
+build -headers IODVDStorageFamily
+build IOCDStorageFamily
+build IODVDStorageFamily
+build IOBDStorageFamily
+build AppleMediaBay
+build AppleKauaiATA
+prepare D36 D37
+build BootX
+build AppleK2SATARoot
+build AppleK2SATA
+build -headers IOGraphics
+build -loadonly IOGraphics
+build AppleMacRISC4PE
+build AppleFlashNVRAM
+build AppleI2C
+build IOGraphics
+build -headers IOATABlockStorage 130.3.1
+prepare D40
+build IOATABlockStorage 130.3.1
+build IOATAPIProtocolTransport
+build pam
+build -loadonly system_cmds
+build files
+build text_cmds
+build pam_modules
+build system_cmds
+build libsecurity_utilities
+build -headers libsecurityd
+build -headers libsecurity_agent
+build -headers libsecurity_apple_csp
+build -headers libsecurity_apple_cspdl
+build -headers libsecurity_apple_file_dl
+build -headers libsecurity_apple_x509_cl
+build -headers libsecurity_apple_x509_tp
+build -headers libsecurity_asn1
+build -headers libsecurity_authorization
+build -headers libsecurity_cdsa_client
+build -headers libsecurity_cdsa_plugin
+build -headers libsecurity_cdsa_utilities
+build -headers libsecurity_cdsa_utils
+build -headers libsecurity_checkpw
+build -headers libsecurity_cms
+build -headers libsecurity_codesigning
+build -headers libsecurity_cssm
+build -headers libsecurity_dotmacdl
+build -headers libsecurity_filedb
+build -headers libsecurity_filevault
+build -headers libsecurity_keychain
+build -headers libsecurity_ldap_dl
+build -headers libsecurity_manifest
+build -headers libsecurity_mds
+build -headers libsecurity_ocspd
+build -headers libsecurity_pkcs12
+build -headers libsecurity_sd_cspdl
+build -headers libsecurity_smime
+build -headers libsecurity_ssl
+build -headers libsecurity_utilities
+build -headers SecurityTokend
+build -headers security_dotmac_tp
+build libsecurityd
+build libsecurity_cdsa_utilities
+build -loadonly libsecurity_codesigning
+build libsecurity_cdsa_client
+build libsecurity_cdsa_plugin
+build libsecurity_asn1
+build libsecurity_cdsa_utils
+build libsecurity_ocspd
+build libsecurity_agent
+build libsecurity_checkpw
+build libsecurity_cms
+build libsecurity_smime
+build libsecurity_ssl
+build libsecurity_cssm
+build libsecurity_manifest
+build libsecurity_filedb
+build libsecurity_apple_file_dl
+build libsecurity_mds
+build libsecurity_sd_cspdl
+build -loadonly libsecurity_apple_csp
+build libsecurity_apple_x509_cl
+build libsecurity_apple_x509_tp
+build -loadonly libsecurity_keychain
+build libsecurity_pkcs12
+build libsecurity_apple_cspdl
+build -loadonly SecurityTokend
+build -loadonly securityd
+build libsecurity_authorization
+build libsecurity_apple_csp
+build libsecurity_keychain
+build DirectoryServiceMIG
+prepare D49
+build libsecurity_codesigning
+build Security
+prepare D60
+build IOSerialFamily
+build configd
+build DiskArbitration
+build notify
+build -headers AppleTalk
+prepare D59
+build configd_plugins
+build configd_executables
+build -headers IONetworkingFamily
+build IONetworkingFamily
+build AppleGMACEthernet
+build -loadonly network_cmds
+build -target=libipsec ipsec
+build network_cmds
+build libresolv
+build tcp_wrappers
+prepare D64 D67 D70
+build bootp
+build -headers CFOpenDirectory
+build -loadonly LDAPFramework
+build -headers DSPasswordServerFramework
+build -headers DirectoryService
+build -target=install_tcl tcl
+build SQLite
+build passwordserver_sasl
+build -loadonly DSPasswordServerFramework
+build LDAPFramework
+prepare D73
+build Kerberos
+build passwordserver_saslkerberos
+build DSPasswordServerFramework
+build OpenSSH
+build DirectoryService
+build DirectoryServiceDaemon
+build libmd
+build SystemStubs
+build grep
+build less
+build adv_cmds
+build syslog
+build ntp
+build vim
+build OpenSSL
+build SmartCardServices
+build -headers SmartCardServices
+build SecurityTokend
+prepare D82
+build securityd
+build -target=embedded launchd
+build IOKitTools
+build TimeZoneData
+build BootCache
+build hfs
+build IOSCSIArchitectureModelFamily 139.0.2
+build IOUSBMassStorageClass
+build -headers IOAudioFamily
+build IOAudioFamily
+build AppleI2S
+prepare D89
+build -loadonly AppleOnboardAudio
+build bless
+build isoutil
+build cddafs
+build -headers IOFireWireFamily
+build IOFireWireFamily
+build -headers IOFireWireSBP2
+build IOFireWireSBP2
+build IOFireWireSerialBusProtocolTransport
+build AppleOnboardAudio
+build msdosfs
+prepare D94
+build OpenOnyx 1.0
+build OpenPlay 1.0
+build -headers Libc_headers
+build Libc_headers
+build -headers architecture
+build architecture
+build -headers Librpcsvc
+build Librpcsvc
+build gcc
+build gcc_42
+build cctools
+build ld64
+build gcc_select
+build gnumake
+prepare D97 D98
+build ruby
+build perl
+build expat
+build libffi
+build -loadonly python
+build samba
+prepare D99
+build python
+build OpenSMU 1.0
+build SystemStubs

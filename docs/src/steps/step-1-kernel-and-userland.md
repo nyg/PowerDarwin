@@ -171,6 +171,7 @@ lipo: can't open replacement file: …/mach_kernel.sys.dSYM/./Contents/Resources
 - [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26): launchctl was built without Security.framework until [Step 6](step-6-securityd.md), which dropped the deviation.
 - [D27](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d27): kextcache no longer links the closed ApplicationServices, from which it uses nothing.
 - [D28](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d28): kextd no longer watches AppleRAID sets, which it did through `CFNotificationCenter`.
+- [D114](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d114): IOKitUser copies a display header from AppleDisplays and includes our CF's `CFBase.h`, but lists neither, so the build list gains both as dependencies. Both were put into the build environment by hand during this part, and the row was written only when the build was replayed from an empty folder.
 
 ## How it was proved
 

@@ -2,12 +2,13 @@
 set -euo pipefail
 
 all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82 D89 D94 D97 D98 D99"
-usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]  (steps: all, $all_steps)"
+usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]
+       prepare-buildroot --here=<build folder> [--check] [step...]
+       (steps: all, $all_steps)"
 
-on_mac() {
-   local host=${1:?$usage}
-   shift
-   local check= folder='$HOME/9L30' steps=()
+parse() {
+   check= folder= steps=()
+   local arg
    for arg in "$@"; do
       case $arg in
          --check) check=--check ;;
@@ -19,10 +20,12 @@ on_mac() {
       esac
    done
    [[ ${#steps[@]} -gt 0 ]] || steps=($all_steps)
+}
 
+make_stage() {
    local root
    root=$(cd "$(dirname "$0")/.." && pwd)
-   stage=$(mktemp -d)
+   stage=$(mktemp -d /tmp/prepare-buildroot.XXXXXX)
    trap 'rm -rf "$stage"' EXIT
    mkdir -p "$stage/scripts" "$stage/inputs" "$stage/manifest/plists"
    cp "$0" "$stage/scripts/prepare-buildroot"
@@ -36,7 +39,11 @@ on_mac() {
             local scsi=IOSCSIArchitectureModelFamily-139.0.2
             tar -xzOf "$root/sources/$scsi.tar.gz" "IOSCSIArchitectureModelFamily-$scsi/IOSCSIArchitectureModel/SCSITaskDefinition.h" > "$stage/inputs/SCSITaskDefinition.h" ;;
          D49)
-            JAVA=${JAVA:-$(/usr/libexec/java_home)/bin/java} "$root/env/antlr2/generate" "$stage/inputs/antlr2" ;;
+            if [[ -d $root/inputs/antlr2 ]]; then
+               cp -R "$root/inputs/antlr2" "$stage/inputs/antlr2"
+            else
+               JAVA=${JAVA:-$(/usr/libexec/java_home)/bin/java} "$root/env/antlr2/generate" "$stage/inputs/antlr2"
+            fi ;;
          D73)
             mkdir -p "$stage/inputs/CarbonHeaders"
             tar -xzf "$root/sources/CarbonHeaders-18.1.tar.gz" -C "$stage/inputs/CarbonHeaders" --strip-components 1 \
@@ -44,11 +51,29 @@ on_mac() {
                CarbonHeaders-CarbonHeaders-18.1/MacErrors.h CarbonHeaders-CarbonHeaders-18.1/MacTypes.h ;;
       esac
    done
+}
+
+on_mac() {
+   local host=${1:?$usage}
+   shift
+   parse "$@"
+   [[ -n $folder ]] || folder='$HOME/9L30'
+   make_stage
 
    local remote
    remote=$(ssh "$host" 'mktemp -d /tmp/prepare-buildroot.XXXXXX')
    COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $remote"
-   ssh "$host" "sudo /bin/bash $remote/scripts/prepare-buildroot --here \"$folder\" $check ${steps[*]}; status=\$?; sudo rm -rf $remote; exit \$status"
+   ssh "$host" "sudo /bin/bash $remote/scripts/prepare-buildroot --on-build-machine \"$folder\" $check ${steps[*]}; status=\$?; sudo rm -rf $remote; exit \$status"
+}
+
+on_here() {
+   local here_folder
+   here_folder=$(cd "${1#--here=}" && pwd)
+   shift
+   parse "$@"
+   make_stage
+   local run=(/bin/bash "$stage/scripts/prepare-buildroot" --on-build-machine "$here_folder" $check "${steps[@]}")
+   if [[ $(id -u) -eq 0 ]]; then "${run[@]}"; else sudo "${run[@]}"; fi
 }
 
 say() { printf '%-6s %s\n' "$1" "$2"; }
@@ -338,9 +363,8 @@ on_build_machine() {
    for step in "$@"; do "step_$step"; done
 }
 
-if [[ ${1:-} == --here ]]; then
-   shift
-   on_build_machine "$@"
-else
-   on_mac "$@"
-fi
+case ${1:-} in
+   --on-build-machine) shift; on_build_machine "$@" ;;
+   --here=*) on_here "$@" ;;
+   *) on_mac "$@" ;;
+esac

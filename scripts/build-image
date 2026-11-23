@@ -1,0 +1,190 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: sudo build-image [--folder=<build folder>]
+
+Run on a PowerPC Mac with Leopard 10.5.8 and Xcode 3.1.4, from the folder that
+download-kit made. Builds every project of manifest/build-order with darwinbuild
+in the build folder (default ~/9L30), then makes /private/var/tmp/PowerDarwin.dmg.
+Run it again after a failure: it goes on from the step that failed."
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+folder=$HOME/9L30
+for arg; do
+   case $arg in
+      --folder=*) folder=${arg#--folder=} ;;
+      *) echo "$usage" >&2; exit 1 ;;
+   esac
+done
+order=$root/manifest/build-order
+darwinbuild=/usr/local/bin/darwinbuild
+darwinbuild_tarball=$root/sources/darwinbuild-4848b7f5b223e094a26c413b451d27b938b0f2bd.tar.gz
+image=/private/var/tmp/PowerDarwin.dmg
+
+die() { echo "build-image: $*" >&2; exit 1; }
+say() { echo "$*" | tee -a "$log"; }
+minutes() { echo "$(( ($1 + 30) / 60 )) min"; }
+
+check_machine() {
+   [[ $(id -u) -eq 0 ]] || die "run it as root: sudo $0"
+   [[ $(uname -p) == powerpc ]] || die "it runs on a PowerPC Mac"
+   [[ $(sw_vers -productVersion) == 10.5* ]] || die "it needs Mac OS X 10.5 Leopard, not $(sw_vers -productVersion)"
+   /Developer/usr/bin/xcodebuild -version 2>/dev/null | grep -q 'Xcode 3\.1\.4' || die "it needs Xcode 3.1.4 in /Developer"
+   [[ -d $root/sources && -d $root/roots && -d $root/inputs/antlr2 ]] || die "no sources/, roots/ or inputs/antlr2/ in $root: run download-kit on a current computer and copy its kit here"
+   local free
+   free=$(df -k "$(dirname "$folder")" | awk 'NR == 2 { print int($4 / 1048576) }')
+   [[ $free -ge 40 ]] || die "it needs 40 GB free next to $folder, and there are $free GB"
+   local sleep_minutes
+   sleep_minutes=$(pmset -g | awk '$1 == "sleep" { print $2 }')
+   [[ ${sleep_minutes:-0} == 0 ]] || echo "build-image: this Mac sleeps after $sleep_minutes minutes of inactivity, which pauses the build; set Computer sleep to Never in Energy Saver"
+}
+
+verify_kit() {
+   echo "checking the SHA-256 of $(ls "$root/sources" | wc -l | tr -d ' ') sources and $(find "$root/roots" -name '*.tar.gz' | wc -l | tr -d ' ') Roots"
+   python - "$root/manifest/9L30.sha256" "$root/sources" "$root/manifest/9L30-roots.sha256" "$root/roots" <<'EOF'
+import hashlib, os, sys
+bad = 0
+for sums, base in zip(sys.argv[1::2], sys.argv[2::2]):
+    for line in open(sums):
+        digest, name = line.split(None, 1)
+        path = os.path.join(base, name.strip())
+        if not os.path.isfile(path):
+            sys.stdout.write('missing: %s\n' % path)
+            bad = 1
+            continue
+        h = hashlib.sha256()
+        f = open(path, 'rb')
+        chunk = f.read(1 << 20)
+        while chunk:
+            h.update(chunk)
+            chunk = f.read(1 << 20)
+        f.close()
+        if h.hexdigest() != digest:
+            sys.stdout.write('differs: %s\n' % path)
+            bad = 1
+sys.exit(bad)
+EOF
+}
+
+install_darwinbuild() {
+   [[ -x $darwinbuild ]] && return
+   echo "installing darwinbuild in /usr/local"
+   local work
+   work=$(mktemp -d /tmp/darwinbuild.XXXXXX)
+   tar -xzf "$darwinbuild_tarball" -C "$work"
+   make -C "$work"/darwinbuild-* > "$work.log" 2>&1 && make -C "$work"/darwinbuild-* install >> "$work.log" 2>&1 || die "darwinbuild did not build: see $work.log"
+   rm -rf "$work" "$work.log"
+}
+
+init_folder() {
+   [[ -f $folder/.build/xref.db ]] && return
+   echo "making the build folder $folder"
+   mkdir -p "$folder/.build"
+   cp "$root"/manifest/plists/*.plist "$folder/.build/"
+   (cd "$folder" && "$darwinbuild" -init 9L30)
+}
+
+source_of() {
+   local project=$1 version=$2 original
+   original=$(awk -F'\t' -v p="$project" '$1 == p { print $4 }' "$root/manifest/9L30-roots.tsv")
+   [[ -n $original ]] && project=$original
+   [[ -n $version ]] || version=$(awk -F'\t' -v p="$project" '$1 == p { print $2 }' "$root/manifest/9L30.tsv")
+   echo "$project=$version"
+}
+
+sources_needed() {
+   local kind arg names
+   while read -r kind rest; do
+      names=()
+      for arg in $rest; do
+         [[ $arg == -* ]] || names+=("$arg")
+      done
+      case $kind in
+         build|stage) source_of "${names[0]}" "${names[1]:-}" ;;
+      esac
+   done < "$order" | sort -u
+}
+
+ensure_buildroot() {
+   [[ -d $folder/BuildRoot/usr ]] && return
+   hdiutil attach "$folder/.build/buildroot.sparsebundle" -readwrite -owners on -nobrowse > /dev/null
+}
+
+run_build() {
+   local number=$1 out start status project newest
+   shift
+   out=$folder/Logs/build-image/$(printf '%03d' "$number")-$(echo "$*" | tr ' /=' '___').out
+   mkdir -p "$folder/Logs/build-image"
+   start=$(date +%s)
+   status=0
+   (cd "$folder" && "$darwinbuild" "$@" < /dev/null > "$out" 2>&1) || status=$?
+   if [[ $status -ne 0 ]]; then
+      for project; do [[ $project == -* ]] || break; done
+      newest=$(ls -t "$folder/Logs/$project"/* 2>/dev/null | head -1 || true)
+      say "failed, exit $status, after $(minutes $(( $(date +%s) - start ))): darwinbuild $*"
+      [[ -n $newest ]] && grep -m 5 -E 'error:|BUILD FAILED|\*\*\*' "$newest" | sed 's/^/   /' | tee -a "$log" || true
+      say "darwinbuild's log: ${newest:-$out}"
+      return 1
+   fi
+   say "   $(minutes $(( $(date +%s) - start )))"
+}
+
+run_prepare() {
+   local out status=0
+   ensure_buildroot
+   out=$("$root/scripts/prepare-buildroot" --here="$folder" "$@" < /dev/null 2>&1) || status=$?
+   echo "$out" | sed 's/^/   /' | tee -a "$log"
+   [[ $status -eq 0 ]] || return 1
+   if echo "$out" | grep -q 'waiting:'; then
+      say "a step is waiting for something not built yet: manifest/build-order has it too early"
+      return 1
+   fi
+}
+
+check_machine
+install_darwinbuild
+init_folder
+progress=$folder/.build/build-image.progress
+log=$folder/build-image.log
+touch "$progress" "$log"
+
+if ! grep -qx 'kit checked' "$progress"; then
+   verify_kit || die "the kit differs from manifest/: run download-kit again"
+   echo 'kit checked' >> "$progress"
+fi
+if ! grep -qx 'sources staged' "$progress"; then
+   sources_needed | xargs "$root/scripts/stage-sources" --here="$folder" > "$folder/stage-sources.log" 2>&1 || die "staging failed: see $folder/stage-sources.log"
+   echo "staged $(grep -c '^[^ ]' "$folder/stage-sources.log") sources in $folder/Sources"
+   echo 'sources staged' >> "$progress"
+fi
+if ! grep -qx 'roots staged' "$progress"; then
+   count=$("$root/scripts/stage-roots" --here="$folder") || die "a Root is missing from $root/roots: run download-kit again"
+   echo "copied $(echo $count) Roots into $folder/Roots/.DownloadCache"
+   echo 'roots staged' >> "$progress"
+fi
+
+total=$(grep -cvE '^stage ' "$order")
+number=0
+while read -r kind rest; do
+   [[ $kind == stage ]] && continue
+   number=$((number + 1))
+   done_line=$(grep -m 1 "^$number"$'\t' "$progress" || true)
+   if [[ -n $done_line ]]; then
+      [[ $done_line == "$number"$'\t'"$kind $rest" ]] || die "step $number of manifest/build-order is now '$kind $rest', but '${done_line#*$'\t'}' was done there: use a new build folder"
+      continue
+   fi
+   say "[$number/$total] $(date '+%H:%M') $kind $rest"
+   case $kind in
+      build) run_build "$number" $rest || exit 1 ;;
+      prepare) run_prepare $rest || exit 1 ;;
+      *) die "unknown step in manifest/build-order: $kind $rest" ;;
+   esac
+   printf '%s\t%s %s\n' "$number" "$kind" "$rest" >> "$progress"
+done < "$order"
+
+say "$(date '+%H:%M') making $image"
+"$root/scripts/make-test-image" --folder="$folder" > "$folder/make-test-image.log" 2>&1 || die "make-test-image failed: see $folder/make-test-image.log"
+say "$(date '+%H:%M') checking it against the Roots"
+"$root/scripts/check-image" "$image" "$folder" > "$folder/check-image.log" 2>&1 || die "check-image failed: see $folder/check-image.log"
+say "$(head -1 "$folder/check-image.log") $(( $(wc -l < "$folder/check-image.log") - 1 )), listed in $folder/check-image.log; only the files make-test-image writes may be there"
+say "done: $image. Install it with: sudo $root/scripts/install-image"

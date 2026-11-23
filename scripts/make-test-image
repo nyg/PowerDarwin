@@ -1,10 +1,25 @@
 #!/bin/sh
 set -e
 
-roots=~/9L30/Roots
-image=/private/var/tmp/darwin9-step1
-mount=/Volumes/Darwin9-image
-root_hash=~/9L30/root-password.hash
+usage="usage: make-test-image [--folder=<build folder>] [--ntp-server=<host>] [--time-zone=<zone>]"
+folder=~/9L30
+ntp_server=$(sed -n 's/^server[[:space:]]*\([^[:space:]]*\).*/\1/p' /etc/ntp.conf 2>/dev/null | head -1)
+[ -n "$ntp_server" ] || ntp_server=time.apple.com
+zone=$(readlink /etc/localtime || true)
+zone=${zone#/usr/share/zoneinfo/}
+for arg; do
+   case $arg in
+      --folder=*) folder=${arg#--folder=} ;;
+      --ntp-server=*) ntp_server=${arg#--ntp-server=} ;;
+      --time-zone=*) zone=${arg#--time-zone=} ;;
+      *) echo "$usage" >&2; exit 1 ;;
+   esac
+done
+roots=$folder/Roots
+sources=$folder/Sources
+image=/private/var/tmp/PowerDarwin
+mount=/Volumes/PowerDarwin-image
+root_hash=$folder/root-password.hash
 userland_projects="Libm dyld bash ncurses libiconv libgcc bsm libutil libedit file_cmds shell_cmds diskdev_cmds IOKitUser ICU objc4 autozone libstdcxx zlib Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay Csu SystemStubs cctools ld64 gcc gcc_42 gcc_select gnumake perl expat libffi python ruby samba"
 header_projects="Libc_headers architecture Librpcsvc Libsyscall Libinfo Libm libdyld launchd_libs CommonCrypto removefile copyfile Libnotify bsm mDNSResponder cctools_ofiles objc4"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU IOSCSIArchitectureModelFamily IOUSBMassStorageClass IOAudioFamily AppleI2S AppleOnboardAudio OpenOnyx"
@@ -16,7 +31,7 @@ for project in $userland_projects xnu kext_tools $header_projects $kext_projects
 done
 
 rm -f $image.dmg $image.cdr $image.cdr.gz
-hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname Darwin9 $image.dmg
+hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname PowerDarwin $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
 
 for project in $userland_projects; do
@@ -28,7 +43,7 @@ for project in $header_projects; do
    sudo ditto "$(latest $project)/usr/include" $mount/usr/include
 done
 carbon=$(mktemp -d /tmp/carbonheaders.XXXXXX)
-make -s -C ~/9L30/Sources/CarbonHeaders-18.1 install DSTROOT=$carbon KERNEL_SYLINKS= DO_CARBON_CORE_FILES=install_carbon_core_headers
+make -s -C $sources/CarbonHeaders-18.1 install DSTROOT=$carbon KERNEL_SYLINKS= DO_CARBON_CORE_FILES=install_carbon_core_headers
 sudo ditto $carbon/usr/include $mount/usr/include
 core_services=$mount/System/Library/Frameworks/CoreServices.framework
 carbon_core=$core_services/Versions/A/Frameworks/CarbonCore.framework
@@ -62,13 +77,12 @@ sudo ditto "$(latest BootX)" $mount
 sudo mkdir -p $mount/System/Library/CoreServices
 
 sudo mkdir -p $mount/Volumes $mount/Library/Preferences/SystemConfiguration
-sudo install -m 644 ~/9L30/Sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
-sudo install -m 644 ~/9L30/Sources/launchd-258.25/launchd/src/rc.common ~/9L30/Sources/launchd-258.25/launchd/src/hostconfig $mount/private/etc/
+sudo install -m 644 $sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
+sudo install -m 644 $sources/launchd-258.25/launchd/src/rc.common $sources/launchd-258.25/launchd/src/hostconfig $mount/private/etc/
 sudo sed -i '' "/<key>Disabled<\/key>/{n;s|<true/>|<false/>|;}" $mount/System/Library/LaunchDaemons/ssh.plist
-zone=$(readlink /etc/localtime || true)
-[ -f "$mount$zone" ] || zone=/usr/share/zoneinfo/UTC
-sudo ln -sfh "$zone" $mount/private/etc/localtime
-echo "server time.euro.apple.com" | sudo tee $mount/private/etc/ntp.conf > /dev/null
+[ -f "$mount/usr/share/zoneinfo/$zone" ] || zone=UTC
+sudo ln -sfh "/usr/share/zoneinfo/$zone" $mount/private/etc/localtime
+echo "server $ntp_server" | sudo tee $mount/private/etc/ntp.conf > /dev/null
 sudo mkdir -p $mount/private/var/db/dyld/shared_region_roots
 printf '%s\n' /bin/sh /bin/bash /usr/sbin/configd /usr/sbin/DirectoryService /usr/sbin/sshd | sudo tee $mount/private/var/db/dyld/shared_region_roots/Darwin.paths > /dev/null
 if [ -f $root_hash ]; then

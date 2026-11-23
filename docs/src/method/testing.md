@@ -60,7 +60,7 @@ What QEMU cannot prove is anything about the iMac. `mac99` is a G4 with a PMU, a
 
 A real Mac is the only bench that tests the drivers of real hardware, its firmware, and the timing of a real boot. The project's test Mac is the iMac, the reference machine on which every step from Step 1 on was proved.
 
-The image goes onto a spare partition of the iMac's disk, at least as large as the image, named `Darwin9`, beside Leopard's own. Leopard, started on the iMac, copies the image onto that partition with `asr`, Apple Software Restore.
+The image goes onto a spare partition of the iMac's disk, at least as large as the image, named `Darwin9`, beside Leopard's own. Leopard, started on the iMac, copies the image onto that partition with `asr`, Apple Software Restore, as `install-image` now does on any PowerPC Mac ([Making the image](making-the-image.md)).
 
 Three ways start the iMac from `Darwin9`:
 
