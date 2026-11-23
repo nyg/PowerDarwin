@@ -1,0 +1,226 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: sudo install-image [--image=<image.dmg>]
+          [--shrink=<volume> --size=<size> | --partition=<partition> | --disk=<disk>]
+          [--time-zone=<zone>] [--ntp-server=<host>] [--startup-disk | --no-startup-disk] [--yes]
+
+Run on a PowerPC Mac under Leopard. Restores the image that build-image made
+(default /private/var/tmp/PowerDarwin.dmg) onto one partition, then sets its time
+zone, NTP server and root password. The partition is either a new one, made by
+shrinking a Journaled HFS+ volume that keeps its files (--shrink, such as
+--shrink=disk0s3 --size=10G), an existing one that is erased (--partition=disk0s4),
+or a whole disk that is erased (--disk=disk1). It asks for what the options do not
+give, and reads root's password from the terminal."
+
+image=/private/var/tmp/PowerDarwin.dmg
+mode= device= size= zone= ntp_server= startup= yes=
+for arg; do
+   case $arg in
+      --image=*) image=${arg#--image=} ;;
+      --shrink=*) mode=shrink device=${arg#--shrink=} ;;
+      --size=*) size=${arg#--size=} ;;
+      --partition=*) mode=partition device=${arg#--partition=} ;;
+      --disk=*) mode=disk device=${arg#--disk=} ;;
+      --time-zone=*) zone=${arg#--time-zone=} ;;
+      --ntp-server=*) ntp_server=${arg#--ntp-server=} ;;
+      --startup-disk) startup=yes ;;
+      --no-startup-disk) startup=no ;;
+      --yes) yes=1 ;;
+      *) echo "$usage" >&2; exit 1 ;;
+   esac
+done
+device=${device#/dev/}
+minimum=$((2 * 1024 * 1024 * 1024))
+
+die() { echo "install-image: $*" >&2; exit 1; }
+info() { diskutil info "$1" 2>/dev/null | sed -n "s|^ *$2: *||p" | head -1; }
+bytes() { info "$1" 'Total Size' | sed -n 's/.*(\([0-9]*\) B).*/\1/p'; }
+gigabytes() { awk -v b="$1" 'BEGIN { printf "%.1f GB", b / 1073741824 }'; }
+describe() { echo "$1 ($(info "$1" 'Volume Name'), $(gigabytes "$(bytes "$1")"))"; }
+partitions_of() { diskutil list "$1" | awk '$NF ~ /^disk[0-9]+s[0-9]+$/ { print $NF }'; }
+device_of() { df "$1" | awk 'NR == 2 { sub("^/dev/", "", $1); print $1 }'; }
+uuids_on() { local part; for part in $(partitions_of "$1"); do info "$part" 'Volume UUID'; done; }
+with_uuid() { local part; for part in $(partitions_of "$1"); do if [[ $(info "$part" 'Volume UUID') == "$2" ]]; then echo "$part"; fi; done; }
+
+new_powerdarwin_on() {
+   local part uuid
+   for part in $(partitions_of "$1"); do
+      uuid=$(info "$part" 'Volume UUID')
+      if [[ -n $uuid && $(info "$part" 'Volume Name') == PowerDarwin ]] && ! echo "$2" | grep -qx "$uuid"; then echo "$part"; fi
+   done
+}
+
+ask() {
+   local prompt=$1 default=${2:-} answer
+   if [[ -n $default ]]; then read -r -p "$prompt [$default]: " answer || true; else read -r -p "$prompt: " answer || true; fi
+   echo "${answer:-$default}"
+}
+
+to_bytes() {
+   awk -v s="$1" 'BEGIN {
+      n = s + 0; u = toupper(substr(s, length(s)))
+      if (u == "G") n *= 1024 * 1024 * 1024; else if (u == "M") n *= 1024 * 1024; else if (u == "T") n *= 1024 * 1024 * 1024 * 1024
+      printf "%.0f", n
+   }'
+}
+
+check_apm() {
+   local whole
+   whole=$(info "$1" 'Part Of Whole')
+   [[ $(info "$whole" 'Partition Type') == Apple_partition_scheme ]] || die "$whole has no Apple partition map, which a PowerPC Mac needs to start from it"
+}
+
+check_not_in_use() {
+   local protected
+   for protected in "$(device_of /)" "$(device_of "$image")" "$(device_of "$0")"; do
+      [[ $1 != "$protected" ]] || die "$(describe "$1") holds the running system, the image or this script"
+      [[ $1 != "${protected%s*}" ]] || die "$1 holds the running system, the image or this script"
+   done
+}
+
+[[ $(id -u) -eq 0 ]] || die "run it as root: sudo $0"
+[[ $(sw_vers -productVersion) == 10.5* ]] || die "it runs under Mac OS X 10.5 Leopard"
+[[ -f $image ]] || die "no image at $image: make it with build-image, or give --image"
+
+if [[ -z $mode ]]; then
+   diskutil list
+   echo
+   echo "Where should PowerDarwin go?"
+   echo "  1. on a new partition, made by shrinking a Journaled HFS+ volume, which keeps its files"
+   echo "  2. on an existing partition, which is erased"
+   echo "  3. on a whole disk, which is erased"
+   case $(ask "1, 2 or 3") in
+      1) mode=shrink device=$(ask "volume to shrink (its identifier, such as disk0s3)") ;;
+      2) mode=partition device=$(ask "partition to erase (such as disk0s4)") ;;
+      3) mode=disk device=$(ask "disk to erase (such as disk1)") ;;
+      *) die "no choice made" ;;
+   esac
+fi
+[[ -n $(info "$device" 'Device Identifier') ]] || die "no disk or partition named $device"
+
+case $mode in
+   shrink)
+      [[ $device =~ ^disk[0-9]+s[0-9]+$ ]] || die "$device is not a volume"
+      check_apm "$device"
+      [[ $(info "$device" 'File System') == 'Journaled HFS+' ]] || die "$(describe "$device") is not Journaled HFS+, the only kind diskutil can shrink"
+      [[ -n $size ]] || size=$(ask "size of the new partition" 10G)
+      wanted=$(to_bytes "$size")
+      [[ $wanted -ge $minimum ]] || die "PowerDarwin needs at least 2G"
+      current=$(bytes "$device")
+      smallest=$(diskutil resizeVolume "$device" limits | awk '/Minimum size/ { print $3 }')
+      keep=$((current - wanted))
+      [[ $keep -ge $smallest ]] || die "$(describe "$device") cannot shrink below $(gigabytes "$smallest"): ask for less than $(gigabytes $((current - smallest)))"
+      plan="PowerDarwin goes onto a new partition of $(gigabytes "$wanted") taken from the end of $(describe "$device"), which keeps its files and shrinks to $(gigabytes "$keep")." ;;
+   partition)
+      [[ $device =~ ^disk[0-9]+s[0-9]+$ ]] || die "$device is not a partition"
+      check_apm "$device"
+      check_not_in_use "$device"
+      [[ $(bytes "$device") -ge $minimum ]] || die "$(describe "$device") is smaller than the 2G PowerDarwin needs"
+      plan="PowerDarwin replaces everything on $(describe "$device")." ;;
+   disk)
+      [[ $device =~ ^disk[0-9]+$ ]] || die "$device is not a whole disk"
+      check_not_in_use "$device"
+      plan="PowerDarwin replaces everything on the whole disk $device ($(info "$device" 'Device / Media Name'), $(gigabytes "$(bytes "$device")")): all of its partitions are erased. A PowerPC Mac starts it from an internal or FireWire disk; starting from USB is Step 11, not reached yet." ;;
+esac
+
+host_zone=$(readlink /etc/localtime 2>/dev/null || true)
+host_zone=${host_zone#/usr/share/zoneinfo/}
+[[ -n $zone ]] || zone=$(ask "time zone, from /usr/share/zoneinfo" "${host_zone:-UTC}")
+[[ -f /usr/share/zoneinfo/$zone ]] || die "no time zone $zone in /usr/share/zoneinfo"
+host_ntp=$(sed -n 's/^server[[:space:]]*\([^[:space:]]*\).*/\1/p' /etc/ntp.conf 2>/dev/null | head -1)
+[[ -n $ntp_server ]] || ntp_server=$(ask "NTP server" "${host_ntp:-time.apple.com}")
+[[ $ntp_server =~ ^[A-Za-z0-9.:-]+$ ]] || die "$ntp_server is not a host name or address"
+read -r -s -p "root's password on PowerDarwin: " password || die "no password given"; echo
+read -r -s -p "the same again: " again || die "no password given"; echo
+[[ -n $password ]] || die "root needs a password to log in"
+[[ $password == "$again" ]] || die "the two passwords differ"
+[[ ${#password} -le 8 ]] || echo "install-image: only its first 8 characters count, as Darwin 9 keeps root's password as a DES crypt hash"
+[[ -n $startup ]] || case $(ask "make PowerDarwin the startup disk (y or n)" n) in y|Y|yes) startup=yes ;; *) startup=no ;; esac
+
+echo
+echo "$plan"
+echo "Time zone $zone, NTP server $ntp_server, and $([[ $startup == yes ]] && echo "it becomes the startup disk" || echo "the startup disk stays as it is")."
+if [[ -z $yes ]]; then
+   [[ $(ask "type yes to go on") == yes ]] || die "nothing was changed"
+fi
+
+asr_image=${image%.dmg}-asr.dmg
+if [[ ! -f $asr_image || $asr_image -ot $image ]]; then
+   echo "preparing $asr_image for asr"
+   hdiutil convert "$image" -format UDZO -ov -o "$asr_image" > /dev/null
+   asr imagescan --source "$asr_image" > /dev/null
+fi
+
+boot=$(bless --getBoot 2>/dev/null || true)
+boot=${boot#/dev/}
+boot_uuid=
+[[ -n $boot ]] && boot_uuid=$(info "$boot" 'Volume UUID')
+
+keep_startup_disk() {
+   local moved
+   [[ -n $boot_uuid && $(info "$boot" 'Part Of Whole') == "$1" ]] || return 0
+   moved=$(with_uuid "$1" "$boot_uuid")
+   if [[ -n $moved && $moved != "$boot" ]]; then
+      bless --mount "$(info "$moved" 'Mount Point')" --setOF
+      echo "the startup volume $(info "$moved" 'Volume Name') moved from $boot to $moved: made it the startup disk again"
+   fi
+}
+
+case $mode in
+   shrink)
+      whole=$(info "$device" 'Part Of Whole')
+      before=$(uuids_on "$whole")
+      diskutil resizeVolume "$device" "$((keep / 512))S" JHFS+ PowerDarwin "$((wanted / 512))S"
+      target=$(new_powerdarwin_on "$whole" "$before" | tail -1)
+      [[ -n $target ]] || die "diskutil made no new partition on $whole"
+      keep_startup_disk "$whole" ;;
+   partition)
+      [[ -n $(info "$device" 'Mount Point') ]] || diskutil mount "$device" > /dev/null 2>&1 || true
+      if [[ $(info "$device" 'File System') == *HFS* && -n $(info "$device" 'Mount Point') ]]; then
+         target=$device
+      else
+         whole=$(info "$device" 'Part Of Whole')
+         before=$(uuids_on "$whole")
+         diskutil eraseVolume 'Journaled HFS+' PowerDarwin "$device"
+         target=$(new_powerdarwin_on "$whole" "$before" | tail -1)
+         [[ -n $target ]] || die "diskutil made no PowerDarwin volume on $whole"
+         keep_startup_disk "$whole"
+      fi ;;
+   disk)
+      diskutil partitionDisk "$device" 1 APMFormat 'Journaled HFS+' PowerDarwin 100%
+      target=$(new_powerdarwin_on "$device" "" | tail -1)
+      [[ -n $target ]] || die "diskutil made no PowerDarwin partition on $device" ;;
+esac
+
+mount_point=$(info "$target" 'Mount Point')
+[[ -n $mount_point ]] || { diskutil mount "$target" > /dev/null; mount_point=$(info "$target" 'Mount Point'); }
+echo "restoring the image onto $target"
+asr restore --source "$asr_image" --target "$mount_point" --erase --noprompt
+mount_point=$(info "$target" 'Mount Point')
+[[ -n $mount_point ]] || { diskutil mount "$target" > /dev/null; mount_point=$(info "$target" 'Mount Point'); }
+[[ -n $mount_point ]] || die "$target does not mount after the restore"
+vsdbutil -a "$mount_point"
+
+[[ -f $mount_point/usr/share/zoneinfo/$zone ]] || die "the image has no time zone $zone"
+ln -sfh "/usr/share/zoneinfo/$zone" "$mount_point/private/etc/localtime"
+echo "server $ntp_server" > "$mount_point/private/etc/ntp.conf"
+chmod 644 "$mount_point/private/etc/ntp.conf"
+hash=$(printf '%s\n' "$password" | openssl passwd -crypt -stdin)
+sed -i '' "s|^root:[^:]*:|root:$hash:|" "$mount_point/private/etc/master.passwd"
+/usr/libexec/PlistBuddy -c "Set :passwd:0 $hash" "$mount_point/private/var/db/dslocal/nodes/Default/users/root.plist"
+
+if [[ $startup == yes ]]; then
+   bless --mount "$mount_point" --setOF
+fi
+
+startup_volume=$(info / 'Volume Name')
+cat <<EOF
+
+PowerDarwin is on $target, mounted at $mount_point.
+$(if [[ $startup == yes ]]; then echo "It is the startup disk: restart to start it."; else echo "To start it, restart holding Option and choose it in the Startup Manager."; fi)
+Log in as root, on the console or over SSH, which is on: a current OpenSSH client needs
+   ssh -o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1 root@<its address>
+To make $startup_volume the startup disk again, run this on PowerDarwin, then reboot:
+   bless --mount "/Volumes/$startup_volume" --setOF
+EOF
