@@ -2,11 +2,15 @@ stage CarbonHeaders 18.1
 build bootstrap_cmds
 prepare D4
 build file_cmds
+build -loadonly launchd
 build -headers -target=launchd_libs launchd_libs
 prepare D5
 build shell_cmds
+build -loadonly kext_tools
+build -loadonly IOKitUser
 prepare D6 D7
 build xnu
+build -loadonly Libsystem
 build Csu
 build keymgr
 build removefile
@@ -15,6 +19,8 @@ build copyfile
 build CommonCrypto
 build Libnotify
 build launchd_libs
+build -loadonly mDNSResponder
+build -loadonly Libinfo
 build Libm
 build project_makefiles
 prepare D9
@@ -30,12 +36,15 @@ build Libc_debug
 build Libc_profile
 prepare D13 D14 D15
 build Libsystem
+build -loadonly libgcc
 build libiconv
 build bsm
 build libutil
 build libedit
 build bash
 build dyld
+build -loadonly launchd
+build -loadonly diskdev_cmds
 build libgcc
 build -headers IOBDStorageFamily
 prepare D18
@@ -67,6 +76,7 @@ build KeyLargoATA
 build AppleFileSystemDriver
 build IOI2CFamily
 build AppleGPIO
+build -loadonly IOUSBFamily
 prepare D30
 build -headers IOHIDFamily
 build -headers IOUSBFamily
@@ -83,16 +93,18 @@ prepare D36 D37
 build BootX
 build AppleK2SATARoot
 build AppleK2SATA
+build -headers IOGraphics
+build -loadonly IOGraphics
 build AppleMacRISC4PE
 build AppleFlashNVRAM
 build AppleI2C
-build -headers IOGraphics
 build IOGraphics
 build -headers IOATABlockStorage 130.3.1
 prepare D40
 build IOATABlockStorage 130.3.1
 build IOATAPIProtocolTransport
 build pam
+build -loadonly system_cmds
 build files
 build text_cmds
 build pam_modules
@@ -133,6 +145,7 @@ build -headers SecurityTokend
 build -headers security_dotmac_tp
 build libsecurityd
 build libsecurity_cdsa_utilities
+build -loadonly libsecurity_codesigning
 build libsecurity_cdsa_client
 build libsecurity_cdsa_plugin
 build libsecurity_asn1
@@ -149,14 +162,19 @@ build libsecurity_filedb
 build libsecurity_apple_file_dl
 build libsecurity_mds
 build libsecurity_sd_cspdl
+build -loadonly libsecurity_apple_csp
 build libsecurity_apple_x509_cl
 build libsecurity_apple_x509_tp
+build -loadonly libsecurity_keychain
 build libsecurity_pkcs12
 build libsecurity_apple_cspdl
+build -loadonly SecurityTokend
+build -loadonly securityd
 build libsecurity_authorization
 build libsecurity_apple_csp
 build libsecurity_keychain
 build DirectoryServiceMIG
+build -loadonly Security
 prepare D49
 build libsecurity_codesigning
 build Security
@@ -172,6 +190,7 @@ build configd_executables
 build -headers IONetworkingFamily
 build IONetworkingFamily
 build AppleGMACEthernet
+build -loadonly network_cmds
 build -target=libipsec ipsec
 build network_cmds
 build libresolv
@@ -179,11 +198,13 @@ build tcp_wrappers
 prepare D64 D67 D70
 build bootp
 build -headers CFOpenDirectory
+build -loadonly LDAPFramework
 build -headers DSPasswordServerFramework
 build -headers DirectoryService
 build -target=install_tcl tcl
 build SQLite
 build passwordserver_sasl
+build -loadonly DSPasswordServerFramework
 build LDAPFramework
 prepare D73
 build Kerberos
@@ -217,6 +238,7 @@ build -headers IOAudioFamily
 build IOAudioFamily
 build AppleI2S
 prepare D89
+build -loadonly AppleOnboardAudio
 build bless
 build isoutil
 build cddafs
@@ -247,6 +269,7 @@ build ruby
 build perl
 build expat
 build libffi
+build -loadonly python
 build samba
 prepare D99
 build python
