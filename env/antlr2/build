@@ -2,7 +2,7 @@
 set -e
 
 top=${1:?usage: build-antlr2 <folder made by generate>}
-arches="-arch ppc -arch ppc64 -arch i386 -arch x86_64"
+arches="-arch ppc -arch ppc64"
 objects=$top/src/antlr2/obj
 
 mkdir -p "$objects" "$top/usr/local/lib"

@@ -294,7 +294,7 @@ Byte order matters wherever bytes cross between two machines or two parts of one
 
 A 32-bit processor works on 32-bit numbers and addresses, so a program can reach 4 GB of virtual memory. A 64-bit processor works on 64-bit ones. The G4 is a 32-bit processor; the G5, IBM's PowerPC 970 family, is a 64-bit processor that also runs 32-bit code.
 
-Leopard's kernel on PowerPC is a 32-bit program even on a G5, and so is ours: its version string ends in `RELEASE_PPC`. Programs can be 64-bit on a G5, and libSystem, Darwin's C library, is built for both. A Mach-O file can hold several builds of the same program for different processors, one slice each, in one fat binary; the image's `libSystem.B.dylib` has four slices, `ppc7400 ppc64 i386 x86_64`, and its `mach_kernel` two, `i386 ppc`. [PowerPC Macs](powerpc-macs.md) explains the PowerPC slices.
+Leopard's kernel on PowerPC is a 32-bit program even on a G5, and so is ours: its version string ends in `RELEASE_PPC`. Programs can be 64-bit on a G5, and libSystem, Darwin's C library, is built for both. A Mach-O file can hold several builds of the same program for different processors, one slice each, in one fat binary. Until [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115), the image's `libSystem.B.dylib` had four slices, `ppc7400 ppc64 i386 x86_64`, and its `mach_kernel` two, `i386 ppc`; D115 keeps only the PowerPC ones. [PowerPC Macs](powerpc-macs.md) explains the PowerPC slices.
 
 Where Darwin uses this: [PowerPC Macs](powerpc-macs.md) for the slices; [darwinbuild](../method/darwinbuild.md) for `RC_ARCHS` and how fat binaries are built; [Step 5](../steps/step-5-clock-and-power.md) for a 32-bit `long` that overflowed in 1972.
 

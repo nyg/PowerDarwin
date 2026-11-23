@@ -53,7 +53,7 @@ This lets anyone read, from a driver installed on a running Leopard, which proje
 
 A list of project versions for one build is a build list. darwinbuild, the tool that builds Darwin projects and the subject of [the next chapter](darwinbuild.md), keeps one per build, as a property list: a text file of nested dictionaries and lists in the old NeXT format that Apple's tools still read. darwinbuild's own repository holds the nine of Leopard, and [manifest/plists/](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/) holds a copy of each.
 
-The first, `9A581.plist`, is long: it names every project of 10.5.0, with its version and the projects it depends on, and sets the build environment that darwinbuild gives every build, such as `RC_ARCHS = "ppc i386"`, the processors to build for. Every later list is short. It names only the projects whose version changed in that update, and says which list it builds on, with the key `inherits`. This is the whole of `9B18.plist`, 10.5.1, but for seven of its nine projects:
+The first, `9A581.plist`, is long: it names every project of 10.5.0, with its version and the projects it depends on, and sets the build environment that darwinbuild gives every build, such as `RC_ARCHS`, the processors to build for: `ppc i386` in Apple's list, `ppc` in this project's copy ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)). Every later list is short. It names only the projects whose version changed in that update, and says which list it builds on, with the key `inherits`. This is the whole of `9B18.plist`, 10.5.1, but for seven of its nine projects:
 
 ```text
 {

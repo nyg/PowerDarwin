@@ -9,7 +9,7 @@
 		INSTALLED_PRODUCT_ASIDES = YES;
 		MACOSX_DEPLOYMENT_TARGET = 10.5;
 		NEXT_ROOT = "";
-		RC_ARCHS = "ppc i386";
+		RC_ARCHS = ppc;
 		RC_JASPER = YES;
 		RC_NONARCH_CFLAGS = "-pipe -no-cpp-precomp";
 		RC_OS = macos;
@@ -1321,13 +1321,13 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 476;
 		};
 		CFNetwork = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 219;
 		};
@@ -1368,7 +1368,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = OpenDirectory;
 			target = CFOpenDirectory;
@@ -1443,7 +1443,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 20;
 		};
@@ -1624,7 +1624,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32207;
 		};
@@ -1659,7 +1659,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 30889;
 		};
@@ -1681,7 +1681,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 75;
 		};
@@ -1795,7 +1795,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = DSPasswordServerPlugin;
 			target = PasswordServerFramework;
@@ -1913,7 +1913,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 109;
 		};
@@ -2080,7 +2080,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = DirectoryService;
 			target = DirectoryServiceMIG;
@@ -2140,7 +2140,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 182;
 		};
@@ -2183,7 +2183,7 @@
 		};
 		FastCGI = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 4;
 		};
@@ -2214,7 +2214,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 8.11;
 		};
@@ -2517,7 +2517,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 221.4.0;
 		};
@@ -2559,7 +2559,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 338.4.0;
 		};
@@ -2625,7 +2625,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 197.4.0;
 		};
@@ -2729,7 +2729,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 247;
 		};
@@ -2776,7 +2776,7 @@
 		};
 		IOKitUser = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
                         dependencies = {
                                 build = (
@@ -3153,7 +3153,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 75.9;
 		};
@@ -3286,7 +3286,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = OpenLDAP;
 		};
@@ -3327,7 +3327,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 498;
 		};
@@ -3368,7 +3368,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = Libc;
 			target = install;
@@ -3441,7 +3441,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = Libc;
 			target = install;
@@ -3496,7 +3496,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 278;
 		};
@@ -3525,7 +3525,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			target = libm;
 			version = 287.1;
@@ -3563,7 +3563,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = Libm;
 			target = libmx;
@@ -3595,7 +3595,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 35;
 		};
@@ -3684,7 +3684,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = xnu;
 		};
@@ -3734,7 +3734,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 111;
 		};
@@ -3760,7 +3760,7 @@
 		};
 		MySQL = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 43;
 		};
@@ -3816,7 +3816,7 @@
 		};
 		OpenAL = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29;
 		};
@@ -3857,7 +3857,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 39;
 		};
@@ -4087,7 +4087,7 @@
 		};
 		OpenSSL = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 46;
 		};
@@ -4246,7 +4246,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 57;
 		};
@@ -4300,7 +4300,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 25;
 		};
@@ -4321,7 +4321,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 45;
 		};
@@ -4360,7 +4360,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 31122;
 		};
@@ -4514,7 +4514,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 6;
 		};
@@ -4688,7 +4688,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 21;
 		};
@@ -4718,7 +4718,7 @@
 		};
 		WebCore = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 5523.10.3;
 		};
@@ -4821,7 +4821,7 @@
 		};
 		X11libs = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 16;
 		};
@@ -4869,7 +4869,7 @@
 		};
 		X11proto = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 14;
 		};
@@ -5025,7 +5025,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 729;
 		};
@@ -5077,7 +5077,7 @@
 		};
 		apache_mod_bonjour = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 9;
 		};
@@ -5121,19 +5121,19 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 3;
 		};
 		apache_mod_hfs_apple = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 7;
 		};
 		apache_mod_perl = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 101;
 		};
@@ -5142,7 +5142,7 @@
 		};
 		apache_mod_php = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 43;
 		};
@@ -5362,7 +5362,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "i386 x86_64 ppc ppc64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 77.1;
 		};
@@ -5711,7 +5711,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 60;
 		};
@@ -5893,13 +5893,13 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 13;
 		};
 		bzip2 = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 16;
 		};
@@ -5975,7 +5975,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = cctools;
 			target = ofiles_install;
@@ -6138,7 +6138,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			target = configd_base;
 			version = 204;
@@ -6272,7 +6272,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 41;
 		};
@@ -6404,14 +6404,14 @@
 		};
 		cups = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			target = installfat;
 			version = 136;
 		};
 		curl = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 42;
 		};
@@ -6862,7 +6862,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 48;
 		};
@@ -6909,7 +6909,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			target = dyld;
 			version = 95.3;
@@ -6961,7 +6961,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 49;
 		};
@@ -7127,7 +7127,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 6;
 		};
@@ -7344,7 +7344,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 20.3;
 		};
@@ -8411,7 +8411,7 @@
 		};
 		gutenprint = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 5;
 		};
@@ -8493,7 +8493,7 @@
 		};
 		iodbc = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 34;
 		};
@@ -8689,7 +8689,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 18;
 		};
@@ -8831,7 +8831,7 @@
 		};
 		launchd_libs = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = launchd;
 			target = launchd_libs;
@@ -8943,14 +8943,14 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = dyld;
 			target = libdyld;
 		};
 		libedit = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 11;
 		};
@@ -8985,7 +8985,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 10;
 		};
@@ -9011,7 +9011,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 7;
 		};
@@ -9125,7 +9125,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 24;
 		};
@@ -9151,13 +9151,13 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 2;
 		};
 		libpcap = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 18;
 		};
@@ -9201,7 +9201,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 19;
 		};
@@ -9213,7 +9213,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32091.1;
 		};
@@ -9229,7 +9229,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32567;
 		};
@@ -9245,7 +9245,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32466;
 		};
@@ -9257,7 +9257,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29159;
 		};
@@ -9271,7 +9271,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29856;
 		};
@@ -9286,7 +9286,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32578;
 		};
@@ -9298,7 +9298,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29908;
 		};
@@ -9311,7 +9311,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32564;
 		};
@@ -9328,7 +9328,7 @@
 				);
 			}; 
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32432;
 		};
@@ -9340,7 +9340,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29159;
 		};
@@ -9352,7 +9352,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32432;
 		};
@@ -9363,7 +9363,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32586;
 		};
@@ -9389,7 +9389,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29159;
 		};
@@ -9400,7 +9400,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32521;
 		};
@@ -9414,7 +9414,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32568;
 		};
@@ -9439,7 +9439,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 31536;
 		};
@@ -9450,7 +9450,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29745;
 		};
@@ -9463,7 +9463,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32510;
 		};
@@ -9475,7 +9475,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 28631;
 		};
@@ -9508,7 +9508,7 @@
 				     );
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32623;
 		};
@@ -9519,7 +9519,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 30174;
 		};
@@ -9532,7 +9532,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29384;
 		};
@@ -9548,7 +9548,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32449;
 		};
@@ -9560,7 +9560,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29518;
 		};
@@ -9575,7 +9575,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32085;
 		};
@@ -9590,7 +9590,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29159;
 		};
@@ -9601,7 +9601,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 29908;
 		};
@@ -9613,7 +9613,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32463;
 		};
@@ -9654,7 +9654,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32566;
 		};
@@ -9667,7 +9667,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32676;
 		};
@@ -9713,7 +9713,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 16;
 		};
@@ -9779,19 +9779,19 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 11;
 		};
 		libxml2 = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 17.7.2;
 		};
 		libxslt = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 8.4.1;
 		};
@@ -9988,13 +9988,13 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 161.1;
 		};
 		mDNSResponderSystemLibraries = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = mDNSResponder;
 			target = SystemLibraries;
@@ -10319,13 +10319,13 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 21;
 		};
 		neon = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 8;
 		};
@@ -10408,7 +10408,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 382;
 		};
@@ -10626,7 +10626,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 371;
 		};
@@ -10687,7 +10687,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 5;
 		};
@@ -10825,7 +10825,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 118;
 		};
@@ -11087,7 +11087,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 51;
 		};
@@ -11434,7 +11434,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 30;
 		};
@@ -11547,7 +11547,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 12;
 		};
@@ -11662,7 +11662,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 10;
 		};
@@ -11726,7 +11726,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 				RC_NONARCH_CFLAGS = "-pipe";
 			};
 			version = 67;
@@ -11766,7 +11766,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 6;
 		};
@@ -11807,7 +11807,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 6;
 		};
@@ -11953,7 +11953,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32641;
 		};
@@ -11973,7 +11973,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 32199;
 		};
@@ -12116,7 +12116,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 344;
 		};
@@ -12183,7 +12183,7 @@
 		};
 		subversion = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 16;
 		};
@@ -12469,13 +12469,13 @@
 		};
 		tcl = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 64;
 		};
 		tcl_ext = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			original = tcl;
 		};
@@ -12518,7 +12518,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 18;
 		};
@@ -12747,7 +12747,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 13;
 		};
@@ -12994,7 +12994,7 @@
 		};
 		xar = {
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 28;
 		};
@@ -13140,7 +13140,7 @@
 				);
 			};
 			environment = {
-				RC_ARCHS = "ppc ppc64 i386 x86_64";
+				RC_ARCHS = "ppc ppc64";
 			};
 			version = 18;
 		};

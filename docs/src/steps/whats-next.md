@@ -65,7 +65,6 @@ Several pieces wait for OpenDirectory, Leopard's interface to directory services
 - `.dSYM` bundles: the image's `dsymutil` is a script that does nothing, since Apple's is closed ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
 - In Samba: SPNEGO, which `smb.conf` turns off because Samba 3.0.25b's `spnego_parse_auth` rejects the `mechListMIC` field that the current Mac's client sends ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)); the byte-range locks of the `darwin_streams` module, which need the closed `ByteRangeLocking.framework` ([D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108)); and file sharing switched on from a preference pane: on Leopard the closed Sharing pane writes the file that `synchronize-preferences` reads, and that tool no longer posts its change notices ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), D113), so the image's `smb.conf` and `smbd.plist` are written by `make-test-image` instead. Samba 3.0.25b speaks SMB1 only.
 - CarbonHeaders at Leopard's version: the image has 18.1's, of Mac OS X 10.6 ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)), and would take 9L30's if its source appeared.
-- Intel code. The compilers are built for PowerPC only ([D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)), but most projects keep the build list's `ppc i386` or Apple's four architectures: Samba is `ppc` and `i386`, and `libruby` and the Python framework `ppc`, `ppc64`, `i386` and `x86_64`. A build for `ppc` and `ppc64` only, all that a PowerPC Mac runs, would make the image smaller; `ppc` stays in any case, since the kernel and its kexts are 32-bit.
 - A test in QEMU, where Step 10 was not tried.
 
 None of Step 10's rows is `deferred`: what it turned off waits for closed code, not for an open project.
@@ -118,7 +117,6 @@ mindmap
       MySQL for SASL
       awk, tar, gzip and more
       DTrace, Samba's SPNEGO
-      ppc and ppc64 only
       Darwin 10 for PowerPC
     Distribution
       image for others
