@@ -140,7 +140,6 @@ build -headers libsecurity_sd_cspdl
 build -headers libsecurity_smime
 build -headers libsecurity_ssl
 build -headers libsecurity_utilities
-build -headers securityd
 build -headers SecurityTokend
 build -headers security_dotmac_tp
 build libsecurityd
@@ -174,7 +173,6 @@ build libsecurity_authorization
 build libsecurity_apple_csp
 build libsecurity_keychain
 build DirectoryServiceMIG
-build -loadonly Security
 prepare D49
 build libsecurity_codesigning
 build Security
