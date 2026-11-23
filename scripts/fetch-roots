@@ -10,6 +10,8 @@ export dest="$root/roots"
 export site="src.macosforge.org/Roots"
 mkdir -p "$dest"
 
+sha256() { if command -v shasum > /dev/null; then shasum -a 256 "$@"; else sha256sum "$@"; fi; }
+
 chain=()
 build=9L30
 while [[ -n $build ]]; do
@@ -80,14 +82,14 @@ rm -f "$queue"
 
 cd "$dest"
 touch "$sums"
-[[ -s $sums ]] && { shasum -a 256 -c --quiet "$sums" || failed=1; }
+[[ -s $sums ]] && { sha256 -c --quiet "$sums" || failed=1; }
 added=0
 while read -r file; do
    grep -q "  $file\$" "$sums" && continue
-   shasum -a 256 "$file" >> "$sums"
+   sha256 "$file" >> "$sums"
    added=$((added + 1))
 done < <(find . -name '*.tar.gz' | sed 's|^\./||' | sort)
-sort -k2 -o "$sums" "$sums"
+LC_ALL=C sort -k2 -o "$sums" "$sums"
 echo "$(wc -l < "$sums" | tr -d ' ') hashes in manifest/9L30-roots.sha256, $added new"
 cut -f5 "$used" | sort | uniq -c
 exit $failed

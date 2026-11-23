@@ -9,6 +9,8 @@ record=
 [[ ${1:-} == --record ]] && { record=1; shift; }
 mkdir -p "$dest"
 
+sha256() { if command -v shasum > /dev/null; then shasum -a 256 "$@"; else sha256sum "$@"; fi; }
+
 fetch() {
    local project=$1 version=$2 source=$3 url
    local file="$dest/$project-$version.tar.gz"
@@ -16,6 +18,7 @@ fetch() {
    case $source in
       github) url="https://github.com/apple-oss-distributions/$project/archive/refs/tags/$project-$version.tar.gz" ;;
       archive) url="https://web.archive.org/web/2012id_/http://www.opensource.apple.com/tarballs/$project/$project-$version.tar.gz" ;;
+      darwinbuild) url="https://github.com/macosforge/darwinbuild/archive/$version.tar.gz" ;;
    esac
    if curl -fsSL --retry 3 -o "$file.part" "$url"; then
       mv "$file.part" "$file"
@@ -26,26 +29,53 @@ fetch() {
 }
 export -f fetch
 
-if [[ $# -gt 0 ]]; then
-   for project in "$@"; do
-      awk -F'\t' -v p="$project" '$1 == p { print $1, $2, $3 }' "$manifest"
-   done
-else
+source_of() {
+   local project=$1 version=$2 listed
+   [[ $project == darwinbuild ]] && { echo darwinbuild; return; }
+   listed=$(awk -F'\t' -v p="$project" -v v="$version" '$1 == p && $2 == v { print $3 }' "$manifest")
+   echo "${listed:-github}"
+}
+
+wanted() {
+   local arg project version file name
+   if [[ $# -gt 0 ]]; then
+      for arg in "$@"; do
+         project=${arg%%=*}
+         if [[ $arg == *=* ]]; then
+            version=${arg#*=}
+         else
+            version=$(awk -F'\t' -v p="$project" '$1 == p { print $2 }' "$manifest")
+            [[ -n $version ]] || { echo "not in manifest: $project" >&2; continue; }
+         fi
+         echo "$project $version $(source_of "$project" "$version")"
+      done
+      return
+   fi
    awk -F'\t' 'NR > 1 && $3 == "github" { print $1, $2, $3 }' "$manifest"
-fi | xargs -P 6 -n 3 bash -c 'fetch "$0" "$1" "$2"'
+   while read -r _ file; do
+      [[ -s $dest/$file ]] && continue
+      name=${file%.tar.gz}
+      project=${name%-*}
+      version=${name##*-}
+      echo "$project $version $(source_of "$project" "$version")"
+   done < "$sums"
+}
+
+wanted "$@" | sort -u | xargs -P 6 -n 3 bash -c 'fetch "$0" "$1" "$2"'
 
 cd "$dest"
 touch "$sums"
 unrecorded=0
 for file in *.tar.gz; do
+   [[ -e $file ]] || continue
    awk -v f="$file" '$2 == f { found = 1 } END { exit !found }' "$sums" && continue
    if [[ -n $record ]]; then
-      shasum -a 256 "$file" >> "$sums"
+      sha256 "$file" >> "$sums"
       echo "recorded the hash of $file"
    else
       echo "no recorded hash: $file (fetch-sources --record adds it to manifest/9L30.sha256)" >&2
       unrecorded=1
    fi
 done
-shasum -a 256 -c --quiet "$sums" || exit 1
+sha256 -c --quiet "$sums" || exit 1
 exit $unrecorded
