@@ -1,0 +1,70 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: download-kit [<kit file>]
+
+Run on a current computer, macOS or Linux, with curl and Java 6 or later. Downloads
+Apple's sources and Roots and darwinbuild's source into sources/ and roots/, checks
+them against the hashes in manifest/, makes D49's parser with Java, and packs this
+repo with all of it into one tar file (default ./PowerDarwin-kit.tar) for the
+PowerPC Mac, whose Leopard cannot reach GitHub or archive.org over TLS."
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+kit=${1:-PowerDarwin-kit.tar}
+[[ $kit == -* ]] && { echo "$usage" >&2; exit 1; }
+[[ $kit == /* ]] || kit=$PWD/$kit
+
+die() { echo "download-kit: $*" >&2; exit 1; }
+
+for tool in curl tar gzip; do
+   command -v "$tool" > /dev/null || die "$tool is missing"
+done
+command -v shasum > /dev/null || command -v sha256sum > /dev/null || die "shasum or sha256sum is missing"
+java -version > /dev/null 2>&1 || die "Java 6 or later is missing: it runs ANTLR to make Security's code requirement parser (D49)"
+
+echo "downloading the sources into $root/sources"
+"$root/scripts/fetch-sources" || die "some sources are missing or differ from manifest/9L30.sha256: run download-kit again"
+echo "downloading the Roots into $root/roots (from the Wayback Machine, which is slow)"
+"$root/scripts/fetch-roots" || die "some Roots are missing or differ from manifest/9L30-roots.sha256: run download-kit again"
+echo "making D49's parser in $root/inputs/antlr2"
+rm -rf "$root/inputs/antlr2"
+JAVA=java "$root/env/antlr2/generate" "$root/inputs/antlr2"
+
+repo_files() {
+   if git -C "$root" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+      git -C "$root" ls-files --cached --others --exclude-standard
+   else
+      (cd "$root" && find . -type f ! -path './.git/*' ! -path './sources/*' ! -path './roots/*' ! -path './images/*' \
+         ! -path './inputs/*' ! -path '*/node_modules/*' ! -name '*.tar' | sed 's|^\./||')
+   fi
+}
+
+stage=$(mktemp -d /tmp/download-kit.XXXXXX)
+trap 'rm -rf "$stage"' EXIT
+ln -s "$root" "$stage/PowerDarwin"
+{
+   repo_files | grep -v '^inputs/'
+   awk '{ print "sources/" $2 }' "$root/manifest/9L30.sha256"
+   awk '{ print "roots/" $2 }' "$root/manifest/9L30-roots.sha256"
+   (cd "$root" && find inputs -type f)
+} | while read -r file; do
+   if [[ -f $root/$file && $root/$file != "$kit" ]]; then echo "PowerDarwin/$file"; fi
+done | sort -u > "$stage/files"
+
+echo "packing $(wc -l < "$stage/files" | tr -d ' ') files into $kit"
+if tar --version 2>/dev/null | grep -q bsdtar; then
+   COPYFILE_DISABLE=1 tar -chf "$kit" --format=ustar --no-mac-metadata -C "$stage" -T "$stage/files"
+else
+   tar -chf "$kit" --format=ustar -C "$stage" -T "$stage/files"
+fi
+ls -l "$kit"
+cat <<EOF
+
+Copy $(basename "$kit") to the PowerPC Mac (a USB key, or serve this folder with
+'python3 -m http.server' and fetch it there with 'curl -O http://<this computer>:8000/$(basename "$kit")'),
+then on that Mac, in Leopard's Terminal:
+
+   tar -xf $(basename "$kit")
+   cd PowerDarwin
+   sudo scripts/build-image
+EOF
