@@ -12,8 +12,8 @@ A guide for coding agents working in this repo. The project's goal, rules and st
 
 ## Machines
 
-- A current Mac fetches the sources and Roots with `scripts/fetch-sources` and `scripts/fetch-roots`, since Leopard cannot reach GitHub or archive.org over TLS. They land in `sources/` and `roots/`, which git ignores, and `manifest/` holds their hashes.
-- A PowerPC Mac with Leopard, Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`. The scripts reach it through the SSH host name given as `<host>`.
+- A current Mac fetches the sources and Roots with `scripts/fetch-sources` and `scripts/fetch-roots`, since Leopard cannot reach GitHub or archive.org over TLS. They land in `sources/` and `roots/`, which git ignores, and `manifest/` holds their hashes. `scripts/download-kit` runs both and packs them with the repo into `PowerDarwin-kit.tar`.
+- A PowerPC Mac with Leopard, Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`. The scripts reach it through the SSH host name given as `<host>`, or run on it with `--here=<build folder>`. `scripts/build-image` runs every step of `manifest/build-order` there from an unpacked kit, and `scripts/install-image` puts the image onto a partition.
 - Keep the access details of your own machines in a git-ignored file, such as `CLAUDE.local.md`.
 
 ## Making a change
@@ -21,6 +21,7 @@ A guide for coding agents working in this repo. The project's goal, rules and st
 - Follow the README's rules in order: change the build environment first, then take Apple's own fix from another release, and only then write a new patch, as small as possible.
 - List every patch, build-environment workaround and replacement in DEVIATIONS.md, with the next free ID, its kind, and the Apple release with the same fix, if any.
 - Patches go in `patches/<project>-<version>/`, one file per fix, whose first line gives the deviation, the date of its last change and its licence, as the others do. Build-environment workarounds go in `env/`, each with a step in `scripts/prepare-buildroot`. New code that stands in for a closed Apple part goes in `replacements/`, with its own copy of the licence.
+- A new build, or a new `prepare-buildroot` step, goes into `manifest/build-order` where the builds first need it; a `prepare` step that says `waiting` there stops `build-image`.
 - Check each image with `scripts/check-image`: only the files that `scripts/make-test-image` writes may come from outside the builds.
 - Ask the machine's owner before restoring an image onto a partition or changing what a machine boots.
 

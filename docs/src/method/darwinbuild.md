@@ -6,6 +6,7 @@
 - How darwinxref's database knows each project's version, dependencies and build settings, and how the options `-headers` and `-target` and another version change a build.
 - Why the build machine is a PowerPC Mac running Leopard and Xcode 3.1.4, and what darwinbuild does to its copy of Xcode.
 - How the project's scripts stage sources and Roots on the build machine, and how `prepare-buildroot` turns every change to the build environment into a step that can be checked and repeated.
+- How `build-image` runs every build in the order of `manifest/build-order`, and how that order was found.
 
 ## Three machines
 
@@ -40,7 +41,7 @@ The programs a build makes run on the build machine as soon as they are installe
 
 Rule 4 asks for the release's own toolchain: `gcc` 5465, `gcc_42` 5531, `cctools` 667.3 and `ld64` 77.1, the compilers, assembler and linkers of 10.5.8. They are projects of the build list like any other, and darwinbuild installs them into each build environment from their Roots: Apple's until Step 10, ours since, after a check that ours and Apple's give the same output for the same input ([Step 10](../steps/step-10-working-unix.md)). Xcode 3.1.4 is the last Xcode for Leopard, not the one Apple built 9L30 with ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23) shows one difference); the build uses only its `xcodebuild` and closed helpers, which darwinbuild points at the toolchain's own compilers (below).
 
-The build machine does not download. Leopard's TLS is too old for GitHub and archive.org, so the current Mac fetches and checks everything, and copies it across.
+The build machine does not download. Leopard's TLS is too old for GitHub and archive.org, so the current Mac fetches and checks everything, and copies it across. To build PowerDarwin rather than work on it, no SSH is needed: [scripts/download-kit](https://github.com/nyg/PowerDarwin/blob/master/scripts/download-kit), on any current computer, packs the repo, the sources, the Roots and D49's parser into one file, the kit, and on the build machine [scripts/build-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/build-image) stages them and runs every build there ([The build order](#the-build-order)).
 
 ## What darwinbuild does
 
@@ -164,19 +165,19 @@ darwinbuild puts two more tools into the BuildRoot. When there is no `ditto`, it
 
 ### Sources
 
-[scripts/stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources) `<host> <project>[=<version>]...` puts sources on the build machine:
+[scripts/stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources) `<host> <project>[=<version>]...` puts sources on the build machine, and `--here=<build folder>` in place of the host does the same on the build machine itself:
 
 1. It finds the project's version in `manifest/9L30.tsv`, or takes the one given as `<project>=<version>`.
-2. It unpacks the tarball from `sources/` into a temporary folder, renaming its top folder from `<project>-<project>-<version>` to `<project>-<version>` ([D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1)). A project of [replacements/](https://github.com/nyg/PowerDarwin/blob/master/replacements/), such as OpenSMU, has no tarball and is copied from there. Such a project is not in `manifest/9L30.tsv`, so its version is always given, as `OpenSMU=1.0` ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)).
+2. It unpacks the tarball from `sources/` into a temporary folder, renaming its one top folder, `<project>-<project>-<version>` in a tarball from GitHub, to `<project>-<version>` ([D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1)). It renames with `mv`, since the `tar` of Leopard, GNU tar 1.15.1, cannot rename as it unpacks. A project of [replacements/](https://github.com/nyg/PowerDarwin/blob/master/replacements/), such as OpenSMU, has no tarball and is copied from there. Such a project is not in `manifest/9L30.tsv`, so its version is always given, as `OpenSMU=1.0` ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)).
 3. It applies each patch in `patches/<project>-<version>/`, in order, with `patch -p1`.
 4. It touches the files named in that folder's `touch` file, so that `make` rebuilds what is generated from them ([D20](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d20)).
-5. It sends the result over SSH as a `tar` stream into `~/9L30/Sources/`, without the extended attributes a current Mac adds to files.
+5. It sends the result over SSH as a `tar` stream into `~/9L30/Sources/`, without the extended attributes a current Mac adds to files, or, with `--here`, moves it into that build folder's `Sources/`, replacing an older copy.
 
 darwinbuild then finds an unpacked folder in `Sources/` and never downloads the source, and the patches are applied once, by the repo, rather than by darwinbuild's own patch mechanism.
 
 ### Roots
 
-[scripts/stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots) `<host> [build folder on host]` copies the Roots and headers Roots chosen in `manifest/9L30-roots-used.tsv`, at most one of each per project, into `~/9L30/Roots/.DownloadCache/` on the build machine, or into the build folder given, and reports any that is missing from `roots/`.
+[scripts/stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots) `<host> [build folder on host]` copies the Roots and headers Roots chosen in `manifest/9L30-roots-used.tsv`, at most one of each per project, into `~/9L30/Roots/.DownloadCache/` on the build machine, or into the build folder given, and reports any that is missing from `roots/`. `stage-roots --here=<build folder>` copies them on the build machine itself.
 
 ## Preparing the BuildRoot
 
@@ -184,6 +185,7 @@ Some fixes are files that darwinbuild does not put into the BuildRoot: a header 
 
 ```text
 prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]
+prepare-buildroot --here=<build folder> [--check] [step...]
 ```
 
 Each step is named after its deviation, such as `D6` or `D82`, and `plist` copies `manifest/plists/9A581.plist` into `.build/` and reloads it with `darwinxref loadIndex`; that one step carries every row that changes the build list, such as [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)'s and [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110)'s architectures. With no step named, it runs them all, in this order:
@@ -194,7 +196,7 @@ plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 
 
 The script needs the BuildRoot mounted. `-init` only creates the disk image, and darwinbuild attaches it at its first build, so `prepare-buildroot` can run only after one darwinbuild run, and, once a restart of the build machine has detached the image, only after the next one; otherwise it stops with `no build environment at …/BuildRoot: run darwinbuild once to make and mount it`.
 
-On the current Mac it gathers what the steps need: `env/`, `replacements/`, the build list, and three inputs it makes there from files only the current Mac has: [D37](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d37)'s header, taken from Panther's SCSI family tarball; [D49](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d49)'s parser, generated with ANTLR, which needs Java 6 or later; and [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73)'s four Carbon headers. It copies all of it into a temporary folder on the build machine and runs itself there with `sudo`.
+On the current Mac it gathers what the steps need: `env/`, `replacements/`, the build list, and three inputs it makes there from files only the current Mac has: [D37](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d37)'s header, taken from Panther's SCSI family tarball; [D49](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d49)'s parser, generated with ANTLR, which needs Java 6 or later; and [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73)'s four Carbon headers. It copies all of it into a temporary folder on the build machine and runs itself there with `sudo`. With `--here`, on the build machine, it gathers the same into a temporary folder there: D37's and D73's files from the tarballs in `sources/`, and D49's parser from `inputs/antlr2`, which `download-kit` made with Java on the current computer, since Leopard's Java on PowerPC is version 5 and ANTLR's `antlr.jar` needs version 6.
 
 There, each step compares what it would install with what is in place, file by file with `cmp`, and prints one line per file or folder, after the step's name:
 
@@ -221,6 +223,35 @@ flowchart LR
     BF --> P[".build/9A581.plist<br/>plist"]
 ```
 
+## The build order
+
+[manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order) lists every build of an image, in order, 274 steps, one per line:
+
+- `build <arguments>`: one darwinbuild run, with darwinbuild's own arguments, such as `build -target=embedded launchd` ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)) or `build IOATABlockStorage 130.3.1` ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)).
+- `build -loadonly <project>`: a darwinbuild run that only installs the project's build dependencies into the BuildRoot, and builds nothing (below).
+- `prepare <step>...`: steps of `prepare-buildroot`, at the place where the builds first need them, such as `prepare D82` just before securityd.
+- `stage <project> <version>`: a source to stage that no build names, CarbonHeaders 18.1, from which `make-test-image` installs headers.
+
+The order is the one the builds of 19 to 22 November 2026 found. darwinbuild keeps a log of every run, with its date, its arguments, the Roots installed in the BuildRoot and its exit status, 387 in all; the order keeps the runs that succeeded, in the order they ran, and puts each `prepare` step where it was first applied. Most projects failed at first and were built again after a fix; with every fix now in the repo from the start, each needs only its successful build. A few changes were then needed:
+
+- A project built again only because a fix came later is built once. CF, built six times, is built twice: once before IOKitUser, launchd and kext_tools, which need its `MacTypes.h` ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16)), and once after ICU and objc4, whose libraries it links. Libsystem, built seven times, is built once, after all its parts, with D46's Libinfo and D65's four-architecture `libdns_sd.a`; launchd twice, before its first users and after securityd, as the image's was.
+- Kerberos is built after LDAPFramework. [D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74) builds both for four architectures, and a four-way Kerberos needs a four-way LDAP library; the first builds of both were for two architectures, before D74. OpenSSH, which links Kerberos, follows it.
+- OpenSSL is built once, after SystemStubs, as the image's was; the builds before it link Apple's OpenSSL Root of the same version, which [D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4) puts into the BuildRoot.
+- `darwinbuild -headers securityd` is left out. It ran before [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48) gave securityd its build dependencies, which darwinbuild installs even for `-headers`, and one of them, libsecurity_agent, has no archived Root and is built later. No project includes securityd's headers.
+- darwinbuild installs a project's build dependencies before every run, before it knows whether the build will succeed, and leaves them in the BuildRoot. The first builds relied on Roots that such runs had installed, failed builds and `-headers` runs among them: Libnotify includes `servers/bootstrap.h`, which only the full Root of launchd_libs holds, and found it in Apple's launchd_libs Root, installed by the dependencies of `darwinbuild -headers launchd`; and D6's `arch` survived because Apple's system_cmds Root, which would replace it, came in the same way before D6. Each of darwinbuild's logs lists the Roots installed in the BuildRoot when the run began, so the runs that first installed Roots and are not in the order are known. The order replays each of them, at its place, as `darwinbuild -loadonly <project>`, which installs the same dependencies and stops: 22 such lines.
+- Two things the first builds put into the BuildRoot by hand had no row: AppleDisplays' Root, for a header IOKitUser copies, and a `CFBase.h` that includes `MacTypes.h`, first the SDK's, then our CF's, for IOKitUser's `kNilOptions`. darwinbuild installs neither for IOKitUser, whose entry in the build list names neither project; [D114](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d114) adds both to it.
+
+[scripts/build-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/build-image), run as root on the build machine from an unpacked kit, then does everything:
+
+1. It checks the machine: a PowerPC Mac, Leopard 10.5, Xcode 3.1.4 and 40 GB free.
+2. It checks the SHA-256 of every source and Root in the kit against `manifest/`, with Python 2.5's `hashlib`, since Leopard has no `shasum`.
+3. It installs darwinbuild from its source in the kit, unless `/usr/local/bin/darwinbuild` is there, and makes the build folder with `darwinbuild -init 9L30`.
+4. It stages every source the order names, with `stage-sources --here`, under the name of the project whose source it is (Libc for Libc_debug, configd for configd_plugins), and every Root, with `stage-roots --here`.
+5. It runs each step of the order, writing its progress into `.build/build-image.progress`. A failed build stops it, with the first errors of darwinbuild's log; so does a `prepare` step that says `waiting`, which here means a step placed before what it needs. Run again, it starts at the step that stopped it.
+6. It runs `make-test-image`, then `check-image`, which must list only the files `make-test-image` writes ([Making the image](making-the-image.md)).
+
+On 23 November 2026 `build-image` ran on the iMac G5 from a kit made by `download-kit`, in a build folder it made empty. It stopped twice: at IOKitUser, which needed AppleDisplays and CF ([D114](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d114)), and at `darwinbuild -headers securityd`, which could not find a Root for libsecurity_agent and is now left out of the order (above). Each time, once the fix was in the kit, it was run again and went on from the step that had stopped it. The builds took 842 minutes, and the whole run about 14 and a half hours: from 03:04 to 19:57, less the two stops. The build folder then held 20 GB, and the image 1.6 GB. `check-image` found 28,542 files on it, all from our builds except 23 files of the table in [Making the image](making-the-image.md): every file but `/etc/master.passwd` and DirectoryService's `root.plist`, which `make-test-image` writes only if the build folder holds `root-password.hash`. The order has not yet been run from an empty folder to the end without a stop.
+
 ## Andrew-R's patch
 
 In July 2026, Andrew-R described on MacRumors his own darwinbuild builds of Darwin 9 for PowerPC, 100 projects, with a patch to darwinbuild's `Darwin9` branch ([reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md)). His patch points the build lists, the sources and the Roots at a new host, macos-powerpc.org, in place of the dead macosforge sites, and changes the link darwinbuild makes for an alias project's source.
@@ -230,7 +261,8 @@ This project does without the patch, and runs darwinbuild unchanged, in the way 
 ## Where to look
 
 - [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Build it" and "Layout".
-- Scripts: [stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources), [stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots), [prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot).
+- Scripts: [stage-sources](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-sources), [stage-roots](https://github.com/nyg/PowerDarwin/blob/master/scripts/stage-roots), [prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot), [download-kit](https://github.com/nyg/PowerDarwin/blob/master/scripts/download-kit), [build-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/build-image).
+- [manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order).
 - [env/](https://github.com/nyg/PowerDarwin/blob/master/env/), the files the build-environment deviations install.
 - [reference/andrew-r/](https://github.com/nyg/PowerDarwin/blob/master/reference/andrew-r/README.md).
 - Deviations: [D1](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d1) to [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D25](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d25), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D82](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d82), and every row that `prepare-buildroot` names, [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D99](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d99) the latest; [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100), [D105](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d105) and [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110) for `RC_ARCHS` and `RC_CFLAGS`.

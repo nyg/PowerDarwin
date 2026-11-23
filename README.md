@@ -54,39 +54,45 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 
 ## Build it
 
-A current Mac downloads the sources and Roots, since Leopard cannot reach GitHub or archive.org over TLS. Sources come from [apple-oss-distributions](https://github.com/apple-oss-distributions) by tag; the 14 projects with no tag there come, when a step needs one, from the archived opensource.apple.com tarballs. A PowerPC Mac running Leopard with Xcode 3.1.4 and darwinbuild's `Darwin9` branch builds, in the build folder `~/9L30`.
+PowerDarwin is built on a PowerPC Mac running Leopard 10.5.8 with Xcode 3.1.4, the Mac it is then installed on, from the sources Apple published. Leopard cannot reach GitHub or the Wayback Machine over TLS, so a current computer downloads everything first, into one file, the kit. The build takes about 15 hours on an iMac G5 and needs 40 GB free. `build-image` has run every step once, in a build folder it made empty, but it stopped twice there, on two problems that have since been fixed; it has not yet run from an empty folder to the end in one go.
 
-1. `scripts/fetch-sources` downloads the 372 projects that have a tag into `sources/`, and `scripts/fetch-sources autozone SQLite` the two archived ones built so far. Four more tarballs are downloaded by hand, as [the book](docs/src/method/sources-and-roots.md) tells; until they are there, the script's last check names them. `scripts/fetch-roots` downloads the Roots into `roots/`. Both check the hashes in `manifest/`.
-2. Copy `manifest/plists/` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md#d2), [D25](DEVIATIONS.md#d25)).
+1. On a current computer, macOS or Linux, with `git`, `curl` and Java 6 or later, clone this repo and run `scripts/download-kit`. It downloads Apple's sources from [apple-oss-distributions](https://github.com/apple-oss-distributions) and the Wayback Machine, darwinbuild's from [macosforge/darwinbuild](https://github.com/macosforge/darwinbuild), and the Roots, Apple's builds of each project, which stand in for the projects not built yet, from the Wayback Machine. It checks each file against its SHA-256 in `manifest/`, makes [D49](DEVIATIONS.md#d49)'s parser with Java, and packs it all with the repo into `PowerDarwin-kit.tar`, about 2.2 GB. Run it again if a download fails: it keeps what it has.
+2. Download Xcode 3.1.4, `xcode314_2809_developerdvd.dmg`, from [Apple's developer downloads](https://developer.apple.com/download/all/) (a free Apple account is enough), and install it on the PowerPC Mac.
+3. Copy the kit to the PowerPC Mac: on a USB key, or over HTTP, with `python3 -m http.server` in the kit's folder on the current computer and `curl -O http://<its address>:8000/PowerDarwin-kit.tar` on the Mac.
+4. On the PowerPC Mac, in Terminal, run `tar -xf PowerDarwin-kit.tar`, `cd PowerDarwin` and `sudo scripts/build-image`. It checks the kit's hashes again, installs darwinbuild into `/usr/local` unless it is there, makes the build folder `~/9L30` (`--folder=<path>` for another), stages the sources and Roots, and runs the 274 steps of [manifest/build-order](manifest/build-order): each darwinbuild build, in order, and each build-environment workaround of DEVIATIONS.md where the builds need it. Then it makes the image, `/private/var/tmp/PowerDarwin.dmg`, and checks every file on it with `scripts/check-image`. Set Computer sleep to Never in Energy Saver first: a sleeping Mac pauses the build.
+5. If a step fails, `build-image` stops and names darwinbuild's log. Run it again: it goes on from that step.
+
+### Working on it
+
+Changing a project means running the same steps one at a time. From a current Mac, the scripts reach the build machine over SSH, through its host name; on the build machine itself, `--here=<build folder>` takes the host's place.
+
+1. `scripts/fetch-sources` downloads into `sources/` every source whose hash `manifest/9L30.sha256` records, and `scripts/fetch-roots` the Roots into `roots/`; `download-kit` runs both.
+2. Copy `manifest/plists/*.plist` into `~/9L30/.build/`, then run `darwinbuild -init 9L30` in `~/9L30` ([D2](DEVIATIONS.md#d2), [D25](DEVIATIONS.md#d25)).
 3. `scripts/stage-sources <host> <project>...` unpacks each project's source into `~/9L30/Sources` as `<project>-<version>`, applies its patches and touches the files listed in its `touch` file. `<project>=<version>` stages another version, or a project from `replacements/`.
 4. `scripts/stage-roots <host>` copies the chosen Roots into `~/9L30/Roots/.DownloadCache`; `manifest/9L30-roots-used.tsv` says which build each came from.
-5. `scripts/prepare-buildroot <host>` puts the build-environment workarounds of DEVIATIONS.md into the build environment, one step per workaround. A step already in place is left alone, a step whose input is not built yet says so and waits, and `--check` only reports. D49's parser is made on the current Mac, which needs Java 6 or later. darwinbuild mounts the build environment at its first build, so run step 6 once, for any project, before this one.
+5. `scripts/prepare-buildroot <host>` puts the build-environment workarounds of DEVIATIONS.md into the build environment, one step per workaround. A step already in place is left alone, a step whose input is not built yet says so and waits, and `--check` only reports. From a current Mac, D49's parser is made there, with Java 6 or later; on the build machine, it is taken from the kit's `inputs/antlr2`. darwinbuild mounts the build environment at its first build, so run step 6 once, for any project, before this one.
 6. On the build machine, `cd ~/9L30 && sudo /usr/local/bin/darwinbuild <project>`. Self-built Roots land in `~/9L30/Roots/<project>/` and take precedence over downloaded ones.
-7. A failure is fixed by rule 2 and listed in DEVIATIONS.md.
+7. A failure is fixed by rule 2 and listed in DEVIATIONS.md. A new build, or a new step of `prepare-buildroot`, goes into `manifest/build-order` where the builds need it.
 
 ## Install it
 
-No image is published yet: build one, then install it.
+No image is published yet: build one, then install it, from Leopard on the same Mac.
 
-1. On the build machine, `scripts/make-test-image` writes the image as `/private/var/tmp/darwin9-step1.dmg`, an Apple-partitioned HFS+ disk of 1.6 GB, and a raw copy as `darwin9-step1.cdr`. Root's password is the DES hash in `~/9L30/root-password.hash` (`openssl passwd -crypt -stdin`); without that file, root cannot log in.
-2. To try it in QEMU, copy the raw image to the current Mac and run `scripts/boot-qemu <image> [boot-args]`. Without boot-args it boots to the single-user shell (`-v -s`); with `-v` it boots to the login prompt, and the guest's SSH port is forwarded to port 2222.
-3. To install it on a PowerPC Mac, make an empty HFS+ partition of at least 2 GB, then, from Leopard on the same Mac:
-   ```
-   hdiutil convert /private/var/tmp/darwin9-step1.dmg -format UDZO -o darwin9-asr.dmg
-   sudo asr imagescan --source darwin9-asr.dmg
-   sudo asr restore --source darwin9-asr.dmg --target /Volumes/<partition> --erase --noprompt
-   ```
-4. Boot it: hold Option at power-on and choose it in the Startup Manager, or run `sudo bless --mount /Volumes/<partition> --setOF` and restart. From Open Firmware, `setenv boot-args -v` then `boot sata/k2-sata@0/@0:<partition number>,\\:tbxi` boots it verbosely on an iMac G5.
-5. Log in as root on the console or over SSH. `bless --mount /Volumes/<Leopard volume> --setOF` and `reboot` go back to Leopard.
+1. Run `sudo scripts/install-image`. It asks where PowerDarwin goes: onto a new partition taken from the end of a Journaled HFS+ volume, which keeps its files (Leopard's own volume will do); onto an existing partition, which is erased; or onto a whole disk, which is erased. It needs 2 GB, and offers 10 GB. Then it asks for the time zone and the NTP server, offering Leopard's own, for root's password, and whether to make PowerDarwin the startup disk, and it shows what it will do before it changes anything. Options answer without asking: `--shrink=disk0s3 --size=10G`, `--partition=disk0s4` or `--disk=disk1`, `--time-zone=America/New_York`, `--ntp-server=pool.ntp.org`, `--startup-disk`, and `--yes`.
+2. Start it: hold Option at power-on and choose it in the Startup Manager, or restart, if it is the startup disk. From Open Firmware, `setenv boot-args -v` then `boot sata/k2-sata@0/@0:<partition number>,\\:tbxi` starts it verbosely on an iMac G5.
+3. Log in as root on the console, or over SSH, which is on and takes root's password: keep the Mac on a network you trust. A current OpenSSH client needs `-o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1`.
+4. `bless --mount /Volumes/<Leopard volume> --setOF` and `reboot` go back to Leopard.
+
+To try it in QEMU instead, copy `/private/var/tmp/PowerDarwin.cdr.gz`, the raw copy of the image, to the current Mac, unpack it, and run `scripts/boot-qemu PowerDarwin.cdr [boot-args]`. Without boot-args it boots to the single-user shell (`-v -s`); with `-v` it boots to the login prompt, and the guest's SSH port is forwarded to port 2222. Root logs in with the password whose DES hash is in the build folder's `root-password.hash` (`openssl passwd -crypt -stdin`) when `make-test-image` runs; without that file, nobody can.
 
 ## Layout
 
-- `manifest/`: project versions, their source, the hashes of the fetched tarballs and Roots, and darwinbuild's build lists in `plists/`.
+- `manifest/`: project versions, their source, the hashes of the fetched tarballs and Roots, darwinbuild's build lists in `plists/`, and `build-order`, the builds and build-environment steps in the order `build-image` runs them.
 - `patches/<project>-<version>/`: one patch file per fix.
 - `env/`: build-environment workarounds, each with the error it fixes.
 - `replacements/`: new code that stands in for a closed Apple library or driver.
 - `LICENSES/`: the texts of the licences that the patches and the copied files are under.
-- `scripts/`: fetching, staging and building (`fetch-sources`, `fetch-roots`, `resolve-buildlist`, `stage-sources`, `stage-roots`, `prepare-buildroot`), making and checking the image (`make-test-image`, `check-image`, `cmp-binaries`, `cmp-disassembly`, `check-family-imports`), running it (`boot-qemu`, `qemu-type`, `ssh-root`), and the book's indexes (`make-book-indexes`). The book's Method chapters explain each one.
+- `scripts/`: the three that build and install PowerDarwin (`download-kit`, `build-image`, `install-image`); fetching, staging and building (`fetch-sources`, `fetch-roots`, `resolve-buildlist`, `stage-sources`, `stage-roots`, `prepare-buildroot`), making and checking the image (`make-test-image`, `check-image`, `cmp-binaries`, `cmp-disassembly`, `check-family-imports`), running it (`boot-qemu`, `qemu-type`, `ssh-root`), and the book's indexes (`make-book-indexes`). The book's Method chapters explain each one.
 - `hardware/`: one page per machine, with the drivers it needs.
 - `reference/`: listings and logs from Leopard, against which the image is compared, and a description of Andrew-R's darwinbuild patch.
 - `docs/`: the book, an mdBook.
