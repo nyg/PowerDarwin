@@ -2792,6 +2792,8 @@
 					shell_cmds,
 					file_cmds,
 					text_cmds,
+					AppleDisplays,
+					CF,
 				);
 				header = (
 					PowerManagement,

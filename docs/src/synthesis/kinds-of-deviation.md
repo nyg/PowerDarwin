@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- How the 113 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 114 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
 - How one closed framework, OpenDirectory, reaches four projects.
@@ -10,7 +10,7 @@
 
 ## A row for every change
 
-Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. By the end of Step 10 there are 113 rows, D1 to D113. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 114 rows, D1 to D114: 113 by the end of Step 10, and one more found when the build was first replayed from an empty folder ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)). Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -29,10 +29,10 @@ xychart-beta horizontal
     title "Rows of DEVIATIONS.md by kind, D1 to D113"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
     y-axis "Rows" 0 --> 35
-    bar [33, 28, 26, 16, 4, 4, 2]
+    bar [33, 29, 26, 16, 4, 4, 2]
 ```
 
-A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 28, 15 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 4 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
+A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 29, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 4 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
 
 ### Kind and cause
 
@@ -42,7 +42,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 
 | Cause | `build-env` | `bitrot` | `bug` | `closed-replacement` | `closed-dependency` | `deferred` | `dropped` |
 |---|---|---|---|---|---|---|---|
-| The build list's gaps | D4, D5, D9, D14, D18, D19, D59, D60, D64, D98, D104, D110 | | D29, D31, D38, D47, D48, D63, D65, D71, D74, D88, D92, D96, D101, D106 | | | | |
+| The build list's gaps | D4, D5, D9, D14, D18, D19, D59, D60, D64, D98, D104, D110 | | D29, D31, D38, D47, D48, D63, D65, D71, D74, D88, D92, D96, D101, D106, D114 | | | | |
 | CF-Lite against Apple's CoreFoundation | D11 | | D54, D57, D62 | D16, D56, D79 | D21, D28, D50, D52, D109 | | |
 | Closed Foundation and dtrace | D24, D49, D97 | | | | D12, D34, D43, D55, D68, D75, D76, D77, D103 | | |
 | What the source export removed | | | D35, D39, D90, D93 | | D22, D32 | | |
@@ -62,11 +62,11 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 
 ### What happens
 
-darwinbuild builds each project in a BuildRoot that holds only what the project's entry in the build list names: its build, header and library dependencies ([darwinbuild and the build machine](../method/darwinbuild.md)). An entry that leaves out a project still builds on a machine where that project's files are already installed. A clean BuildRoot shows every such gap, as a missing header, library or tool. These 26 rows, the largest group, come from there: [D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4), [D5](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d5), [D9](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d9), [D14](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d14), [D18](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d18), [D19](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d19), [D29](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d29), [D31](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d31), [D38](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d38), [D47](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d47), [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48), [D59](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d59), [D60](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d60), [D63](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d63), [D64](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d64), [D65](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d65), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74), [D88](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d88), [D92](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d92), [D96](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d96), [D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98), [D101](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d101), [D104](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d104), [D106](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d106) and [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110).
+darwinbuild builds each project in a BuildRoot that holds only what the project's entry in the build list names: its build, header and library dependencies ([darwinbuild and the build machine](../method/darwinbuild.md)). An entry that leaves out a project still builds on a machine where that project's files are already installed. A clean BuildRoot shows every such gap, as a missing header, library or tool. These 27 rows, the largest group, come from there: [D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4), [D5](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d5), [D9](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d9), [D14](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d14), [D18](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d18), [D19](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d19), [D29](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d29), [D31](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d31), [D38](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d38), [D47](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d47), [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48), [D59](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d59), [D60](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d60), [D63](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d63), [D64](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d64), [D65](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d65), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74), [D88](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d88), [D92](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d92), [D96](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d96), [D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98), [D101](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d101), [D104](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d104), [D106](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d106), [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110) and [D114](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d114).
 
 They take a few forms:
 
-- A project that is not listed at all: OpenSSL for file_cmds' digests (D4), bzip2 for ncurses' install (D19), IOI2CFamily for AppleGPIO's private headers (D29), SQLite, ICU and four more for DirectoryService's daemon (D96), CF and Security for Samba (D106). Python and Ruby have no dependencies at all in the build list (D101).
+- A project that is not listed at all: OpenSSL for file_cmds' digests (D4), bzip2 for ncurses' install (D19), IOI2CFamily for AppleGPIO's private headers (D29), SQLite, ICU and four more for DirectoryService's daemon (D96), CF and Security for Samba (D106), AppleDisplays and CF for IOKitUser (D114). Python and Ruby have no dependencies at all in the build list (D101).
 - A project listed for its headers whose headers come only with its full install: PowerManagement for IOHIDFamily (D31), AppleI2C for IOGraphics (D38), IOSerialFamily for itself and configd (D60).
 - A static library linked but not listed, such as Libsystem's parts (D14) or diskdev_cmds' `libdisk.a` for msdosfs (D92).
 - A build tool that no project provides: Ruby for Xcode's `copyplist` (D24, under Foundation below), Python for a script of Kerberos (D64), `ofileListTool` and `fastcp` from project_makefiles (D9), `sw_vers` for Perl (D98).
