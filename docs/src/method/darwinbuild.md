@@ -225,7 +225,7 @@ flowchart LR
 
 ## The build order
 
-[manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order) lists every build of an image, in order, 274 steps, one per line:
+[manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order) lists every build of an image, in order, 272 steps, one per line:
 
 - `build <arguments>`: one darwinbuild run, with darwinbuild's own arguments, such as `build -target=embedded launchd` ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)) or `build IOATABlockStorage 130.3.1` ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)).
 - `build -loadonly <project>`: a darwinbuild run that only installs the project's build dependencies into the BuildRoot, and builds nothing (below).
@@ -234,7 +234,7 @@ flowchart LR
 
 The order is the one the builds of 19 to 22 November 2026 found. darwinbuild keeps a log of every run, with its date, its arguments, the Roots installed in the BuildRoot and its exit status, 387 in all; the order keeps the runs that succeeded, in the order they ran, and puts each `prepare` step where it was first applied. Most projects failed at first and were built again after a fix; with every fix now in the repo from the start, each needs only its successful build. A few changes were then needed:
 
-- A project built again only because a fix came later is built once. CF, built six times, is built twice: once before IOKitUser, launchd and kext_tools, which need its `MacTypes.h` ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16)), and once after ICU and objc4, whose libraries it links. Libsystem, built seven times, is built once, after all its parts, with D46's Libinfo and D65's four-architecture `libdns_sd.a`; launchd twice, before its first users and after securityd, as the image's was.
+- A project built again only because a fix came later is built once. CF, built six times, is built once, before IOKitUser, launchd and kext_tools, which need its `MacTypes.h` ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16)), and before autozone and ICU, which list it among their build dependencies. It links Apple's archived ICU, objc4 and autozone Roots, whose libraries have the same install names, versions and exported symbols as ours on `ppc` and `ppc64`. Libsystem, built seven times, is built once, after all its parts, with D46's Libinfo and D65's `libdns_sd.a`; SystemStubs once, with [D110](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d110)'s architectures from the start; launchd twice, before its first users and after securityd, as the image's was.
 - Kerberos is built after LDAPFramework. [D74](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d74) builds both for four architectures, and a four-way Kerberos needs a four-way LDAP library; the first builds of both were for two architectures, before D74. OpenSSH, which links Kerberos, follows it.
 - OpenSSL is built once, after SystemStubs, as the image's was; the builds before it link Apple's OpenSSL Root of the same version, which [D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4) puts into the BuildRoot.
 - `darwinbuild -headers securityd` is left out. It ran before [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48) gave securityd its build dependencies, which darwinbuild installs even for `-headers`, and one of them, libsecurity_agent, has no archived Root and is built later. No project includes securityd's headers.
