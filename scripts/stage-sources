@@ -1,11 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-host=${1:?usage: stage-sources <ssh host> <project>[=<version>]...}
+usage="usage: stage-sources <ssh host> <project>[=<version>]...
+       stage-sources --here=<build folder> <project>[=<version>]..."
+
+target=${1:?$usage}
 shift
-folder=9L30
+here=
+[[ $target == --here=* ]] && here=${target#--here=}
 root=$(cd "$(dirname "$0")/.." && pwd)
-stage=$(mktemp -d)
+stage=$(mktemp -d /tmp/stage-sources.XXXXXX)
 trap 'rm -rf "$stage"' EXIT
 
 for arg in "$@"; do
@@ -16,7 +20,13 @@ for arg in "$@"; do
    [[ -n $version ]] || { echo "not in manifest: $project" >&2; exit 1; }
    tarball="$root/sources/$project-$version.tar.gz"
    if [[ -f $tarball ]]; then
-      tar -xzf "$tarball" -C "$stage" -s "|^$project-$project-$version|$project-$version|"
+      unpacked="$stage/.unpack"
+      mkdir "$unpacked"
+      tar -xzf "$tarball" -C "$unpacked"
+      top=$(ls "$unpacked")
+      [[ $(echo "$top" | wc -l) -eq 1 && -d $unpacked/$top ]] || { echo "not one top folder: $tarball" >&2; exit 1; }
+      mv "$unpacked/$top" "$stage/$project-$version"
+      rmdir "$unpacked"
    elif [[ -d $root/replacements/$project ]]; then
       cp -R "$root/replacements/$project" "$stage/$project-$version"
    else
@@ -38,4 +48,12 @@ for arg in "$@"; do
    fi
 done
 
-COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$host" "tar -xf - -C $folder/Sources"
+if [[ -n $here ]]; then
+   mkdir -p "$here/Sources"
+   for folder in "$stage"/*; do
+      rm -rf "$here/Sources/${folder##*/}"
+      mv "$folder" "$here/Sources/"
+   done
+else
+   COPYFILE_DISABLE=1 tar -cf - --no-mac-metadata -C "$stage" . | ssh "$target" "tar -xf - -C 9L30/Sources"
+fi
