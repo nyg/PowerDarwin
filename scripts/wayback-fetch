@@ -1,0 +1,20 @@
+#!/bin/bash
+set -uo pipefail
+
+usage="usage: wayback-fetch <file> <url>
+
+Downloads <url> from the Wayback Machine into <file>. The Wayback Machine refuses
+connections for minutes at a time from an address that sends it many requests, so
+a failed download is tried again every 5 minutes for an hour."
+
+file=${1:?$usage}
+url=${2:?$usage}
+patience=3600
+pause=300
+
+deadline=$(( $(date +%s) + patience ))
+until curl -fsSL --retry 8 --retry-delay 30 --retry-connrefused -o "$file" "$url"; do
+   (( $(date +%s) + pause < deadline )) || exit 1
+   echo "wayback-fetch: $url failed, trying again in $(( pause / 60 )) min" >&2
+   sleep "$pause"
+done

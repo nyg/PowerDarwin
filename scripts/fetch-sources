@@ -4,6 +4,7 @@ set -uo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
 manifest="$root/manifest/9L30.tsv"
 sums="$root/manifest/9L30.sha256"
+export wayback_fetch="$root/scripts/wayback-fetch"
 export dest="$root/sources"
 record=
 [[ ${1:-} == --record ]] && { record=1; shift; }
@@ -20,7 +21,9 @@ fetch() {
       archive) url="https://web.archive.org/web/2012id_/http://www.opensource.apple.com/tarballs/$project/$project-$version.tar.gz" ;;
       darwinbuild) url="https://github.com/macosforge/darwinbuild/archive/$version.tar.gz" ;;
    esac
-   if curl -fsSL --retry 3 -o "$file.part" "$url"; then
+   local download=(curl -fsSL --retry 3 -o)
+   [[ $source == archive ]] && download=("$wayback_fetch")
+   if "${download[@]}" "$file.part" "$url"; then
       mv "$file.part" "$file"
    else
       rm -f "$file.part"
