@@ -9,6 +9,9 @@ sums="$root/manifest/9L30-roots.sha256"
 export wayback_fetch="$root/scripts/wayback-fetch"
 export dest="$root/roots"
 export site="src.macosforge.org/Roots"
+export mirror="https://github.com/nyg/PowerDarwin-roots/releases/download/roots-9L30"
+resolve=
+[[ ${1:-} == --resolve || ! -s $sums ]] && resolve=1
 mkdir -p "$dest"
 
 sha256() { if command -v shasum > /dev/null; then shasum -a 256 "$@"; else sha256sum "$@"; fi; }
@@ -18,17 +21,6 @@ build=9L30
 while [[ -n $build ]]; do
    chain+=("$build")
    build=$(sed -nE 's/^[[:space:]]*inherits = ([0-9A-Z]+);/\1/p' "$plists/$build.plist")
-done
-
-for build in "${chain[@]}"; do
-   mkdir -p "$dest/$build"
-   [[ -s $dest/$build/.listing ]] && continue
-   index="$dest/$build/.index.html"
-   "$wayback_fetch" "$index" "https://web.archive.org/web/2011/http://$site/$build/" || { echo "no listing for $build" >&2; exit 1; }
-   grep -oE 'href="[^"]+\.tar\.gz"' "$index" | sed -E 's|.*/||; s|^href="||; s|"$||' | sort -u > "$dest/$build/.listing"
-   rm -f "$index"
-   [[ -s $dest/$build/.listing ]] || { echo "no listing for $build" >&2; exit 1; }
-   echo "$build: $(wc -l < "$dest/$build/.listing" | tr -d ' ') files listed"
 done
 
 find_build() {
@@ -47,25 +39,49 @@ position() {
    for i in "${!chain[@]}"; do [[ ${chain[$i]} == "$1" ]] && echo "$i"; done
 }
 
+resolve_roots() {
+   local build index name version origin rootbuild hdrsbuild status new_used
+   for build in "${chain[@]}"; do
+      mkdir -p "$dest/$build"
+      [[ -s $dest/$build/.listing ]] && continue
+      index="$dest/$build/.index.html"
+      "$wayback_fetch" "$index" "https://web.archive.org/web/2011/http://$site/$build/" || { echo "no listing for $build" >&2; exit 1; }
+      grep -oE 'href="[^"]+\.tar\.gz"' "$index" | sed -E 's|.*/||; s|^href="||; s|"$||' | sort -u > "$dest/$build/.listing"
+      rm -f "$index"
+      [[ -s $dest/$build/.listing ]] || { echo "no listing for $build" >&2; exit 1; }
+      echo "$build: $(wc -l < "$dest/$build/.listing" | tr -d ' ') files listed"
+   done
+   new_used=$(mktemp)
+   while IFS=$'\t' read -r name version origin _; do
+      rootbuild=$(find_build "$name.root.tar.gz" "$origin")
+      hdrsbuild=$(find_build "$name.hdrs.tar.gz" "$origin")
+      [[ -n $rootbuild ]] && echo "$rootbuild $name.root.tar.gz" >> "$queue"
+      [[ -n $hdrsbuild ]] && echo "$hdrsbuild $name.hdrs.tar.gz" >> "$queue"
+      if [[ -z $rootbuild ]]; then status=none
+      elif (( $(position "$rootbuild") <= $(position "$origin") )); then status=exact
+      else status=older
+      fi
+      printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$version" "$origin" "${rootbuild:--}" "$status" "${hdrsbuild:--}" >> "$new_used"
+   done < "$list"
+   mv "$new_used" "$used"
+}
+
 queue=$(mktemp)
-new_used=$(mktemp)
-while IFS=$'\t' read -r name version origin _; do
-   rootbuild=$(find_build "$name.root.tar.gz" "$origin")
-   hdrsbuild=$(find_build "$name.hdrs.tar.gz" "$origin")
-   [[ -n $rootbuild ]] && echo "$rootbuild $name.root.tar.gz" >> "$queue"
-   [[ -n $hdrsbuild ]] && echo "$hdrsbuild $name.hdrs.tar.gz" >> "$queue"
-   if [[ -z $rootbuild ]]; then status=none
-   elif (( $(position "$rootbuild") <= $(position "$origin") )); then status=exact
-   else status=older
-   fi
-   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$version" "$origin" "${rootbuild:--}" "$status" "${hdrsbuild:--}" >> "$new_used"
-done < "$list"
-mv "$new_used" "$used"
+if [[ -n $resolve ]]; then
+   resolve_roots
+else
+   awk '{ sub("/", " ", $2); print $2 }' "$sums" > "$queue"
+fi
 
 fetch() {
    local build=$1 file=$2
    local target="$dest/$build/$file"
    [[ -s $target ]] && return 0
+   mkdir -p "$dest/$build"
+   if curl -fsL --retry 3 -o "$target.part" "$mirror/${build}_$file" && gzip -t "$target.part" 2>/dev/null; then
+      mv "$target.part" "$target"
+      return 0
+   fi
    sleep 2
    if "$wayback_fetch" "$target.part" "https://web.archive.org/web/2011id_/http://$site/$build/$file" \
       && gzip -t "$target.part" 2>/dev/null; then
