@@ -24,7 +24,7 @@ java -version > /dev/null 2>&1 || die "Java 6 or later is missing: it runs ANTLR
 
 echo "downloading the sources into $root/sources"
 "$root/scripts/fetch-sources" || die "some sources are missing or differ from manifest/9L30.sha256: run download-kit again"
-echo "downloading the Roots into $root/roots (from the Wayback Machine, which is slow)"
+echo "downloading the Roots into $root/roots (from nyg/PowerDarwin-roots on GitHub, six from the Wayback Machine)"
 "$root/scripts/fetch-roots" || die "some Roots are missing or differ from manifest/9L30-roots.sha256: run download-kit again"
 echo "making D49's parser in $root/inputs/antlr2"
 rm -rf "$root/inputs/antlr2"

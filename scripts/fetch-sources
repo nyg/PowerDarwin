@@ -5,6 +5,7 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 manifest="$root/manifest/9L30.tsv"
 sums="$root/manifest/9L30.sha256"
 export wayback_fetch="$root/scripts/wayback-fetch"
+export mirror="https://github.com/nyg/PowerDarwin-roots/releases/download/sources-9L30"
 export dest="$root/sources"
 record=
 [[ ${1:-} == --record ]] && { record=1; shift; }
@@ -16,6 +17,10 @@ fetch() {
    local project=$1 version=$2 source=$3 url
    local file="$dest/$project-$version.tar.gz"
    [[ -s $file ]] && return 0
+   if [[ $source == archive ]] && curl -fsL --retry 3 -o "$file.part" "$mirror/$project-$version.tar.gz"; then
+      mv "$file.part" "$file"
+      return 0
+   fi
    case $source in
       github) url="https://github.com/apple-oss-distributions/$project/archive/refs/tags/$project-$version.tar.gz" ;;
       archive) url="https://web.archive.org/web/2012id_/http://www.opensource.apple.com/tarballs/$project/$project-$version.tar.gz" ;;
