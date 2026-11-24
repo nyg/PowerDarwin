@@ -6,6 +6,7 @@ plists="$root/manifest/plists"
 list="$root/manifest/9L30-roots.tsv"
 used="$root/manifest/9L30-roots-used.tsv"
 sums="$root/manifest/9L30-roots.sha256"
+export wayback_fetch="$root/scripts/wayback-fetch"
 export dest="$root/roots"
 export site="src.macosforge.org/Roots"
 mkdir -p "$dest"
@@ -22,8 +23,10 @@ done
 for build in "${chain[@]}"; do
    mkdir -p "$dest/$build"
    [[ -s $dest/$build/.listing ]] && continue
-   curl -fsSL --retry 8 --retry-delay 30 --retry-connrefused "https://web.archive.org/web/2011/http://$site/$build/" \
-      | grep -oE 'href="[^"]+\.tar\.gz"' | sed -E 's|.*/||; s|^href="||; s|"$||' | sort -u > "$dest/$build/.listing"
+   index="$dest/$build/.index.html"
+   "$wayback_fetch" "$index" "https://web.archive.org/web/2011/http://$site/$build/" || { echo "no listing for $build" >&2; exit 1; }
+   grep -oE 'href="[^"]+\.tar\.gz"' "$index" | sed -E 's|.*/||; s|^href="||; s|"$||' | sort -u > "$dest/$build/.listing"
+   rm -f "$index"
    [[ -s $dest/$build/.listing ]] || { echo "no listing for $build" >&2; exit 1; }
    echo "$build: $(wc -l < "$dest/$build/.listing" | tr -d ' ') files listed"
 done
@@ -64,8 +67,7 @@ fetch() {
    local target="$dest/$build/$file"
    [[ -s $target ]] && return 0
    sleep 2
-   if curl -fsSL --retry 8 --retry-delay 30 --retry-connrefused -o "$target.part" \
-      "https://web.archive.org/web/2011id_/http://$site/$build/$file" \
+   if "$wayback_fetch" "$target.part" "https://web.archive.org/web/2011id_/http://$site/$build/$file" \
       && gzip -t "$target.part" 2>/dev/null; then
       mv "$target.part" "$target"
    else
