@@ -148,7 +148,7 @@ make[2]: *** [do_build_mach_kernel] Error 138
 lipo: can't open replacement file: …/mach_kernel.sys.dSYM/./Contents/Resources/DWARF//mach_kernel.sys
 ```
 
-[D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7) renames the copy `dsymutil.real` and puts a small script, [env/dsymutil](https://github.com/nyg/PowerDarwin/blob/master/env/dsymutil), in its place. It runs the real tool; if that fails, it puts a copy of the input binary, thinned to the requested architecture, where the debug file would be, so that later steps still find a file, and exits 0. Only the debug bundles are affected, never the binaries the image holds. Every build since prints `Bus error` once per binary and succeeds.
+[D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7) renames the copy `dsymutil.real` and puts a small script, [env/dsymutil](https://github.com/nyg/PowerDarwin/blob/master/env/dsymutil), in its place. It puts a copy of the input binary, thinned to the requested architecture, where the debug file would be, so that later steps still find a file, and exits 0. Only the debug bundles are affected, never the binaries the image holds. Until 23 November 2026 it ran the real tool first, so every build printed `Bus error` once per binary and succeeded, and each crash took a few seconds to report.
 
 ### Every other deviation of this part
 

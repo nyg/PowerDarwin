@@ -1,0 +1,15 @@
+PowerDarwin D115, 2026-11-24: changes to CF 476.19, under the licence of the files changed.
+--- a/BuildCFLite
++++ b/BuildCFLite
+@@ -22,7 +22,10 @@
+ PRIVATE_HEADERS="CFBundlePriv.h CFCharacterSetPriv.h CFError_Private.h CFLogUtilities.h CFPriv.h CFRuntime.h CFStorage.h CFStreamAbstract.h CFStreamPriv.h CFStreamInternal.h CFStringDefaultEncoding.h CFStringEncodingConverter.h CFStringEncodingConverterExt.h CFUniChar.h CFUnicodeDecomposition.h CFUnicodePrecomposition.h ForFoundationOnly.h"
+ 
+ OBJBASE=../CF-Objects
+-ARCHFLAGS="-arch ppc -arch ppc64 -arch i386 -arch x86_64"
++ARCHFLAGS=""
++for ARCH in ${RC_ARCHS:-ppc ppc64 i386 x86_64}; do
++	ARCHFLAGS="$ARCHFLAGS -arch $ARCH"
++done
+ CFLAGS="-c -pipe -std=gnu99 -g -Wmost -Wno-trigraphs -mmacosx-version-min=10.5 -fconstant-cfstrings -fexceptions -DCF_BUILDING_CF=1 -DDEPLOYMENT_TARGET_MACOSX=1 -DMAC_OS_X_VERSION_MAX_ALLOWED=MAC_OS_X_VERSION_10_5 -DU_SHOW_DRAFT_API=1 -I$OBJBASE -DVERSION=476.10"
+ LFLAGS="-dynamiclib -mmacosx-version-min=10.5 -twolevel_namespace -init ___CFInitialize -compatibility_version 150 -current_version 476 -sectcreate __UNICODE __csbitmaps CFCharacterSetBitmaps.bitmap -sectcreate __UNICODE __properties CFUniCharPropertyDatabase.data -sectcreate __UNICODE __data $UNICODE_DATA_FILE -segprot __UNICODE r r"
+ 

@@ -82,7 +82,7 @@ A Mach-O file can hold several builds of the same program, one slice per process
 | `ppc7400` | the G4's PowerPC 7400 and later | G4, G5 | `/bin/sh`, `libSystem.B.dylib`, `dyld` |
 | `ppc64` | 64-bit PowerPC | G5 | `libSystem.B.dylib`, `dyld` |
 
-The examples come from the builds of 19 November 2026: our `mach_kernel` is `i386 ppc`, `/bin/sh` is `ppc7400 i386`, and `libSystem.B.dylib` and `/usr/lib/dyld` are `ppc7400 ppc64 i386 x86_64`. The `i386` and `x86_64` slices are for Intel Macs, which Leopard also supports. The image needs only the PowerPC ones, but darwinbuild sets the build's architectures to `ppc i386`, as Apple's build lists do, and some projects add their 64-bit slices themselves. On the iMac under Leopard, `sysctl hw.cpusubtype` prints 100, Mach-O's number for the PowerPC 970: a G5 runs `ppc7400` and `ppc` code, and 64-bit `ppc64` code. [darwinbuild](../method/darwinbuild.md) shows how the build chooses the slices.
+The examples come from the builds of 19 November 2026: our `mach_kernel` is `i386 ppc`, `/bin/sh` is `ppc7400 i386`, and `libSystem.B.dylib` and `/usr/lib/dyld` are `ppc7400 ppc64 i386 x86_64`. The `i386` and `x86_64` slices are for Intel Macs, which Leopard also supports. The image needs only the PowerPC ones. Those builds followed Apple's build lists, which set `ppc i386`, and four architectures for some projects; since [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) every build is for `ppc`, and `ppc ppc64` where Apple's had four. On the iMac under Leopard, `sysctl hw.cpusubtype` prints 100, Mach-O's number for the PowerPC 970: a G5 runs `ppc7400` and `ppc` code, and 64-bit `ppc64` code. [darwinbuild](../method/darwinbuild.md) shows how the build chooses the slices.
 
 ## QEMU's mac99
 

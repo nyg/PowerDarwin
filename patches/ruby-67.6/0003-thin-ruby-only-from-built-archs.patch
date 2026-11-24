@@ -1,0 +1,17 @@
+PowerDarwin D115, 2026-11-24: changes to ruby 67.6, under the licence of the files changed.
+--- a/Makefile
++++ b/Makefile
+@@ -66,8 +66,11 @@
+ 	$(STRIP) -x $(FW_VERSION_DIR)/usr/bin/ruby
+ 	$(MKDIR) $(ULB)
+ 	$(CP) $(FW_VERSION_DIR)/usr/bin/ruby $(ULB)/ruby64
+-	lipo -remove ppc64 -output $(FW_VERSION_DIR)/usr/bin/ruby $(FW_VERSION_DIR)/usr/bin/ruby
+-	lipo -remove x86_64 -output $(FW_VERSION_DIR)/usr/bin/ruby $(FW_VERSION_DIR)/usr/bin/ruby
++	for arch in ppc64 x86_64; do \
++		if lipo $(FW_VERSION_DIR)/usr/bin/ruby -verify_arch $$arch; then \
++			lipo -remove $$arch -output $(FW_VERSION_DIR)/usr/bin/ruby $(FW_VERSION_DIR)/usr/bin/ruby || exit 1; \
++		fi; \
++	done
+ 	$(STRIP) -x $(FW_VERSION_DIR)/usr/lib/ruby/$(VERSION)/$(SYSSTRING)/*.bundle
+ 	$(STRIP) -x $(FW_VERSION_DIR)/usr/lib/ruby/$(VERSION)/$(SYSSTRING)/*/*.bundle
+ 	$(RM) $(FW_VERSION_DIR)/usr/lib/libruby-static.a

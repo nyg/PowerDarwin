@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- How the 114 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 115 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
 - How one closed framework, OpenDirectory, reaches four projects.
@@ -38,7 +38,7 @@ A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 29, 16
 
 A row's kind says what sort of change was made. It does not say why the change was needed, and the same cause can lead to rows of several kinds. When Xcode 3.1.4 wrote its MIG output into a folder per architecture, where IOKitUser's script looked for it in one folder, the fix was filed as `bitrot` ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23)); when DirectoryService's script failed the same way, as `bug` ([D53](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d53)). A missing dependency becomes `build-env` when a Root is put into the build environment by hand ([D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4)), and `bug` when the build list itself gets the dependency ([D29](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d29)).
 
-So the rest of this chapter sorts the rows a second way, by cause. Every row has one cause, the one its error points at first, or, for rows added before any build failed, such as D88 and D89, the gap it fills; D100, a choice, has a cause of its own:
+So the rest of this chapter sorts the rows a second way, by cause. Every row has one cause, the one its error points at first, or, for rows added before any build failed, such as D88 and D89, the gap it fills; D100 and D115, choices, have a cause of their own:
 
 | Cause | `build-env` | `bitrot` | `bug` | `closed-replacement` | `closed-dependency` | `deferred` | `dropped` |
 |---|---|---|---|---|---|---|---|
@@ -54,7 +54,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | The archive: tarballs, lists, Roots | D1, D3, D6, D20 | D2 | | | | | |
 | Faults in Apple's code | | | D17, D33, D46, D83 | | | | |
 | Waiting for an open project | | | | | | D72 | D26, D45 |
-| A choice: PowerPC only | D100 | | | | | | |
+| A choice: PowerPC only | D100, D115 | | | | | | |
 
 [Indexes and timeline](../reference/indexes.md) lists every row with its step and chapter.
 
@@ -240,7 +240,7 @@ A change made only until another project is built is `deferred`, and becomes `dr
 
 ### A choice
 
-One row fixes nothing: [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100) builds gcc and gcc_42 for PowerPC only, without the Intel cross compilers that the build list's `ppc i386` would add, since the project targets PowerPC. Its error column says "none: a choice".
+Two rows fix nothing: [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100) builds gcc and gcc_42 for PowerPC only, without the Intel cross compilers that the build list's `ppc i386` would add, since the project targets PowerPC, and [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) builds every project so, keeping `ppc64` wherever Leopard has it. Their error column says "none: a choice".
 
 ## Step 9's rows
 

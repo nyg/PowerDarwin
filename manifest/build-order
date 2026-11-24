@@ -61,7 +61,6 @@ build libstdcxx
 build autozone
 build objc4
 build ICU
-build CF
 build kext_tools
 build IOPCIFamily
 build IOStorageFamily
@@ -272,4 +271,3 @@ build samba
 prepare D99
 build python
 build OpenSMU 1.0
-build SystemStubs

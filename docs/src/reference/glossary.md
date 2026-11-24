@@ -482,7 +482,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`rbconfig.rb`**: Ruby's record of the flags and paths it was built with, which Apple's build edits with `rbconfig.diff` ([D104](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d104), [D105](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d105)). See [Step 10](../steps/step-10-working-unix.md).
 
-**`RC_ARCHS`**: the build setting naming the processors a project is built for, `ppc i386` unless the build list says otherwise, such as `ppc` alone for the compilers ([D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100)). See [darwinbuild and the build machine](../method/darwinbuild.md).
+**`RC_ARCHS`**: the build setting naming the processors a project is built for: `ppc`, or `ppc ppc64` where Leopard's binaries have 64-bit slices ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)). Apple's build lists say `ppc i386`, and four architectures for some projects. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
 **`rc.common`, `hostconfig`**: shell files from launchd's source that boot scripts such as `rc.audit` read for settings. See [Step 8](../steps/step-8-clean-boot.md).
 

@@ -214,7 +214,7 @@ The final image, made after these tests, holds 28,525 files, of which the 25 not
 - Python's 36 Carbon modules, Build Applet and Python Launcher ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, as no Tk is built.
 - `.dSYM` bundles for one-step `-g` builds ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
 - In Samba: SPNEGO, the byte-range locks of `darwin_streams`, and file sharing set from a preference pane ([D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). Samba 3.0.25b speaks SMB1 only.
-- Intel code: the compilers are PowerPC only, but Perl, Python, Ruby, Samba and most libraries still carry `i386` slices, and some `x86_64` ([What's next](whats-next.md)).
+- Intel code: the compilers are PowerPC only, but Perl, Python, Ruby, Samba and most libraries still carried `i386` slices, and some `x86_64`, until [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) built every project for PowerPC only.
 - A test in QEMU: Step 10 was proved in a chroot and on the iMac only.
 
 ## Where to look
