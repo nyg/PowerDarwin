@@ -14,6 +14,8 @@ enum {
    kClockTimeoutSeconds = 10,
    kPhyAccessTries = 1000,
    kSoftResetTries = 100,
+   kLPSTries = 3,
+   kPHYPacketWaitTries = 500,
    kMaxRec2K = 10,
    kATRetries = (200 << 16) | (3 << 8) | (3 << 4) | 3,
    kBusOptionsCapabilities = 0xE0000000,
@@ -168,8 +170,7 @@ bool OpenFWOHCI::start(IOService *provider)
    probePhy();
    publishIdentity();
 
-   fPacket = (UInt8 *)IOMalloc(kOpenFWOHCIPacketBytes);
-   if (!fPacket || !allocateContexts()) {
+   if (!allocateContexts()) {
       IOLog("OpenFWOHCI: cannot allocate DMA memory\n");
       return false;
    }
@@ -194,6 +195,7 @@ bool OpenFWOHCI::start(IOService *provider)
    fControl = createController();
    if (!fControl || !fControl->attach(this)) {
       IOLog("OpenFWOHCI: cannot create the FireWire controller\n");
+      PMstop();
       return false;
    }
    if (!fControl->start(this)) {
@@ -206,11 +208,18 @@ bool OpenFWOHCI::start(IOService *provider)
    return true;
 }
 
+IOReturn OpenFWOHCI::powerDownAction(OSObject *owner, void *arg0, void *arg1, void *arg2, void *arg3)
+{
+   ((OpenFWOHCI *)owner)->setLinkPowerState(0);
+   return kIOReturnSuccess;
+}
+
 void OpenFWOHCI::stop(IOService *provider)
 {
-   setLinkPowerState(0);
    if (fInterruptSource)
       fInterruptSource->disable();
+   if (fWorkLoop)
+      fWorkLoop->runAction(powerDownAction, this);
    PMstop();
    super::stop(provider);
 }
@@ -229,8 +238,6 @@ void OpenFWOHCI::free(void)
    if (fWorkLoop)
       fWorkLoop->release();
    freeContexts();
-   if (fPacket)
-      IOFree(fPacket, kOpenFWOHCIPacketBytes);
    if (fRegisterMap)
       fRegisterMap->release();
    super::free();
@@ -249,9 +256,6 @@ IOPMPowerState *OpenFWOHCI::getPowerStateTable(unsigned long *count)
 
 bool OpenFWOHCI::resetController(void)
 {
-   writeRegister(kOHCIIntMaskClear, 0xFFFFFFFF);
-   writeRegister(kOHCIIsoXmitIntMaskClear, 0xFFFFFFFF);
-   writeRegister(kOHCIIsoRecvIntMaskClear, 0xFFFFFFFF);
    writeRegister(kOHCIHCControlSet, kOHCIHCControlSoftReset);
    for (UInt32 i = 0; readRegister(kOHCIHCControlSet) & kOHCIHCControlSoftReset; i++) {
       if (i == kSoftResetTries) {
@@ -260,8 +264,17 @@ bool OpenFWOHCI::resetController(void)
       }
       IOSleep(1);
    }
-   writeRegister(kOHCIHCControlSet, kOHCIHCControlLPS);
-   IOSleep(50);
+   for (UInt32 i = 0; !(readRegister(kOHCIHCControlSet) & kOHCIHCControlLPS); i++) {
+      if (i == kLPSTries) {
+         IOLog("OpenFWOHCI: the link power status did not come on\n");
+         return false;
+      }
+      writeRegister(kOHCIHCControlSet, kOHCIHCControlLPS);
+      IOSleep(50);
+   }
+   writeRegister(kOHCIIntMaskClear, 0xFFFFFFFF);
+   writeRegister(kOHCIIsoXmitIntMaskClear, 0xFFFFFFFF);
+   writeRegister(kOHCIIsoRecvIntMaskClear, 0xFFFFFFFF);
    return true;
 }
 
@@ -564,6 +577,12 @@ IOReturn OpenFWOHCI::resetBus(bool useIBR)
 
    if (!fLinkOn)
       return kIOReturnOffline;
+   if (fPHYPacketPending) {
+      const UInt8 *descriptor = fATRequest.descriptors.bytes + fPHYPacketSlot * kOpenFWOHCIATSlotDescriptorBytes;
+      for (UInt32 i = 0; i < kPHYPacketWaitTries && !OSReadLittleInt32(descriptor, 12); i++)
+         IODelay(10);
+      fPHYPacketPending = false;
+   }
    if (useIBR || !fPhy1394a)
       done = updatePhy(kPhyRegisterReset, 0, kPhyResetInitiate);
    else
@@ -574,8 +593,14 @@ IOReturn OpenFWOHCI::resetBus(bool useIBR)
 IOReturn OpenFWOHCI::sendPHYPacket(UInt32 quad)
 {
    UInt32 header[3] = { kFWTCodePHYPacket << kOHCIAsyncTCodeShift, quad, ~quad };
+   UInt32 slot = (fATRequest.head + fATRequest.count) % fATRequest.slots;
+   IOReturn status = queuePacket(&fATRequest, header, sizeof(header), false, 0, 0, 0, 0, 0);
 
-   return queuePacket(&fATRequest, header, sizeof(header), false, 0, 0, 0, 0, 0);
+   if (status == kIOReturnSuccess) {
+      fPHYPacketSlot = slot;
+      fPHYPacketPending = true;
+   }
+   return status;
 }
 
 IOReturn OpenFWOHCI::setContender(bool state)

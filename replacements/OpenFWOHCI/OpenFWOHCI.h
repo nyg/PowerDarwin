@@ -45,6 +45,7 @@ struct OpenFWOHCIATContext {
    UInt8 branchWord[kOpenFWOHCIATMaxSlots];
    UInt32 head;
    UInt32 count;
+   bool expires;
    bool running;
    bool completing;
 };
@@ -54,6 +55,7 @@ struct OpenFWOHCIARContext {
    UInt32 registers;
    OpenFWOHCIBuffer descriptors;
    OpenFWOHCIBuffer data;
+   UInt8 *packet;
    UInt32 position;
    UInt32 last;
    bool draining;
@@ -143,7 +145,8 @@ private:
    OpenFWOHCIATContext fATResponse;
    OpenFWOHCIARContext fARRequest;
    OpenFWOHCIARContext fARResponse;
-   UInt8 *fPacket;
+   UInt32 fPHYPacketSlot;
+   bool fPHYPacketPending;
 
    UInt32 readRegister(UInt32 offset);
    void writeRegister(UInt32 offset, UInt32 value);
@@ -158,6 +161,7 @@ private:
 
    static bool interruptFilter(OSObject *owner, IOFilterInterruptEventSource *source);
    static void interruptHandler(OSObject *owner, IOInterruptEventSource *source, int count);
+   static IOReturn powerDownAction(OSObject *owner, void *arg0, void *arg1, void *arg2, void *arg3);
    bool collectInterrupts(void);
    void processInterrupts(void);
    void handleSelfIDComplete(void);

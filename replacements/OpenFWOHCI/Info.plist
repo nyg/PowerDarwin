@@ -28,8 +28,8 @@
 			<string>io.github.nyg.driver.OpenFWOHCI</string>
 			<key>IOClass</key>
 			<string>OpenFWOHCI</string>
-			<key>IONameMatch</key>
-			<string>pci106b,52</string>
+			<key>IOPCIMatch</key>
+			<string>0x0052106b</string>
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 		</dict>

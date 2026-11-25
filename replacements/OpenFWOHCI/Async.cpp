@@ -100,12 +100,16 @@ bool OpenFWOHCI::allocateContexts(void)
    fATResponse.name = "AT response";
    fATResponse.registers = kOHCIATResponseContext;
    fATResponse.slots = kOpenFWOHCIATResponseSlots;
+   fATResponse.expires = true;
    fARRequest.name = "AR request";
    fARRequest.registers = kOHCIARRequestContext;
    fARResponse.name = "AR response";
    fARResponse.registers = kOHCIARResponseContext;
 
-   return allocateBuffer(&fSelfIDBuffer, kOpenFWOHCISelfIDBytes) &&
+   fARRequest.packet = (UInt8 *)IOMalloc(kOpenFWOHCIPacketBytes);
+   fARResponse.packet = (UInt8 *)IOMalloc(kOpenFWOHCIPacketBytes);
+   return fARRequest.packet && fARResponse.packet &&
+      allocateBuffer(&fSelfIDBuffer, kOpenFWOHCISelfIDBytes) &&
       allocateBuffer(&fROM[0], kOpenFWOHCIROMBytes) &&
       allocateBuffer(&fROM[1], kOpenFWOHCIROMBytes) &&
       allocateBuffer(&fATRequest.descriptors, fATRequest.slots * kOpenFWOHCIATSlotDescriptorBytes) &&
@@ -120,6 +124,12 @@ bool OpenFWOHCI::allocateContexts(void)
 
 void OpenFWOHCI::freeContexts(void)
 {
+   if (fARRequest.packet)
+      IOFree(fARRequest.packet, kOpenFWOHCIPacketBytes);
+   if (fARResponse.packet)
+      IOFree(fARResponse.packet, kOpenFWOHCIPacketBytes);
+   fARRequest.packet = 0;
+   fARResponse.packet = 0;
    freeBuffer(&fSelfIDBuffer);
    freeBuffer(&fROM[0]);
    freeBuffer(&fROM[1]);
@@ -151,6 +161,8 @@ void OpenFWOHCI::initATContext(OpenFWOHCIATContext *context)
    context->head = 0;
    context->count = 0;
    context->running = false;
+   if (context == &fATRequest)
+      fPHYPacketPending = false;
    context->completing = false;
    bzero(context->commands, sizeof(context->commands));
    if (context->descriptors.bytes)
@@ -217,6 +229,8 @@ IOReturn OpenFWOHCI::queuePacket(OpenFWOHCIATContext *context, const UInt32 *hea
       context->branchWord[slot] = 10;
       z = 3;
    }
+   if (context->expires)
+      putWord(descriptor, 3, ((readRegister(kOHCICycleTimer) >> 12) + (1 << 13)) & 0xFFFF);
    context->commands[slot] = cmd;
    context->count++;
    syncMemory();
@@ -445,8 +459,9 @@ void OpenFWOHCI::drainARContext(OpenFWOHCIARContext *context)
 
       if (available < 4)
          break;
-      copyARBytes(context, context->position, fPacket, 4);
-      tcode = (getWord(fPacket, 0) >> kOHCIAsyncTCodeShift) & 0xF;
+      syncMemory();
+      copyARBytes(context, context->position, context->packet, 4);
+      tcode = (getWord(context->packet, 0) >> kOHCIAsyncTCodeShift) & 0xF;
       switch (tcode) {
       case kFWTCodeWriteResponse:
       case kFWTCodeReadQuadlet:
@@ -475,9 +490,9 @@ void OpenFWOHCI::drainARContext(OpenFWOHCIARContext *context)
       }
       if (available < headerBytes)
          break;
-      copyARBytes(context, context->position, fPacket, headerBytes);
+      copyARBytes(context, context->position, context->packet, headerBytes);
       if (tcode == kFWTCodeWriteBlock || tcode == kFWTCodeReadBlockResponse || tcode == kFWTCodeLock || tcode == kFWTCodeLockResponse)
-         payloadBytes = ((getWord(fPacket, 3) >> 16) + 3) & ~3;
+         payloadBytes = ((getWord(context->packet, 3) >> 16) + 3) & ~3;
       total = headerBytes + payloadBytes + 4;
       if (total > kOpenFWOHCIPacketBytes) {
          IOLog("OpenFWOHCI: %s: %u-byte packet, restarting the context\n", context->name, (unsigned)total);
@@ -487,7 +502,7 @@ void OpenFWOHCI::drainARContext(OpenFWOHCIARContext *context)
       }
       if (available < total)
          break;
-      copyARBytes(context, context->position, fPacket, total);
+      copyARBytes(context, context->position, context->packet, total);
       before = context->position / kOpenFWOHCIARBufferBytes;
       context->position = (context->position + total) % kARRingBytes;
       after = context->position / kOpenFWOHCIARBufferBytes;
@@ -497,11 +512,11 @@ void OpenFWOHCI::drainARContext(OpenFWOHCIARContext *context)
       }
       if (tcode == kFWTCodePHYPacket)
          continue;
-      trailer = getWord(fPacket, (headerBytes + payloadBytes) / 4) >> 16;
+      trailer = getWord(context->packet, (headerBytes + payloadBytes) / 4) >> 16;
       speed = (trailer >> kOHCIContextSpeedShift) & kOHCIContextSpeedMask;
       for (UInt32 i = 0; i < swapWords; i++)
-         ((UInt32 *)fPacket)[i] = getWord(fPacket, i);
-      processRcvPacket((UInt32 *)fPacket, (headerBytes + payloadBytes) / 4, (IOFWSpeed)(speed > kFWSpeed400MBit ? kFWSpeed400MBit : speed));
+         ((UInt32 *)context->packet)[i] = getWord(context->packet, i);
+      processRcvPacket((UInt32 *)context->packet, (headerBytes + payloadBytes) / 4, (IOFWSpeed)(speed > kFWSpeed400MBit ? kFWSpeed400MBit : speed));
    }
 done:
    context->draining = false;

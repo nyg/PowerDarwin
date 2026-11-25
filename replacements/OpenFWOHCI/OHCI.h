@@ -175,7 +175,7 @@ enum {
    kPhyControlLinkActive = 1 << 7,
    kPhyControlContender = 1 << 6,
    kPhyExtendedShortReset = 1 << 6,
-   kPhyExtendedStatusBits = 0x1C,
+   kPhyExtendedStatusBits = 0x3C,
    kPhyExtendedAccelArbitration = 1 << 1,
    kPhyExtendedMultiSpeed = 1 << 0
 };
