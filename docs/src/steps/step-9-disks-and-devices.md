@@ -69,7 +69,7 @@ DiskArbitration also waits for a console user before it mounts a removable or ex
 
 ### FireWire
 
-IOFireWireFamily, IOFireWireSBP2 and IOFireWireSerialBusProtocolTransport all built. The iMac's FireWire controller, though, needs `AppleFWOHCI`, a plug-in of IOFireWireFamily that neither its source nor any later release holds: it is closed, and without it no FireWire device appears. So FireWire disks are left out of this step; [What's next](whats-next.md) says what an open driver would take.
+IOFireWireFamily, IOFireWireSBP2 and IOFireWireSerialBusProtocolTransport all built. The iMac's FireWire controller, though, needs `AppleFWOHCI`, a plug-in of IOFireWireFamily that neither its source nor any later release holds: it is closed, and without it no FireWire device appears. So FireWire disks are left out of this step. [Step 12](step-12-firewire.md) writes an open driver for the controller, OpenFWOHCI, and found that IOFireWireFamily as built here did not load either: its published source leaves one class empty, which Step 12 also writes.
 
 ## Sound
 

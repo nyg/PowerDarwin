@@ -177,7 +177,7 @@ The same, as a table, with the project each driver comes from:
 | NVRAM | `AppleFlashNVRAM` | AppleFlashNVRAM | open |
 | Audio | `AppleOnboardAudio`, with OpenOnyx for the codec | AppleOnboardAudio 258.3.1, OpenOnyx | open and ours ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)) |
 | SMU, clock, power, fans | `OpenSMU` | OpenSMU | ours ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), in place of the closed AppleSMU and platform plug-ins |
-| FireWire | none | Apple's `AppleFWOHCI` is closed | closed |
+| FireWire | `OpenFWOHCI`, `IOFireWireController` | OpenFWOHCI, IOFireWireFamily 349.4.0 | ours ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), in place of the closed AppleFWOHCI, and open with one class of ours ([D120](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d120)) |
 | Graphics acceleration | none | Apple's `ATIRadeon9700` is closed | closed |
 | AirPort, Bluetooth | none | Apple's `AppleAirPortBrcm4311`, `IO80211Family`, `IOBluetoothFamily` are closed | closed |
 

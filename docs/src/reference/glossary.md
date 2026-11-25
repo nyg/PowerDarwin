@@ -8,7 +8,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **ADC**: analog-to-digital converter, which turns a voltage into a number. The SMU's ADC reads the CPU diode. See [Step 7](../steps/step-7-fans.md).
 
-**AppleFWOHCI**: Apple's driver of the FireWire controller, a plug-in of IOFireWireFamily that no published source holds. Without it no FireWire device appears. See [Step 9](../steps/step-9-disks-and-devices.md).
+**AppleFWOHCI**: Apple's driver of the FireWire controller, a plug-in of IOFireWireFamily that no published source holds. Without it, or our OpenFWOHCI in its place, no FireWire device appears. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 12](../steps/step-12-firewire.md).
 
 **AppleGPIO**: the driver of the general-purpose input and output lines of PowerPC Macs. On the iMac G5 it rings the SMU's doorbell. See [Step 5](../steps/step-5-clock-and-power.md).
 
@@ -96,6 +96,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **bus**: a shared path between chips, with its own rules for addresses and data, such as PCI, I²C or USB. See [Hardware and boot basics](../background/hardware-basics.md).
 
+**bus reset**: on FireWire, the moment after a device is plugged in or removed when every node forgets the bus's tree and finds it again; each PHY then sends a self-ID packet. See [Step 12](../steps/step-12-firewire.md).
+
 **byte order**: the order in which a processor stores the bytes of a number. PowerPC Macs are big-endian (most significant byte first), x86 is little-endian. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **`ByteRangeLocking.framework`**: a private, closed framework of Leopard's that Apple's Samba links; its `darwin_streams` module calls it only with `darwin_streams:brlm = yes` ([D107](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d107), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108)). See [Step 10](../steps/step-10-working-unix.md).
@@ -141,6 +143,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **command page**: the page of memory into which OpenSMU writes a command for the SMU, and the SMU writes its reply. See [OpenSMU](../synthesis/opensmu.md) and [Step 5](../steps/step-5-clock-and-power.md).
 
 **compiler driver, `cc1`**: `cc` (or `gcc`) is a driver that runs `cc1`, the compiler proper, then `as` and `ld`. See [Step 10](../steps/step-10-working-unix.md).
+
+**config ROM**: the block at a fixed address of each FireWire node that says who made it and which units it holds, such as an SBP-2 disk. See [Step 12](../steps/step-12-firewire.md).
 
 **configd, dynamic store**: the System Configuration daemon and its table of the machine's current network state, filled by its plug-ins and read by `scutil`. See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
@@ -232,7 +236,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **file-system bundle**: a bundle in `/System/Library/Filesystems`, such as `hfs.fs`, `msdos.fs` or `cd9660.fs`, through which DiskArbitration recognises, names and mounts a volume. See [Step 9](../steps/step-9-disks-and-devices.md).
 
-**FireWire**: IEEE 1394, a serial bus for disks and other devices, which the iMac G5 has beside USB. See [Step 9](../steps/step-9-disks-and-devices.md).
+**FireWire**: IEEE 1394, a serial bus for disks and other devices, which the iMac G5 has beside USB. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 12](../steps/step-12-firewire.md).
 
 **firmware**: the program stored on the machine itself, which runs at power-on, tests and describes the hardware and starts a boot loader. On PowerPC Macs it is Open Firmware. See [Hardware and boot basics](../background/hardware-basics.md).
 
@@ -406,6 +410,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **NVRAM**: memory that keeps its content with the power off. On PowerPC Macs it holds Open Firmware's variables, such as `boot-device` and `boot-args`, and the PRAM. See [the boot chain](../background/boot-chain.md).
 
+**OHCI-1394**: the 1394 Open Host Controller Interface, the register layout and DMA model that most FireWire controllers follow, not to be confused with USB's OHCI. See [Step 12](../steps/step-12-firewire.md).
+
 **OpenBIOS**: the open-source Open Firmware that QEMU runs. See [PowerPC Macs](../background/powerpc-macs.md).
 
 **OpenDarwin**: the community Darwin project founded in April 2002 by the Internet Software Consortium and Apple. It released bootable Darwins 6 and 7 for PowerPC and Intel, and shut down in July 2006. See [Darwin's history](../background/history.md).
@@ -415,6 +421,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **Open Firmware**: the firmware of PowerPC Macs. It describes the hardware in the device tree, offers a Forth prompt, and boots from a device path. See [the boot chain](../background/boot-chain.md).
 
 **`openplay`**: the project's command that plays a tone or a WAV file through IOAudioFamily's engine interface, without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)). See [Step 9](../steps/step-9-disks-and-devices.md).
+
+**OpenFWOHCI**: this project's link driver for the iMac G5's FireWire controller, in place of Apple's closed `AppleFWOHCI` ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)). See [Step 12](../steps/step-12-firewire.md).
 
 **OpenPMU**: this project's open driver for the PMU, in place of Apple's closed ApplePMU: clock, restart and power-off. Its class derives from one named `ApplePMU`, for which AppleMacRISC2PE's processor driver waits. See [Step 11](../steps/step-11-pmu.md).
 
@@ -449,6 +457,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **phandle**: Open Firmware's number for a device-tree node, kept by IOKit as the node's `AAPL,phandle` property. See [Step 5](../steps/step-5-clock-and-power.md).
 
 **physical address**: where a byte sits in the machine's memory, as devices see it. Programs and the kernel use virtual addresses, which the processor's MMU translates. See [Hardware and boot basics](../background/hardware-basics.md).
+
+**physical request**: a FireWire read or write of the host's memory that the controller answers by itself, for the nodes that its physical request filter lets through. See [Step 12](../steps/step-12-firewire.md).
 
 **PID loop**: a controller that sets its output from the error between a reading and a target, the error's sum over time and its rate of change. Apple's fan control runs one per sensor. See [OpenSMU](../synthesis/opensmu.md).
 
@@ -514,7 +524,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **SATA, ATA**: the serial and parallel disk interfaces. The iMac G5's disk is on SATA, its optical drive on ATA. See [Hardware and boot basics](../background/hardware-basics.md).
 
-**SBP-2**: the protocol by which FireWire disks carry SCSI commands. See [Step 9](../steps/step-9-disks-and-devices.md).
+**SBP-2**: the protocol by which FireWire disks carry SCSI commands. The disk reads its commands, called ORBs, from the host's memory, and moves its data there, through physical requests. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 12](../steps/step-12-firewire.md).
 
 **SCSI**: a command set for storage devices, older than the buses that carry it. CD and DVD drives, USB disks and FireWire disks all speak it. See [Step 9](../steps/step-9-disks-and-devices.md).
 
@@ -529,6 +539,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **securityd**: the Security Server, the daemon behind Security.framework's shared state, started by launchd as `com.apple.SecurityServer`. See [Step 6](../steps/step-6-securityd.md).
 
 **SecurityTokend**: the library of tokend, the daemons that present a smart card to securityd as a keychain. See [Step 6](../steps/step-6-securityd.md).
+
+**self-ID packet**: the packet each FireWire PHY sends after a bus reset, with the node number it took, its ports and its speed. See [Step 12](../steps/step-12-firewire.md).
 
 **service access list**: DirectoryService's list of users allowed to use a service such as SSH, which Apple's sshd checks through `mbr_user_name_to_uuid`. See [Step 3, part 2](../steps/step-3-network-and-ssh.md).
 
