@@ -25,7 +25,7 @@ timeline
     A Unix system : Step 10, a working Unix system
 ```
 
-Steps 1 to 10 are reached, with Step 9's CDs tested in QEMU only. The image boots to a login prompt, brings up Ethernet and takes SSH logins, runs everyday commands, keeps the time, restarts and switches off, runs securityd, drives the iMac's fans as quietly as Leopard does, and boots with nothing in its log but what Apple's own files or the missing closed parts cause. It also mounts its disks and USB keys as they appear, makes a partition the startup disk with bless, and plays sound. It compiles and links C and C++ programs with the release's own compilers, built from source, runs Perl, Python and Ruby, and shares a folder with another Mac through Samba. Step 11 (booting from a USB key) is defined.
+Steps 1 to 10 are reached, with Step 9's CDs tested in QEMU only. The image boots to a login prompt, brings up Ethernet and takes SSH logins, runs everyday commands, keeps the time, restarts and switches off, runs securityd, drives the iMac's fans as quietly as Leopard does, and boots with nothing in its log but what Apple's own files or the missing closed parts cause. It also mounts its disks and USB keys as they appear, makes a partition the startup disk with bless, and plays sound. It compiles and links C and C++ programs with the release's own compilers, built from source, runs Perl, Python and Ruby, and shares a folder with another Mac through Samba. Steps 11 to 14 are defined: an open driver for the PMU, tested in QEMU, FireWire disks, the GPU's temperature at idle, and booting from a USB key.
 
 ## What makes it different
 

@@ -1,6 +1,6 @@
-# Step 11: booting from a USB key
+# Step 14: booting from a USB key
 
-> Draft: Step 11 is defined, and no work on it has started. This chapter tells what the step asks for and what is already known, and will be rewritten when the step is reached.
+> Draft: Step 14 is defined, and no work on it has started. This chapter tells what the step asks for and what is already known, and will be rewritten when the step is reached.
 
 ## What you will learn
 
@@ -79,7 +79,7 @@ All of the step.
 
 ## Where to look
 
-- README.md: Step 11.
+- README.md: Step 14.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the partition map, the driver cache and `bless`.
 - In kext_tools 117.4: `kextcache.8`, for `-l`. In IOUSBMassStorageClass 208.0.1: `OSBundleRequired` in its project file.
 - In bless 63.2: `libbless/OpenFirmware/BLGetOpenFirmwareBootDevice.c`, which builds the device path that `--setOF` writes.
