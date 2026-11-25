@@ -220,6 +220,10 @@ void OpenFWOHCI::stop(IOService *provider)
       fInterruptSource->disable();
    if (fWorkLoop)
       fWorkLoop->runAction(powerDownAction, this);
+   if (fControl) {
+      fControl->release();
+      fControl = NULL;
+   }
    PMstop();
    super::stop(provider);
 }
