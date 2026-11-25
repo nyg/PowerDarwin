@@ -6,7 +6,7 @@
 - What each open item would take, from what the repo already records.
 - Which closed parts stand behind most of them.
 
-Steps 1 to 10 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Steps 11 to 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. Three of its driver items are now steps in README.md: the open PMU driver is Step 11, FireWire Step 12 and the GPU Step 13, and each leaves this chapter when its step is reached. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
+Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Steps 11, 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. Two of its driver items are now steps in README.md, the open PMU driver Step 11 and FireWire Step 12, and each leaves this chapter when its step is reached, as the GPU's item did with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
 
 ## Drivers
 
@@ -19,10 +19,6 @@ It would take a kext like OpenSMU ([Step 5](step-5-clock-and-power.md)): the PMU
 ### FireWire
 
 FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 33 pure virtual functions, which a subclass must write, cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers, the steady streams of audio and video devices. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
-
-### The GPU
-
-Leopard's GPU driver, `ATIRadeon9700`, is closed, and without it the iMac's GPU and north bridge run some 5 to 10 °C warmer at idle than under Leopard ([Step 7](step-7-fans.md)). The screen itself comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either.
 
 ### What Step 9 leaves
 
@@ -105,7 +101,6 @@ mindmap
     Drivers
       open PMU driver
       open AppleFWOHCI
-      GPU power
       CDs, sound input, UDF
       unpublished sources
     Machines

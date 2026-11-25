@@ -34,7 +34,8 @@ block-beta
     l["System library"] l1["sandbox, quarantine: stubs, ours"]:2
     k["Kernel"] k1["xnu: all open"]:2
     d["Drivers"] d1["AppleSMU, plug-ins:<br/>OpenSMU, ours"] d2["disk and SCSI drivers:<br/>Panther's"]
-    space d3["AppleOnyxAudio:<br/>OpenOnyx, ours"] d4["PMU, FireWire, ATI,<br/>AirPort, Bluetooth: none"]
+    space d3["AppleOnyxAudio:<br/>OpenOnyx, ours"] d4["PMU, FireWire, ATI acceleration,<br/>AirPort, Bluetooth: none"]
+    space d5["ATI idle power:<br/>OpenRadeonPM, ours"] space
 ```
 
 ## Drivers
@@ -49,7 +50,7 @@ block-beta
 | IOATABlockStorage 200.1.8, never published | the driver of ATA and SATA disks | little: Panther's driver class is `IOATABlockStorageDriver`, where Apple's is `AppleATADiskDriver`, and the kernel notes `Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.` | Panther's 130.3.1 ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)) |
 | IOSCSIArchitectureModelFamily 200.3.6, with its three plug-ins, never published | turns SCSI devices into disks and optical drives: CDs, DVDs, USB disks | without a stand-in, no CD or USB disk; with Panther's, no Blu-ray | Panther's 139.0.2 ([D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86)) |
 | `AppleFWOHCI` | the FireWire controller's driver, a plug-in of IOFireWireFamily that no published source holds | no FireWire device appears | none |
-| `ATIRadeon9700`, and the ATI display drivers in `IONDRVSupport` | the GPU's acceleration and power management | the screen comes from the firmware's display driver; the GPU runs some 10 °C and the north bridge some 5 °C warmer at idle | none |
+| `ATIRadeon9700`, and the ATI display drivers in `IONDRVSupport` | the GPU's acceleration and power management | the screen comes from the firmware's display driver; our OpenRadeonPM sets the GPU's clock gating and its link's L0s state, which keeps the GPU and the north bridge cooler at idle than under Leopard ([Step 13](../steps/step-13-gpu-idle-heat.md)) | OpenRadeonPM ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)) |
 | `IO80211Family` with `AppleAirPortBrcm4311`; `IOBluetoothFamily` | AirPort and Bluetooth | no Wi-Fi, no Bluetooth: the network is Ethernet | none |
 | `IOHDIXController` | the driver of disk images | no disk-image driver | none |
 | `ALF`, `AppleXsanFilter`, `TMSafetyNet`, `seatbelt` | the application firewall, Xsan, Time Machine's protection, the sandbox's policy | no firewall, no sandbox | none |
@@ -116,13 +117,13 @@ On the iMac G5, the image is a Unix system with no graphical system: it boots, m
 
 - the graphical system and everything built on Foundation and Cocoa;
 - Wi-Fi, Bluetooth and FireWire;
-- sleep, and the GPU's power management, which leaves the iMac warmer;
+- sleep, and graphics acceleration;
 - `passwd`, password policies and a DHCP server, through OpenDirectory;
 - crash reports, the sandbox and the firewall;
 - DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
 - in QEMU, the clock, restart and power-off, through ApplePMU.
 
-Some of these could come back as open parts, on the model of OpenSMU and OpenOnyx: a PMU driver, a FireWire controller driver, the GPU's power settings, OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
+Some of these could come back as open parts, on the model of OpenSMU and OpenOnyx: a PMU driver, a FireWire controller driver, OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
 
 ## Where to look
 

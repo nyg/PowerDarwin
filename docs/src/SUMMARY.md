@@ -32,6 +32,7 @@
 - [Step 8: a clean boot](steps/step-8-clean-boot.md)
 - [Step 9: disks and devices](steps/step-9-disks-and-devices.md)
 - [Step 10: a working Unix system](steps/step-10-working-unix.md)
+- [Step 13: the GPU at idle](steps/step-13-gpu-idle-heat.md)
 - [Step 14: booting from a USB key](steps/step-14-usb-boot.md)
 - [What's next](steps/whats-next.md)
 

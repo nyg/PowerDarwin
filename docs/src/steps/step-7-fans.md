@@ -5,7 +5,7 @@
 - Why an iMac G5 (`PowerMac12,1`) was loud under Darwin 9: when no driver sets the fans, the SMU's own firmware runs them.
 - What Leopard uses instead, and the source Apple published for the same fans before Leopard.
 - How OpenSMU reads five temperature sensors, one through the SMU and four over I²C, and sets three fans from them in zones.
-- How Darwin 9 compares with Leopard at idle and under load, and why the GPU and north bridge run warmer.
+- How Darwin 9 compared with Leopard at idle and under load, and why the GPU and north bridge ran warmer, until [Step 13](step-13-gpu-idle-heat.md).
 - How a calibration that was not where Leopard shows it, and readings half a degree too fine, were found and fixed.
 
 ## The goal
@@ -154,7 +154,7 @@ xychart-beta
 
 Leopard's speeds are what its plug-in reports; Darwin 9's are read back from the SMU, within 5 rpm of what OpenSMU set.
 
-Every Darwin 9 temperature but the CPU's is higher. On Leopard, the GPU has its closed driver, `ATIRadeon9700`; on the image no driver manages it, and it runs warmer, 81.6 °C against 72, and warms its neighbours, the north bridge among them. The north bridge's zone starts at 85 °C, so after 30 minutes, holding at 85.1 to 85.4 °C, it lifted the two fans it then drove just above their minimum: the ODD fan to 1050 to 1160 rpm and the CPU fan to 1240 to 1330 rpm, within about 50 rpm of Leopard's idle targets. Heard at the machine, the iMac was quiet, where the SMU's own control had been loud.
+Every Darwin 9 temperature but the CPU's is higher. On Leopard, the GPU has its closed driver, `ATIRadeon9700`; on the image no driver managed it, and it ran warmer, 81.6 °C against 72, and warmed its neighbours, the north bridge among them. [Step 13](step-13-gpu-idle-heat.md) later measured both systems again in one afternoon, once their temperatures had settled: the image's GPU was 2.9 °C warmer than Leopard's and its north bridge 1.8 °C cooler, and with OpenRadeonPM both run cooler than under Leopard. The north bridge's zone starts at 85 °C, so after 30 minutes, holding at 85.1 to 85.4 °C, it lifted the two fans it then drove just above their minimum: the ODD fan to 1050 to 1160 rpm and the CPU fan to 1240 to 1330 rpm, within about 50 rpm of Leopard's idle targets. Heard at the machine, the iMac was quiet, where the SMU's own control had been loud.
 
 ### Under load
 
@@ -177,7 +177,7 @@ The version with the rubber band and the model check was booted in the Step 10 b
 
 - The rubber band has not yet had to act: in that test the ODD fan's target never rose more than 500 rpm above the CPU fan's.
 - The fan loop knows one machine, the 17-inch iMac G5. On the 20-inch, whose profile pairs the GPU and the north bridge with other fans and aims the GPU at 80 °C, and on any other model, OpenSMU leaves the fans to the SMU; each needs its own zones, from its own thermal profile.
-- The GPU and north bridge run warmer than under Leopard, as no driver of ours manages the GPU.
+- The GPU and north bridge ran warmer than under Leopard, as no driver of ours managed the GPU. OpenRadeonPM sets the GPU's idle power state since [Step 13](step-13-gpu-idle-heat.md).
 - Under load, Leopard's plug-in raised all three fans' targets. Worked out from each fan's minimum and the profile's slopes, the three targets give the same processor power: the power rule, not a temperature, held them up. OpenSMU has no such rule, as it would need the processor's current and voltage, and under the same load it left its ODD fan at the minimum.
 - OpenSMU publishes no `AppleSMUDevice` nubs for the fans, the sensors or the SMU's own I²C buses, so no other driver can use them.
 

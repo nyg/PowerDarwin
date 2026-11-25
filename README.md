@@ -11,6 +11,7 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 - Andrew-R, whose [darwinbuild work on Darwin 9 for PowerPC](https://forums.macrumors.com/threads/building-with-darwinbuild-for-darwin9-ppc-in-2026-wip.2485638/) built 100 of its projects on a Leopard PowerPC Mac in 2026.
 - [barracuda156](https://github.com/barracuda156) and the [macos-powerpc](https://github.com/macos-powerpc) organisation, who keep darwinbuild and Apple's projects building for PowerPC.
 - NetBSD's macppc drivers, [`smu.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/smu.c) and [`fancontrol.c`](https://github.com/NetBSD/src/blob/trunk/sys/arch/macppc/dev/fancontrol.c), whose SMU protocol and fan zones OpenSMU follows, FreeBSD's [`onyx.c`](https://github.com/freebsd/freebsd-src/blob/main/sys/dev/sound/macio/onyx.c), whose codec settings OpenOnyx uses, and Linux's [`smu.c`](https://github.com/torvalds/linux/blob/master/drivers/macintosh/smu.c) and [`windfarm_pm121.c`](https://github.com/torvalds/linux/blob/master/drivers/macintosh/windfarm_pm121.c), read for facts about the SMU and the fans.
+- X.Org's [xf86-video-ati](https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati), whose clock-gating sequence for ATI's RV350 family OpenRadeonPM follows, and Linux's [`radeonfb`](https://github.com/torvalds/linux/tree/master/drivers/video/fbdev/aty), read for facts about the same chips.
 - [PureDarwin](https://github.com/PureDarwin/PureDarwin), which built bootable Darwin 9 systems for Intel machines.
 - [QEMU](https://www.qemu.org/) and [OpenBIOS](https://github.com/openbios/openbios), whose `mac99` machine tests each image before it reaches a real Mac.
 
@@ -18,13 +19,13 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 
 ## Status
 
-Steps 1 to 10 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
+Steps 1 to 10 and 13 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, keeps its GPU and north bridge cooler at idle than Leopard does, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
 
 The comparisons with Leopard are provisional: the reference system is Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](reference/imacg5/README.md)), until they are repeated against an unmodified Leopard 10.5.8.
 
 ## Hardware
 
-- iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10.
+- iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10 and 13.
 - QEMU `mac99`: tested, Steps 1 to 4 and 6, and the CDs and USB disks of Step 9.
 - Other PowerPC Macs that Leopard supports: untested.
 
@@ -52,7 +53,7 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 - ✅ **Step 10.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
 - ⬜ **Step 11.** In QEMU `mac99`, an open driver for the PMU reads the clock from the hardware at boot, `reboot` restarts the machine, `shutdown -h now` switches it off, and the network comes up without a 60-second wait.
 - ⬜ **Step 12.** On the iMac G5, a FireWire disk mounts as it is plugged in, through an open driver for the FireWire controller.
-- ⬜ **Step 13.** On the iMac G5, the GPU and the north bridge are as cool at idle as under Leopard.
+- ✅ **Step 13.** On the iMac G5, the GPU and the north bridge are as cool at idle as under Leopard.
 - ⬜ **Step 14.** A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
 
 ## Build it
@@ -62,7 +63,7 @@ PowerDarwin is built on a PowerPC Mac running Leopard 10.5.8 with Xcode 3.1.4, t
 1. On a current computer, macOS or Linux, with `git`, `curl` and Java 6 or later, clone this repo and run `scripts/download-kit`. It downloads Apple's sources from [apple-oss-distributions](https://github.com/apple-oss-distributions) and the Wayback Machine, darwinbuild's from [macosforge/darwinbuild](https://github.com/macosforge/darwinbuild), and the Roots, Apple's builds of each project, which stand in for the projects not built yet, from [nyg/PowerDarwin-roots](https://github.com/nyg/PowerDarwin-roots), a copy of them on GitHub, and the six it lacks from the Wayback Machine. It checks each file against its SHA-256 in `manifest/`, makes [D49](DEVIATIONS.md#d49)'s parser with Java, and packs it all with the repo into `PowerDarwin-kit.tar`, about 2.2 GB. The Wayback Machine refuses connections for a few minutes after many requests: `download-kit` then waits and tries again, for up to an hour per file. Run it again if a download still fails: it keeps what it has.
 2. Download Xcode 3.1.4, `xcode314_2809_developerdvd.dmg`, from [Apple's developer downloads](https://developer.apple.com/download/all/) (a free Apple account is enough), and install it on the PowerPC Mac.
 3. Copy the kit to the PowerPC Mac: on a USB key, or over HTTP, with `python3 -m http.server` in the kit's folder on the current computer and `curl -O http://<its address>:8000/PowerDarwin-kit.tar` on the Mac. That server cannot resume a transfer: if `curl` stops with `transfer closed`, run it again.
-4. On the PowerPC Mac, in Terminal, run `tar -xf PowerDarwin-kit.tar`, `cd PowerDarwin` and `sudo scripts/build-image`. It checks the kit's hashes again, installs darwinbuild into `/usr/local` unless it is there, makes the build folder `~/9L30` (`--folder=<path>` for another), stages the sources and Roots, and runs the 272 steps of [manifest/build-order](manifest/build-order): each darwinbuild build, in order, and each build-environment workaround of DEVIATIONS.md where the builds need it. Then it makes the image, `/private/var/tmp/PowerDarwin.dmg`, and checks every file on it with `scripts/check-image`. Set Computer sleep to Never in Energy Saver first: a sleeping Mac pauses the build.
+4. On the PowerPC Mac, in Terminal, run `tar -xf PowerDarwin-kit.tar`, `cd PowerDarwin` and `sudo scripts/build-image`. It checks the kit's hashes again, installs darwinbuild into `/usr/local` unless it is there, makes the build folder `~/9L30` (`--folder=<path>` for another), stages the sources and Roots, and runs the 273 steps of [manifest/build-order](manifest/build-order): each darwinbuild build, in order, and each build-environment workaround of DEVIATIONS.md where the builds need it. Then it makes the image, `/private/var/tmp/PowerDarwin.dmg`, and checks every file on it with `scripts/check-image`. Set Computer sleep to Never in Energy Saver first: a sleeping Mac pauses the build.
 5. If a step fails, `build-image` stops and names darwinbuild's log. Run it again: it goes on from that step.
 
 ### Working on it
@@ -120,7 +121,7 @@ pnpm run deploy
 
 ## Licence
 
-- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/` but the two below, the replacements in `replacements/` (each with its own copy of the licence, and OpenOnyx's with the BSD notice of the FreeBSD table it copies), the book in `docs/`, the Worker in `worker/` and the other documents.
+- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/` but the two below, the replacements in `replacements/` (each with its own copy of the licence, OpenOnyx's with the BSD notice of the FreeBSD table it copies, and OpenRadeonPM's with the MIT notices of the X.Org files it follows), the book in `docs/`, the Worker in `worker/` and the other documents.
 - `env/ditto` is darwinbuild's `ditto.sh` with one change, under darwinbuild's BSD licence from Apple, and `env/quarantine.h` holds the stubs of copyfile's `copyfile.c` with three additions, under the APSL 2.0. Each file says so in its first lines.
 - `docs/src/count.js` is GoatCounter's script, under the ISC licence, as its first lines state.
 - Each patch in `patches/` changes another project's source, so its changes are under the licence of the files it changes, as that project's source states: the APSL, version 2.0 or 1.1, for most of Apple's projects, and the licences of bash, gcc, Kerberos, ntp, Python, Ruby, Samba and the others for theirs. Its first line gives its deviation and the date of the change. A file that a patch adds is this project's, under the MIT licence, unless its notice says otherwise: the one that `patches/CF-476.19/0003-string-transform-and-forced-preferences.patch` adds comes from swift-corelibs-foundation, under the Apache License 2.0 with Runtime Library Exception.

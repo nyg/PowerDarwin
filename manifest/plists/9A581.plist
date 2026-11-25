@@ -3991,6 +3991,31 @@
 			};
 			version = 1.0;
 		};
+		OpenRadeonPM = {
+			dependencies = {
+				build = (
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					shell_cmds,
+					text_cmds,
+				);
+				header = (
+					IOPCIFamily,
+					xnu,
+				);
+				staticlib = (
+					xnu,
+				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
+			version = 1.0;
+		};
 		OpenSMU = {
 			dependencies = {
 				build = (
