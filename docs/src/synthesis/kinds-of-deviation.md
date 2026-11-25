@@ -47,7 +47,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | Closed Foundation and dtrace | D24, D49, D97 | | | | D12, D34, D43, D55, D68, D75, D76, D77, D103 | | |
 | What the source export removed | | | D35, D39, D90, D93 | | D22, D32 | | |
 | Apple's Xcode against the public one | D7, D70, D82, D99 | D23, D25, D78 | D53, D105 | | | | |
-| Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111 | | | |
+| Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111, D121 | | | |
 | Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112 | | | |
 | Other closed frameworks and libraries | D51, D69, D89, D107 | | | | D27, D41, D61, D87, D91, D102, D108, D113 | | |
 | OpenDirectory | | | | | D42, D44 | D66, D80, D84 | |
@@ -175,11 +175,12 @@ The build tools are part of the input. Read each Root after its first build, its
 
 ### Leopard's versions in older form
 
-Some projects that Leopard ships were never published at Leopard's version, or at all. Ten rows: [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D30](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d30), [D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36), [D37](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d37), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D58](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d58), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86) and [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111).
+Some projects that Leopard ships were never published at Leopard's version, or at all. Eleven rows: [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D30](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d30), [D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36), [D37](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d37), [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D58](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d58), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111) and [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121).
 
 - CarbonHeaders, whose 9L30 version has no source, comes as the 9G55 Root's headers for building only, with CarbonHeaders 18.1's where they are missing (D10, D30, D73); for the image's own compiler, `make-test-image` installs 18.1's headers, of Mac OS X 10.6 (D111).
 - The SCSI family and the ATA disk driver, IOSCSIArchitectureModelFamily 200.3.6 and IOATABlockStorage 200.1.8, were never published. Their public headers come from the SDK for building (D36), one private header from Panther's published family (D37), and Panther's 139.0.2 and 130.3.1, Apple's last published versions, are built in Leopard's place (D40, D85).
 - configd_plugins 91 was never published, but configd-212.2 carries the same plug-ins, so they are built from there (D58).
+- Leopard's `sw_vers` comes from a closed project, but Apple published an open one in Darwin 8's DarwinTools 1, which is built in its place, its `sw_vers` alone (D121).
 
 ### Worked example: a version number in an Info.plist (D86)
 

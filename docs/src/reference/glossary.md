@@ -174,6 +174,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **darwinbuild**: the tool that builds one Darwin project at a time from Apple's sources, in a BuildRoot, from a build list of exact versions. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
+**DarwinTools**: a project of Darwin 8.0's build list, `8A428`, that holds Apple's open `sw_vers` and `startupfiletool`; the image's `sw_vers` is built from it ([D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121)). See [Step 10](../steps/step-10-working-unix.md).
+
 **darwinxref**: darwinbuild's database tool, which loads the build lists and answers each project's version, dependencies and settings. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
 **`deferred`**: the kind of deviation that turns off a feature until the open-source project it needs is built. See [The rules](../method/rules.md).
@@ -574,7 +576,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`sungem`**: QEMU's model of Apple's GMAC Ethernet chip, the iMac G5's own, driven by AppleGMACEthernet. See [PowerPC Macs](../background/powerpc-macs.md).
 
-**`sw_vers`**: the command that prints the system's name, version and build; Perl's build calls it, and a stand-in prints 10.5.8 and `9L30` in the build environment ([D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98)). See [Step 10](../steps/step-10-working-unix.md).
+**`sw_vers`**: the command that prints the system's name, version and build, read from `SystemVersion.plist`; Perl's build calls it, and a stand-in prints 10.5.8 and `9L30` in the build environment ([D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98)). Leopard's comes from a closed project; the image's is built from DarwinTools 1, Apple's open `sw_vers` of Darwin 8, and prints Darwin, 9.8 and `9L30` ([D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121)). See [Step 10](../steps/step-10-working-unix.md).
 
 **swift-corelibs-foundation**: Apple's open Foundation for Swift, with a CoreFoundation of its own, from which CFStringTransform comes ([D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56)). See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
