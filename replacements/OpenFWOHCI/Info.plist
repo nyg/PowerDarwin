@@ -40,8 +40,12 @@
 		<string>1.0.0</string>
 		<key>com.apple.iokit.IOPCIFamily</key>
 		<string>1.1</string>
-		<key>com.apple.kernel.6.0</key>
-		<string>7.9.9</string>
+		<key>com.apple.kpi.iokit</key>
+		<string>9.0.0</string>
+		<key>com.apple.kpi.libkern</key>
+		<string>9.0.0</string>
+		<key>com.apple.kpi.mach</key>
+		<string>9.0.0</string>
 	</dict>
 </dict>
 </plist>
