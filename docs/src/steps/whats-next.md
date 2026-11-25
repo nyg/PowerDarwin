@@ -2,11 +2,11 @@
 
 ## What you will learn
 
-- What the project leaves open once Step 11 is reached, in four areas: drivers, machines, userland and distribution.
+- What the project leaves open once Step 14 is reached, in four areas: drivers, machines, userland and distribution.
 - What each open item would take, from what the repo already records.
 - Which closed parts stand behind most of them.
 
-Steps 1 to 10 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Step 11 is defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-usb-boot.md)). This chapter lists what would remain after them. Every item is an idea, not a commitment: none is a step in README.md yet. The chapter changes whenever README.md gains a step.
+Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Steps 11, 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. Two of its driver items are now steps in README.md, the open PMU driver Step 11 and FireWire Step 12, and each leaves this chapter when its step is reached, as the GPU's item did with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
 
 ## Drivers
 
@@ -19,10 +19,6 @@ It would take a kext like OpenSMU ([Step 5](step-5-clock-and-power.md)): the PMU
 ### FireWire
 
 FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 33 pure virtual functions, which a subclass must write, cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers, the steady streams of audio and video devices. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
-
-### The GPU
-
-Leopard's GPU driver, `ATIRadeon9700`, is closed, and the screen comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either. OpenRadeonPM now sets the GPU's idle power state, its clock gating and its link's L0s state, so the GPU and the north bridge run cooler at idle than under Leopard ([Step 13](step-13-gpu-idle-heat.md)). What stays open: graphics acceleration, brightness control, switching the screen off, lower engine and memory clocks at idle, and the L1 link state.
 
 ### What Step 9 leaves
 
@@ -89,7 +85,7 @@ Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Ot
 
 ### An image others can boot
 
-Today the image is made for tests: `make-test-image` writes the hash of a test password into it, and `passwd`, the usual way to change a password, is not built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)). An image for others would need a first-boot way to set the password, and one download, a disk image to restore with `asr` or, after Step 11, to write to a USB key.
+Today the image is made for tests: `make-test-image` writes the hash of a test password into it, and `passwd`, the usual way to change a password, is not built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)). An image for others would need a first-boot way to set the password, and one download, a disk image to restore with `asr` or, after Step 14, to write to a USB key.
 
 Rule 5 already holds for such an image: every file is built from source or written by the scripts, and the check of each file's MD5 proves it ([Making the image](../method/making-the-image.md)). The licences ask for more. Most of Darwin is under the APSL 2.0, and bash, gcc and Samba under the GPL; both ask that binaries come with their sources and changes. The repo holds the patches and scripts, and `manifest/` pins each source by its hash, so publishing them beside the image would be most of it.
 
@@ -105,7 +101,6 @@ mindmap
     Drivers
       open PMU driver
       open AppleFWOHCI
-      GPU power
       CDs, sound input, UDF
       unpublished sources
     Machines

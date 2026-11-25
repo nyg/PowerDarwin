@@ -250,7 +250,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **GPIO**: general-purpose input and output, a single wire that a driver can set or read. See [Hardware and boot basics](../background/hardware-basics.md).
 
-**GUID partition map**: the partition table of current Macs. Open Firmware reads the Apple Partition Map instead. See [Step 11](../steps/step-11-usb-boot.md).
+**GUID partition map**: the partition table of current Macs. Open Firmware reads the Apple Partition Map instead. See [Step 14](../steps/step-14-usb-boot.md).
 
 **`hdiutil`**: Mac OS X's tool that creates, attaches and converts disk images. See [Making the image](../method/making-the-image.md).
 
@@ -306,7 +306,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **IOSCSIArchitectureModelFamily**: the IOKit family that turns a device answering SCSI commands into a disk or an optical drive. Leopard's 200.3.6 was never published, so the image has Panther's 139.0.2 ([D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85)). See [Step 9](../steps/step-9-disks-and-devices.md).
 
-**IOUSBMassStorageClass**: the driver of USB disks and keys, the transport for USB's mass-storage class. Its `OSBundleRequired` is `Local-Root`. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 11](../steps/step-11-usb-boot.md).
+**IOUSBMassStorageClass**: the driver of USB disks and keys, the transport for USB's mass-storage class. Its `OSBundleRequired` is `Local-Root`. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 14](../steps/step-14-usb-boot.md).
 
 **IPConfiguration**: the configd plug-in that gives interfaces their addresses, by DHCP among others. `ipconfig waitall` waits until the interfaces it found are configured. See [Step 3, part 2](../steps/step-3-network-and-ssh.md) and [Step 8](../steps/step-8-clean-boot.md).
 
@@ -358,7 +358,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **local channel, remote channel**: the MAX6690's two temperatures, its own and that of a diode in another chip. `GPU Temp` and `NB Temp` are remote channels. See [OpenSMU](../synthesis/opensmu.md).
 
-**`Local-Root`**: the `OSBundleRequired` value of a kext needed to boot from a local disk, such as IOUSBMassStorageClass. `kextcache -l` puts such kexts in the driver cache. See [Step 11](../steps/step-11-usb-boot.md).
+**`Local-Root`**: the `OSBundleRequired` value of a kext needed to boot from a local disk, such as IOUSBMassStorageClass. `kextcache -l` puts such kexts in the driver cache. See [Step 14](../steps/step-14-usb-boot.md).
 
 **loginwindow**: Leopard's closed graphical login program. See [Step 9](../steps/step-9-disks-and-devices.md).
 
