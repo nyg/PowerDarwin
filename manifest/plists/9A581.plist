@@ -1917,6 +1917,47 @@
 			};
 			version = 109;
 		};
+		DarwinTools = {
+			dependencies = {
+				build = (
+					CF,
+					ICU,
+					Libm,
+					Libsystem,
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					libgcc,
+					objc4,
+					system_cmds,
+				);
+				header = (
+					CF,
+					CarbonHeaders,
+					Libc_headers,
+					Libinfo,
+					Libm,
+					Libsyscall,
+					architecture,
+					gcc,
+					xnu,
+				);
+				lib = (
+					CF,
+					Libsystem,
+					dyld,
+					libgcc,
+				);
+				staticlib = (
+					Csu,
+					SystemStubs,
+				);
+			};
+			version = 1;
+		};
 		DirectoryService = {
 			dependencies = {
 				build = (
