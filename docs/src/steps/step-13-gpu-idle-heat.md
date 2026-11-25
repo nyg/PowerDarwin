@@ -128,9 +128,11 @@ The image with OpenRadeonPM held 28,298 files, two more than without it, with th
 | 30 to 40 minutes after boot | 73.4 to 73.9 °C | 75.9 to 76.1 °C | 48.8 to 49.1 °C | 41.5 to 42.0 °C | 41.5 to 42.0 °C |
 | 4 hours after boot | 72.9 °C | 75.4 °C | 48.4 °C | 41.0 °C | 41.0 °C |
 
-At the same time after boot as Leopard's run, the GPU was 5.8 °C and the north bridge 7.7 °C cooler than under Leopard. The fans stayed at their minimum speeds throughout. `system.log` held only the two lines that [Step 8](step-8-clean-boot.md) accepts and the Ethernet driver's `UniNEnet::restartReceiver` lines that the image logs without OpenRadeonPM too, and the display wrangler stayed at its usable state. `reboot` restarted the iMac into the image, whose kernel started 37 seconds later, and OpenRadeonPM set the same state again 3 seconds after that. Not tested: `shutdown -h now` with OpenRadeonPM, and the screen by eye, as nobody was at the iMac during these runs.
+At the same time after boot as Leopard's run, the GPU was 5.8 °C and the north bridge 7.7 °C cooler than under Leopard. The fans stayed at their minimum speeds throughout. `system.log` held only the two lines that [Step 8](step-8-clean-boot.md) accepts and the Ethernet driver's `UniNEnet::restartReceiver` lines that the image logs without OpenRadeonPM too, and the display wrangler stayed at its usable state. `reboot` restarted the iMac into the image, whose kernel started 37 seconds later, and OpenRadeonPM set the same state again 3 seconds after that.
 
 The image tested had OpenRadeonPM's first build, which also cleared bit 24 of `SCLK_CNTL`, the RE block's force bit, which X.Org's branch leaves alone. The firmware leaves that bit clear, so both builds write the same values on the iMac; the build in the repo differs from the tested one by that mask alone, two more instructions, as a comparison of their disassembly shows.
+
+Later that evening, with someone at the iMac, the image was booted again. The console was readable, and Return gave a new `login:` prompt. The build in the repo, loaded by hand in place of the first, set the same values. `shutdown -h now` switched the iMac off, and the power button started it again, with OpenRadeonPM on. A thin vertical line showed on the screen. It stayed when two test kexts put the GPU's clocks and its link back as the firmware left them, and it showed under Leopard too, so it does not come from OpenRadeonPM's settings. When it first appeared is not known.
 
 ### In QEMU
 
@@ -140,7 +142,6 @@ QEMU's `mac99` has no ATI GPU: its screen is `.Display_Video_QemuVGA`, a framebu
 
 - L1, the deeper link state, is not set: L0s already took the north bridge below Leopard, and L1 is untested on this link.
 - OpenRadeonPM does not compare the link's exit latencies with what the GPU accepts: the GPU accepts 128 ns for L0s, and the U4's port advertises 128 to 256 ns.
-- Power-off with OpenRadeonPM, and the screen by eye, were not tested.
 - The engine and memory clocks keep the firmware's 400 and 300 MHz. X.Org and Linux can lower them at idle, which would need a test of its own.
 - The primary DAC, the converter behind the external video port, stays powered with nothing plugged in.
 - OpenRadeonPM knows one GPU on one machine. The 20-inch iMac G5 and other Macs with an ATI GPU are untested and left alone.
