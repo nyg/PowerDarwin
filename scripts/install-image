@@ -121,7 +121,7 @@ case $mode in
    disk)
       [[ $device =~ ^disk[0-9]+$ ]] || die "$device is not a whole disk"
       check_not_in_use "$device"
-      plan="PowerDarwin replaces everything on the whole disk $device ($(info "$device" 'Device / Media Name'), $(gigabytes "$(bytes "$device")")): all of its partitions are erased. A PowerPC Mac starts it from an internal or FireWire disk; starting from USB is Step 11, not reached yet." ;;
+      plan="PowerDarwin replaces everything on the whole disk $device ($(info "$device" 'Device / Media Name'), $(gigabytes "$(bytes "$device")")): all of its partitions are erased. A PowerPC Mac starts it from an internal or FireWire disk; starting from USB is Step 14, not reached yet." ;;
 esac
 
 host_zone=$(readlink /etc/localtime 2>/dev/null || true)
