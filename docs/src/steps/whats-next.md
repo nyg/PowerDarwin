@@ -22,7 +22,7 @@ FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller,
 
 ### The GPU
 
-Leopard's GPU driver, `ATIRadeon9700`, is closed, and without it the iMac's GPU and north bridge run some 5 to 10 °C warmer at idle than under Leopard ([Step 7](step-7-fans.md)). The screen itself comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either.
+Leopard's GPU driver, `ATIRadeon9700`, is closed, and the screen comes from the firmware's display driver, since Apple's ATI display drivers in `IONDRVSupport` are not published either. OpenRadeonPM now sets the GPU's idle power state, its clock gating and its link's L0s state, so the GPU and the north bridge run cooler at idle than under Leopard ([Step 13](step-13-gpu-idle-heat.md)). What stays open: graphics acceleration, brightness control, switching the screen off, lower engine and memory clocks at idle, and the L1 link state.
 
 ### What Step 9 leaves
 

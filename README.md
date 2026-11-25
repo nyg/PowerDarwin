@@ -19,13 +19,13 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 
 ## Status
 
-Steps 1 to 10 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
+Steps 1 to 10 and 13 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, keeps its GPU and north bridge cooler at idle than Leopard does, and restarts and powers off. Not working yet: FireWire, the microphone, Wi-Fi, graphics acceleration and sleep. The image also lacks `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
 
 The comparisons with Leopard are provisional: the reference system is Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](reference/imacg5/README.md)), until they are repeated against an unmodified Leopard 10.5.8.
 
 ## Hardware
 
-- iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10.
+- iMac G5 (iSight), `PowerMac12,1`: tested, Steps 1 to 10 and 13.
 - QEMU `mac99`: tested, Steps 1 to 4 and 6, and the CDs and USB disks of Step 9.
 - Other PowerPC Macs that Leopard supports: untested.
 
@@ -52,6 +52,7 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 - ✅ **Step 9.** DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound.
 - ✅ **Step 10.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
 - ⬜ **Step 11.** A USB key holding the image boots the iMac G5 to the same system, with no internal disk involved.
+- ✅ **Step 13.** On the iMac G5, the GPU and the north bridge are as cool at idle as under Leopard.
 
 ## Build it
 

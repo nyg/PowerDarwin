@@ -30,6 +30,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`asr`**: Apple Software Restore, Leopard's tool that copies a disk image onto a partition. See [How testing is done](../method/testing.md).
 
+**ASPM, L0s, L1**: Active State Power Management, by which each end of a PCI Express link puts its transmitter into a low-power state while it has nothing to send: L0s, left within a fraction of a microsecond, or the deeper L1. Software turns it on in each end's Link Control register. See [Step 13](../steps/step-13-gpu-idle-heat.md).
+
 **ATAPI**: SCSI commands carried over an ATA bus, the way CD and DVD drives are driven. In Darwin, IOATAPIProtocolTransport carries them. See [Step 1, part 2](../steps/step-1-drivers-and-bootx.md).
 
 **`auto-boot?`**: the NVRAM variable that says whether Open Firmware boots at power-on (`true`) or stops at its prompt. See [the boot chain](../background/boot-chain.md).
@@ -121,6 +123,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **CFOpenDirectory, OpenDirectory**: Leopard's interface to directory services (accounts, groups, passwords). Its C part, CFOpenDirectory, includes a private header of the closed CoreFoundation, so nothing built on it can be built here, such as `passwd`, `chpass` and `pam_securityserver`. See [Step 2](../steps/step-2-console-login.md).
 
 **chroot**: a folder entered with `chroot`, so that programs inside see it as `/` and can load nothing outside it. The first userland was tried this way before it was booted. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
+
+**clock gating**: stopping the clock of a chip's block while the block is idle, which saves power without changing what software sees. An ATI GPU gates each block unless a force bit keeps its clock on. See [Step 13](../steps/step-13-gpu-idle-heat.md).
 
 **closed, open, ours**: the book's three kinds of code: Apple's binary only; built here from Apple's published source; written by the project. See [What Darwin is](../background/what-darwin-is.md).
 
@@ -412,6 +416,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`openplay`**: the project's command that plays a tone or a WAV file through IOAudioFamily's engine interface, without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)). See [Step 9](../steps/step-9-disks-and-devices.md).
 
+**OpenRadeonPM**: this project's kext that sets the idle power state of the iMac G5's ATI RV370, its clock gating and its link's L0s state, in place of that part of Apple's closed `ATIRadeon9700` ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)). See [Step 13](../steps/step-13-gpu-idle-heat.md).
+
 **OpenSMU**: this project's open driver for the iMac G5's SMU, in place of Apple's closed AppleSMU: clock, restart, power-off and fans. See [OpenSMU](../synthesis/opensmu.md).
 
 **order file**: a list of functions in the order the linker should place them. Kerberos links with one Apple did not publish ([D70](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d70)). See [Kinds of deviation](../synthesis/kinds-of-deviation.md).
@@ -453,6 +459,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **platform function**: a named operation that one driver performs for others, such as `platform-doorbell-req`, listed in the device tree and called with `callPlatformFunction`. See [Step 5](../steps/step-5-clock-and-power.md).
 
 **platform plug-in**: a kext of `IOPlatformPluginFamily` that runs one G5 model's fans from a thermal profile, such as `PowerMac12_1_PlatformPlugin`. Leopard's are closed; Tiger's AppleMacRISC4PE published the iMac G5's. See [PowerPC Macs](../background/powerpc-macs.md) and [Step 7](../steps/step-7-fans.md).
+
+**PLL**: phase-locked loop, the circuit that makes a clock of a given frequency from a reference clock. An ATI GPU's PLL registers, reached through `CLOCK_CNTL_INDEX` and `CLOCK_CNTL_DATA`, also hold its clock-gating bits. See [Step 13](../steps/step-13-gpu-idle-heat.md).
 
 **PMU**: power management unit, the chip of many earlier PowerPC Macs, and of QEMU's `mac99`, that keeps the clock and switches the power. See [PowerPC Macs](../background/powerpc-macs.md).
 
