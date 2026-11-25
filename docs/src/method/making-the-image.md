@@ -7,7 +7,7 @@
 - Which files it removes, which 25 it writes or edits, and why each is needed.
 - How it makes the driver cache and blesses the volume, so that Open Firmware can start it.
 - How every other file on the image is checked against the project's builds, and how the image reaches QEMU and the test Mac, an iMac G5 (`PowerMac12,1`).
-- How `install-image` puts the image onto a partition of a PowerPC Mac and sets its time zone, NTP server and root's password.
+- How `install-image` puts the image onto a partition of a PowerPC Mac, sets its time zone, NTP server and root's password, and makes its SSH host keys.
 
 ## One script
 
@@ -188,6 +188,8 @@ Then `asr`, Apple Software Restore, copies the image onto the partition. `asr` c
 - `/etc/ntp.conf`, with the server chosen; Leopard's own is offered, or else `time.apple.com`.
 - root's entry in `/etc/master.passwd` and root's record in the local directory, `root.plist`, with the DES hash of the password typed, made with `openssl passwd -crypt`, of which only the first 8 characters count.
 
+It then makes the SSH host keys. The image holds none, as it is restored onto more than one machine, and the first boot would otherwise make them without a lock. For each connection to port 22, launchd runs Apple's `sshd-keygen-wrapper`, from OpenSSH 95.1.5, before `sshd`: it makes each of the three keys whose file is missing, `/etc/ssh_host_key`, `/etc/ssh_host_rsa_key` and `/etc/ssh_host_dsa_key`, and `ssh-keygen` writes a key's file only once the key is made. Every connection made in those seconds therefore starts its own `ssh-keygen`: on the first boot of an installed image, a test that tried port 22 to see when the iMac was up started 105 of them, which slowed one another on its one processor and raised the load average to 128, and sshd answered no client for about 7 minutes. The script removes any of the six files, keys and `.pub` files, that the image holds, then runs Leopard's `ssh-keygen` with the wrapper's arguments, `-q -t <type> -f <file> -N "" -C ""`, for the types `rsa1`, `rsa` and `dsa`, so that the wrapper finds all three and makes none. An image started in QEMU still makes its keys at its first boot.
+
 With `--startup-disk`, or a yes, it ends with `bless --mount <volume> --setOF`, which makes PowerDarwin the startup disk.
 
 ## Where to look
@@ -195,4 +197,5 @@ With `--startup-disk`, or a yes, it ends with `bless --mount <volume> --setOF`, 
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image) and [scripts/install-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/install-image).
 - Deviations: [D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21), [D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D78](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d78), [D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89), [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113).
 - [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md), "Install it", for `install-image` and the test password's hash file.
+- In OpenSSH-95.1.5: `sshd-keygen-wrapper` and `launchd-ssh.plist`, for the host keys.
 - [The boot chain](../background/boot-chain.md), for what Open Firmware and BootX do with the blessed folder and the driver cache.

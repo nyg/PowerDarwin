@@ -7,11 +7,11 @@ usage="usage: sudo install-image [--image=<image.dmg>]
 
 Run on a PowerPC Mac under Leopard. Restores the image that build-image made
 (default /private/var/tmp/PowerDarwin.dmg) onto one partition, then sets its time
-zone, NTP server and root password. The partition is either a new one, made by
-shrinking a Journaled HFS+ volume that keeps its files (--shrink, such as
---shrink=disk0s3 --size=10G), an existing one that is erased (--partition=disk0s4),
-or a whole disk that is erased (--disk=disk1). It asks for what the options do not
-give, and reads root's password from the terminal."
+zone, NTP server and root password, and makes its SSH host keys. The partition is
+either a new one, made by shrinking a Journaled HFS+ volume that keeps its files
+(--shrink, such as --shrink=disk0s3 --size=10G), an existing one that is erased
+(--partition=disk0s4), or a whole disk that is erased (--disk=disk1). It asks for
+what the options do not give, and reads root's password from the terminal."
 
 image=/private/var/tmp/PowerDarwin.dmg
 mode= device= size= zone= ntp_server= startup= yes=
@@ -157,6 +157,16 @@ boot=${boot#/dev/}
 boot_uuid=
 [[ -n $boot ]] && boot_uuid=$(info "$boot" 'Volume UUID')
 
+make_host_keys() (
+   local type file
+   umask 022
+   for type in rsa1:ssh_host_key rsa:ssh_host_rsa_key dsa:ssh_host_dsa_key; do
+      file=$1/${type#*:}
+      rm -f "$file" "$file.pub"
+      ssh-keygen -q -t "${type%%:*}" -f "$file" -N '' -C '' < /dev/null
+   done
+)
+
 keep_startup_disk() {
    local moved
    [[ -n $boot_uuid && $(info "$boot" 'Part Of Whole') == "$1" ]] || return 0
@@ -209,6 +219,8 @@ chmod 644 "$mount_point/private/etc/ntp.conf"
 hash=$(printf '%s\n' "$password" | openssl passwd -crypt -stdin)
 sed -i '' "s|^root:[^:]*:|root:$hash:|" "$mount_point/private/etc/master.passwd"
 /usr/libexec/PlistBuddy -c "Set :passwd:0 $hash" "$mount_point/private/var/db/dslocal/nodes/Default/users/root.plist"
+echo "making the SSH host keys"
+make_host_keys "$mount_point/private/etc"
 
 if [[ $startup == yes ]]; then
    bless --mount "$mount_point" --setOF
