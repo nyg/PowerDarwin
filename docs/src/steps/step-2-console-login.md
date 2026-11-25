@@ -228,6 +228,8 @@ In QEMU's `mac99`, the first multi-user boot test was booted with `-v` only. lau
 
 On the iMac, the third boot test on it restored the same image onto `Darwin9` and started it from Open Firmware with `setenv boot-args -v` and `boot sata/k2-sata@0/@0:4,\\:tbxi`. After the 30-second wait for the clock that [Step 5](step-5-clock-and-power.md) removes, it printed `Darwin/BSD (localhost) (console)` and `login:`, and root logged in to `-sh` in `/var/root`. Step 2 was reached in QEMU and on the iMac.
 
+For D116, IOGraphics was built again with its patch, and `make-test-image` and `install-image` put it on the iMac. Left alone after boot, with no key pressed, the wrangler was at `CurrentPowerState=4` after 19 minutes and again after 45, where without the patch it would have been at 3 and then at 1, and `system.log` held only the two lines that [Step 8](step-8-clean-boot.md) accepts.
+
 ## What is still missing
 
 - There is still no way to change a password on the running system: no `passwd`, no `chpass`, no `pam_securityserver`, all for want of CFOpenDirectory.
