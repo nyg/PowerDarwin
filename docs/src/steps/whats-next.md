@@ -16,7 +16,7 @@ FireWire disks needed `AppleFWOHCI`, the driver of the iMac's FireWire controlle
 
 ### What Step 9 leaves
 
-A CD test on the iMac; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. 9L30's build list has no UDF project, so a DVD with only a UDF volume has no file system to mount it.
+A CD test on the iMac; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. Leopard's UDF is closed and no Darwin release published one, so a disc with only a UDF volume is ejected, and a bridge disc mounts through its ISO 9660 volume ([Step 9](step-9-disks-and-devices.md)). An open UDF could be a port of FreeBSD's `sys/fs/udf`, under a BSD licence: about 3,500 lines that read UDF's physical and sparable partitions, but neither the virtual allocation table of discs written in increments nor the metadata partition of UDF 2.50 and later, which Blu-ray discs use. Like msdosfs 136.6, it would need a kext, a `udf.fs` bundle with its probe, and `mount_udf`.
 
 ### Unpublished sources
 
