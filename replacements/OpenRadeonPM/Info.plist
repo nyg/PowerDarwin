@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>OpenRadeonPM</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.nyg.driver.OpenRadeonPM</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>OpenRadeonPM</string>
+	<key>CFBundlePackageType</key>
+	<string>KEXT</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>IOKitPersonalities</key>
+	<dict>
+		<key>OpenRadeonPM</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>io.github.nyg.driver.OpenRadeonPM</string>
+			<key>IOClass</key>
+			<string>OpenRadeonPM</string>
+			<key>IOMatchCategory</key>
+			<string>OpenRadeonPM</string>
+			<key>IOPCIMatch</key>
+			<string>0x5b621002</string>
+			<key>IOProviderClass</key>
+			<string>IOPCIDevice</string>
+		</dict>
+	</dict>
+	<key>OSBundleLibraries</key>
+	<dict>
+		<key>com.apple.iokit.IOPCIFamily</key>
+		<string>1.0.0b1</string>
+		<key>com.apple.kernel.6.0</key>
+		<string>7.9.9</string>
+	</dict>
+</dict>
+</plist>
