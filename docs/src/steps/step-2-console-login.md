@@ -6,7 +6,7 @@
 - How a console login works on Darwin: getty, login, PAM and its modules, Libinfo and `/etc/master.passwd`.
 - Why the image has no `passwd` command, and how the test password gets onto it instead.
 - How OpenDirectory, Leopard's new directory interface, pulls closed code into anything that uses it.
-- A bug in Libinfo that crashed `id -G`, and why `reboot` first hung, then stopped at `MACH Reboot`.
+- A bug in Libinfo that crashed `id -G`, why `reboot` first hung, then stopped at `MACH Reboot`, and why the console stopped taking keys after half an hour.
 
 ## The goal
 
@@ -184,6 +184,44 @@ USBF: 328.700 OHCI driver: OHCIRootHubPortPower bit not sticking (0). Retrying.
 
 With no driver to power off the machine, the kernel's threads keep running, and the root hub's ports had lost their power.
 
+## Why the console stopped taking keys
+
+### Keys without a window server
+
+On Leopard, IOHIDSystem, the kernel's hub for keyboards and mice, posts every key as an event to WindowServer, Leopard's closed window server. When no program reads those events, IOHIDSystem takes on the console's duties instead and hands each character to the kernel's console with `cons_cinput`: that is how getty reads a login name on the image.
+
+### The display wrangler
+
+IODisplayWrangler, in IOGraphics, decides when the displays dim and sleep. An idle timer lowers its power state one step at a time while no key is pressed and no mouse moves, and any input, which IOHIDSystem reports by calling its `activityTickle`, raises it back. Its states 3 and 4 carry `IOPMDeviceUsable`; below them, the displays count as off. IOHIDSystem follows the wrangler's state and, while the displays are off, swallows the key that wakes them (IOHIDFamily 258.14, `IOHIDSystem/IOHIDSystem.cpp`):
+
+```c
+if ( ! (displayState & IOPMDeviceUsable) ) {	// display is off, consume the keystroke
+    if ( eventType == NX_KEYDOWN ) {
+        return;
+    } else if ( eventType == NX_KEYUP ) {
+        TICKLE_DISPLAY;
+        return;
+    }
+}
+```
+
+The key-up tickles the wrangler, so the first key wakes the screen and the next ones type. In IOGraphics 305.14, though, the wrangler's `start` sets a 30-minute dimming time, which runs its idle timer from boot, and `activityTickle` ignores every tickle until a window server opens a framebuffer and calls `serverStart` (`IOGraphicsFamily/IODisplayWrangler.cpp`):
+
+```c
+if (!fOpen)
+	return (true);
+```
+
+On the image, with no window server, nothing ever counted as activity. The timer lowered the wrangler a step every 15 minutes, and once it was below `IOPMDeviceUsable`, IOHIDSystem dropped every key-down, and the key-ups could not raise it again. The screen stayed lit, as no driver of the image turns it off, so the console looked frozen.
+
+### What was seen
+
+On the iMac, the first image that `build-image` made and `install-image` installed was left at its `login:` prompt for an hour and a half, and then took no keys. Over SSH, every daemon was running, and the keyboard's drivers were all attached: `USB Keyboard`, IOUSBHIDDriver, IOHIDEventDriver, IOHIDKeyboard and IOHIDSystem. A line written to `/dev/console` appeared on the screen, and characters pushed into the console's input with the `TIOCSTI` ioctl reached getty, which ran `login -p1 root`. The wrangler was at `CurrentPowerState=0`. Setting the dimming time to 0 through `IOPMSetAggressiveness`, which makes the wrangler raise itself to state 4, brought the keys back at once.
+
+### A fix from Mac OS X 10.6 (D116)
+
+IOGraphics 330, in Mac OS X 10.6, removes the 30-minute default from `start` and starts the idle timer in `serverStart`, if a dimming time has been set by then. [D116](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d116)'s [patch](https://github.com/nyg/PowerDarwin/blob/master/patches/IOGraphics-305.14/0001-no-dimming-before-window-server.patch) backports those two changes. The power-management root domain passes a dimming time on to the wrangler only once one has been set through it, and nothing on the image sets one, so the wrangler stays at state 4 and the console keeps its keys.
+
 ## How it was proved
 
 In QEMU's `mac99`, the first multi-user boot test was booted with `-v` only. launchd ran `launchctl bootstrap -S System`, which checked the root volume with `fsck -p`, mounted it read-write and loaded the LaunchDaemons, and getty printed `Darwin/BSD (localhost) (console)` and `login:`. After D45, root logged in: with DirectoryService not running, Libinfo read `/etc/master.passwd`, pam_unix checked the password, and pam_uwtmp recorded the login, which `who` listed. After D46, `id -G` and `groups` listed root's 11 groups. Of the image's 7,624 files, all came from our builds except four: the generated `com.apple.Boot.plist` and `Extensions.mkext`, the edited `master.passwd`, and `com.apple.getty.plist`, copied from system_cmds' source. Step 2 was reached in QEMU.
@@ -199,8 +237,8 @@ On the iMac, the third boot test on it restored the same image onto `Darwin9` an
 
 ## Where to look
 
-- DEVIATIONS.md, [D41](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d41) to [D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46).
-- [patches/pam_modules-36.2/](https://github.com/nyg/PowerDarwin/blob/master/patches/pam_modules-36.2/), [patches/system_cmds-433.8/](https://github.com/nyg/PowerDarwin/blob/master/patches/system_cmds-433.8/), [patches/Libinfo-278.0.3/](https://github.com/nyg/PowerDarwin/blob/master/patches/Libinfo-278.0.3/).
+- DEVIATIONS.md, [D41](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d41) to [D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46), and [D116](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d116).
+- [patches/pam_modules-36.2/](https://github.com/nyg/PowerDarwin/blob/master/patches/pam_modules-36.2/), [patches/system_cmds-433.8/](https://github.com/nyg/PowerDarwin/blob/master/patches/system_cmds-433.8/), [patches/Libinfo-278.0.3/](https://github.com/nyg/PowerDarwin/blob/master/patches/Libinfo-278.0.3/), [patches/IOGraphics-305.14/](https://github.com/nyg/PowerDarwin/blob/master/patches/IOGraphics-305.14/).
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the getty job and the test password's hash.
-- In launchd-258.25: `launchd/src/launchctl.c` (`system_specific_bootstrap`, `do_potential_fsck`). In system_cmds-433.8: `getty.tproj/com.apple.getty.plist`, `login.tproj/login.c`, `reboot.tproj/reboot.c` (`reserve_reboot`). In pam-32.1: `pam.d/login`, `pam/libpam/pam_handlers.c`. In Libinfo-278.0.3: `lookup.subproj/lu_group.c`.
+- In launchd-258.25: `launchd/src/launchctl.c` (`system_specific_bootstrap`, `do_potential_fsck`). In system_cmds-433.8: `getty.tproj/com.apple.getty.plist`, `login.tproj/login.c`, `reboot.tproj/reboot.c` (`reserve_reboot`). In pam-32.1: `pam.d/login`, `pam/libpam/pam_handlers.c`. In Libinfo-278.0.3: `lookup.subproj/lu_group.c`. In IOGraphics-305.14: `IOGraphicsFamily/IODisplayWrangler.cpp` (`start`, `serverStart`, `activityTickle`). In IOHIDFamily-258.14: `IOHIDSystem/IOHIDSystem.cpp` (`keyboardEvent`).
 - Commit `c77540a`, which reached Step 2 and built Security, configd, notifyd and DiskArbitration.
