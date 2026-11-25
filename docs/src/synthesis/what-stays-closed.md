@@ -34,8 +34,8 @@ block-beta
     l["System library"] l1["sandbox, quarantine: stubs, ours"]:2
     k["Kernel"] k1["xnu: all open"]:2
     d["Drivers"] d1["AppleSMU, plug-ins:<br/>OpenSMU, ours"] d2["disk and SCSI drivers:<br/>Panther's"]
-    space d3["AppleOnyxAudio:<br/>OpenOnyx, ours"] d4["PMU, FireWire, ATI acceleration,<br/>AirPort, Bluetooth: none"]
-    space d5["ATI idle power:<br/>OpenRadeonPM, ours"] space
+    space d3["AppleOnyxAudio:<br/>OpenOnyx, ours"] d4["ApplePMU:<br/>OpenPMU, ours"]
+    space d5["ATI idle power:<br/>OpenRadeonPM, ours"] d6["FireWire, ATI acceleration,<br/>AirPort, Bluetooth: none"]
 ```
 
 ## Drivers
@@ -46,7 +46,7 @@ block-beta
 |---|---|---|---|
 | AppleSMU 1.2.1d1 | drives the iMac's SMU: clock, restart and power-off, `IOPMU`, nubs for fans and sensors, sleep | without a stand-in: a clock from 1970 after a 30-second wait, no restart or power-off, loud fans, a 60-second wait for the network | OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)); no sleep, no nubs |
 | `IOPlatformPluginFamily` with `PowerMac12_1_PlatformPlugin`, `SMU_Neo2_PlatformPlugin` and `PowerMac12_1_ThermalProfile`, 3.4.0 | runs the fans from a thermal profile | the SMU's firmware runs the fans, loudly | OpenSMU's zones, around the targets of Tiger's published plug-in, AppleMacRISC4PE 186.3.1 ([OpenSMU](opensmu.md)) |
-| ApplePMU | the PMU of QEMU's `mac99` and of many G4 Macs: clock, restart, power-off | in QEMU, the clock starts at 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds | none ([What's next](../steps/whats-next.md)) |
+| ApplePMU | the PMU of QEMU's `mac99` and of many G4 Macs: clock, restart, power-off, sleep, ADB, battery and lid | without a stand-in, in QEMU: the clock starts at 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds | OpenPMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118), [Step 11](../steps/step-11-pmu.md)); no sleep, no PMU interrupts |
 | IOATABlockStorage 200.1.8, never published | the driver of ATA and SATA disks | little: Panther's driver class is `IOATABlockStorageDriver`, where Apple's is `AppleATADiskDriver`, and the kernel notes `Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.` | Panther's 130.3.1 ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)) |
 | IOSCSIArchitectureModelFamily 200.3.6, with its three plug-ins, never published | turns SCSI devices into disks and optical drives: CDs, DVDs, USB disks | without a stand-in, no CD or USB disk; with Panther's, no Blu-ray | Panther's 139.0.2 ([D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86)) |
 | `AppleFWOHCI` | the FireWire controller's driver, a plug-in of IOFireWireFamily that no published source holds | no FireWire device appears | none |
@@ -121,9 +121,9 @@ On the iMac G5, the image is a Unix system with no graphical system: it boots, m
 - `passwd`, password policies and a DHCP server, through OpenDirectory;
 - crash reports, the sandbox and the firewall;
 - DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
-- in QEMU, the clock, restart and power-off, through ApplePMU.
+- on a PMU Mac, sleep, the ADB keyboard, the battery and the lid, through ApplePMU.
 
-Some of these could come back as open parts, on the model of OpenSMU and OpenOnyx: a PMU driver, a FireWire controller driver, OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
+Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU and OpenRadeonPM: a FireWire controller driver, OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
 
 ## Where to look
 

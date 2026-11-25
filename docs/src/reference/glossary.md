@@ -24,7 +24,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Apple Partition Map**: the partition table of PowerPC Macs' disks, read by Open Firmware. See [the boot chain](../background/boot-chain.md).
 
-**ApplePMU, AppleSMU**: Apple's closed drivers for the PMU and the SMU. Leopard ships them as binaries only, so the image has neither. See [What stays closed](../synthesis/what-stays-closed.md).
+**ApplePMU, AppleSMU**: Apple's closed drivers for the PMU and the SMU. Leopard ships them as binaries only, so the image has neither; OpenPMU and OpenSMU stand in for them. See [What stays closed](../synthesis/what-stays-closed.md).
 
 **APSL**: the Apple Public Source License 2.0, the licence of most of Darwin's projects. See [What Darwin is](../background/what-darwin-is.md).
 
@@ -416,6 +416,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`openplay`**: the project's command that plays a tone or a WAV file through IOAudioFamily's engine interface, without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)). See [Step 9](../steps/step-9-disks-and-devices.md).
 
+**OpenPMU**: this project's open driver for the PMU, in place of Apple's closed ApplePMU: clock, restart and power-off. Its class derives from one named `ApplePMU`, for which AppleMacRISC2PE's processor driver waits. See [Step 11](../steps/step-11-pmu.md).
+
 **OpenRadeonPM**: this project's kext that sets the idle power state of the iMac G5's ATI RV370, its clock gating and its link's L0s state, in place of that part of Apple's closed `ATIRadeon9700` ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)). See [Step 13](../steps/step-13-gpu-idle-heat.md).
 
 **OpenSMU**: this project's open driver for the iMac G5's SMU, in place of Apple's closed AppleSMU: clock, restart, power-off and fans. See [OpenSMU](../synthesis/opensmu.md).
@@ -462,7 +464,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **PLL**: phase-locked loop, the circuit that makes a clock of a given frequency from a reference clock. An ATI GPU's PLL registers, reached through `CLOCK_CNTL_INDEX` and `CLOCK_CNTL_DATA`, also hold its clock-gating bits. See [Step 13](../steps/step-13-gpu-idle-heat.md).
 
-**PMU**: power management unit, the chip of many earlier PowerPC Macs, and of QEMU's `mac99`, that keeps the clock and switches the power. See [PowerPC Macs](../background/powerpc-macs.md).
+**PMU**: power management unit, the chip of many earlier PowerPC Macs, and of QEMU's `mac99`, that keeps the clock and switches the power. The kernel talks to it one byte at a time through a VIA. See [PowerPC Macs](../background/powerpc-macs.md) and [Step 11](../steps/step-11-pmu.md).
 
 **polling**: reading a status again and again until it changes, instead of waiting for an interrupt. See [Hardware and boot basics](../background/hardware-basics.md).
 

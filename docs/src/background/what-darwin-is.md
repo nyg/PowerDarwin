@@ -46,7 +46,7 @@ flowchart TB
     subgraph KEXTS[Drivers: kexts]
         direction LR
         X1["platform, PCI, SATA, ATA, USB, Ethernet, audio"]
-        X2["OpenSMU, OpenOnyx (ours)"]
+        X2["OpenSMU, OpenPMU, OpenOnyx (ours)"]
         X3["AppleSMU, ApplePMU, graphics, AirPort, Bluetooth, FireWire (closed)"]
     end
     HW[Hardware]

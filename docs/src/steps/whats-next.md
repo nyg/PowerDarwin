@@ -6,15 +6,9 @@
 - What each open item would take, from what the repo already records.
 - Which closed parts stand behind most of them.
 
-Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, and Steps 11, 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. Two of its driver items are now steps in README.md, the open PMU driver Step 11 and FireWire Step 12, and each leaves this chapter when its step is reached, as the GPU's item did with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
+Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, Step 11 is reached in QEMU's `mac99`, and Steps 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-pmu.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. One of its driver items is now a step in README.md, FireWire Step 12, and it leaves this chapter when its step is reached, as the PMU's item did with Step 11 and the GPU's with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
 
 ## Drivers
-
-### An open driver for the PMU
-
-QEMU's `mac99`, and many PowerPC Macs before the later G5s, keep their clock and switch their power through a PMU, whose driver, ApplePMU, is closed ([PowerPC Macs](../background/powerpc-macs.md)). Without it, QEMU's clock starts at 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds before it names `en0`. That wait has a twist ([Step 8](step-8-clean-boot.md)): AppleMacRISC2PE's processor driver waits with `waitForService(serviceMatching("ApplePMU"))`, for a driver of that class, not for a resource. IOKit matches a class or any subclass of it, so only a driver whose class is named `ApplePMU`, or derives from one so named, ends the wait.
-
-It would take a kext like OpenSMU ([Step 5](step-5-clock-and-power.md)): the PMU's clock, restart and power-off commands, known from NetBSD's `pmu.c` under the BSD licence, the kernel's two hooks filled in, `IORTC` published, and the class name above. Anyone could test it in QEMU, and QEMU would then cover Steps 5 and 8 too.
 
 ### FireWire
 
@@ -35,7 +29,7 @@ Panther's IOATABlockStorage 130.3.1 and IOSCSIArchitectureModelFamily 139.0.2 st
 The image is built for PowerPC Macs, not for one model, but only the iMac has run it. Another Mac needs four things:
 
 - its platform driver, AppleMacRISC2PE or AppleMacRISC4PE, both built here;
-- a driver for its power controller: OpenSMU for an SMU, or the open PMU driver above;
+- a driver for its power controller: OpenSMU for an SMU, or OpenPMU for a PMU, which only QEMU has run so far ([Step 11](step-11-pmu.md));
 - on an SMU Mac, its own fans, sensors and temperatures in OpenSMU, which today knows only the 17-inch iMac G5's, thermal model 2 ([OpenSMU](../synthesis/opensmu.md));
 - drivers for its own chips, such as its Ethernet, disk controller and sound codec, each open, closed, or to be written, as [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md) maps them for the iMac.
 
@@ -99,7 +93,6 @@ Every image so far was built on one build machine, which runs Sorbet Leopard, a 
 mindmap
   root((Open items))
     Drivers
-      open PMU driver
       open AppleFWOHCI
       CDs, sound input, UDF
       unpublished sources
@@ -118,15 +111,14 @@ mindmap
       second build machine
 ```
 
-Some items help others: the PMU driver would serve both QEMU and the older Macs, and OpenDirectory would bring back `passwd`, with which an image for others could set its password.
+Some items help others: OpenDirectory would bring back `passwd`, with which an image for others could set its password.
 
 ## Where to look
 
 - README.md: "Status", which ends with what does not work yet and the tools still missing.
 - DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), the `closed-*` rows, among them [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), Step 10's [D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112) and [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): the closed drivers of the iMac G5.
-- [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): NetBSD's `pmu.c`, FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
-- In AppleMacRISC2PE-187.0.5: `MacRISC2CPU.cpp`, the wait for `ApplePMU`.
+- [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
 - In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the test password.

@@ -56,7 +56,7 @@ The Mac names in the G5 rows are Linux's, from its Kconfig and the table of mode
 
 Leopard drives the PMU with ApplePMU and the SMU with AppleSMU, and Apple published the source of neither. Both are closed. The project's rule 5 keeps every Apple binary off the image, so a Darwin 9 built from source has no driver for either chip. On every PowerPC Mac, that means no clock at boot, and a kernel that cannot restart or switch the machine off: `RTC did not show up` and `MACH Reboot`, as [Step 5](../steps/step-5-clock-and-power.md) shows.
 
-Which chip a Mac has therefore decides what the project must write. For the iMac G5's SMU, the project wrote OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), which keeps the clock, restarts, powers off and drives the fans. QEMU's `mac99` has a PMU, for which no open driver exists yet; [What's next](../steps/whats-next.md) lists one.
+Which chip a Mac has therefore decides what the project must write. For the iMac G5's SMU, the project wrote OpenSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81)), which keeps the clock, restarts, powers off and drives the fans. For the PMU of QEMU's `mac99`, and of the G4 Macs and the first G5s, it wrote OpenPMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118), [Step 11](../steps/step-11-pmu.md)), which keeps the clock, restarts and powers off; it is tested in QEMU only.
 
 The fans are a second closed piece on the G5s. Leopard's platform plug-ins, the drivers in the table's last column, run the fans from the sensors; all of them are closed. Tiger's AppleMacRISC4PE 186.3.1 publishes the iMac's plug-in and thermal profile, from which OpenSMU takes its values ([OpenSMU](../synthesis/opensmu.md)). Without a plug-in, the iMac's SMU runs its fans on its own, loudly, until OpenSMU's fan loop takes over ([Step 7](../steps/step-7-fans.md)).
 
@@ -109,7 +109,7 @@ QEMU runs on any current computer, can be reset at will, and can be typed into a
 It cannot test what it does not imitate, and that is most of what makes a G5 Mac a G5 Mac:
 
 - It has a PMU, not an SMU, so OpenSMU has nothing to start on: the clock, restart, power-off and fans of Steps 5 and 7 were proved on the iMac only.
-- It has no ApplePMU either, and none can be on the image, so in QEMU the clock starts at 1 January 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds at boot, since AppleMacRISC2PE's processor driver waits for ApplePMU ([Step 8](../steps/step-8-clean-boot.md)).
+- Its PMU has OpenPMU, since Step 11, for the clock, restart and power-off; before it, the clock started at 1 January 1970, `reboot` stopped at `MACH Reboot`, and configd waited 60 seconds at boot, since AppleMacRISC2PE's processor driver waits for ApplePMU ([Step 8](../steps/step-8-clean-boot.md), [Step 11](../steps/step-11-pmu.md)).
 - It has no U4, DART, HyperTransport, K2 or SATA, so AppleMacRISC4PE, AppleMacRiscHT, AppleK2SATARoot and AppleK2SATA load only on the iMac.
 - It has no I²C sensors, fans or audio codec.
 - Its processor is a G4, so `qemu-system-ppc` never runs 64-bit code.
@@ -191,7 +191,7 @@ A single-user shell needs the rows from the processor down to SATA, and USB for 
 | Platform driver | AppleMacRISC2PE | AppleMacRISC4PE |
 | Root disk | ATA, KeyLargoATA | SATA, AppleK2SATA |
 | Ethernet | `sungem`, QEMU's model of GMAC | GMAC |
-| Clock, restart, power-off | no: ApplePMU is closed | yes, through OpenSMU |
+| Clock, restart, power-off | yes, through OpenPMU | yes, through OpenSMU |
 | Fans and sensors | none to drive | yes, through OpenSMU |
 | IOMMU, HyperTransport, 64-bit processor | none | yes |
 
