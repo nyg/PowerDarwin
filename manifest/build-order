@@ -244,6 +244,7 @@ build IOFireWireFamily
 build -headers IOFireWireSBP2
 build IOFireWireSBP2
 build IOFireWireSerialBusProtocolTransport
+build OpenFWOHCI 1.0
 build AppleOnboardAudio
 build msdosfs
 prepare D94

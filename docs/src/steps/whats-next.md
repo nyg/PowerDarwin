@@ -12,7 +12,7 @@ Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's 
 
 ### FireWire
 
-FireWire disks need `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). An open one would subclass IOFireWireFamily's `IOFireWireLink`, whose 33 pure virtual functions, which a subclass must write, cover bus resets, packets to and from the bus, the access that SBP-2 disks have to memory, and isochronous transfers, the steady streams of audio and video devices. FreeBSD's `fwohci.c`, under the BSD licence, drives the same kind of controller and would be the reference, as NetBSD's `smu.c` was for OpenSMU. Testing it needs a FireWire disk.
+FireWire disks needed `AppleFWOHCI`, the driver of the iMac's FireWire controller, which is closed ([Step 9](step-9-disks-and-devices.md)). [Step 12](step-12-firewire.md) wrote OpenFWOHCI in its place, a subclass of IOFireWireFamily's `IOFireWireLink`, and the class that IOFireWireFamily's published source leaves out; with no device attached, the bus comes up on the iMac. What is left is a test with a FireWire disk that holds nothing of value: its config ROM, an SBP-2 login, mounting it read-only and then read-write, unplugging it, and a restart with it attached. Isochronous transfers, the steady streams of audio and video devices, are not written.
 
 ### What Step 9 leaves
 

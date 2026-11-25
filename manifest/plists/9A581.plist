@@ -3923,6 +3923,32 @@
 			};
 			version = 106;
 		};
+		OpenFWOHCI = {
+			dependencies = {
+				build = (
+					bash,
+					cctools,
+					file_cmds,
+					gcc,
+					gcc_select,
+					gnumake,
+					shell_cmds,
+					text_cmds,
+				);
+				header = (
+					IOFireWireFamily,
+					IOPCIFamily,
+					xnu,
+				);
+				staticlib = (
+					xnu,
+				);
+			};
+			environment = {
+				RC_ARCHS = ppc;
+			};
+			version = 1.0;
+		};
 		OpenOnyx = {
 			dependencies = {
 				build = (

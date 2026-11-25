@@ -1,0 +1,112 @@
+PowerDarwin D120, 2026-11-25: changes to IOFireWireFamily 349.4.0, under the licence of the files changed.
+--- a/IOFireWireFamily.kmodproj/IOFWSimplePhysicalAddressSpace.cpp
++++ b/IOFireWireFamily.kmodproj/IOFWSimplePhysicalAddressSpace.cpp
+@@ -4,3 +4,108 @@
+  *
+  */
+  
++
++#import <IOKit/IOLib.h>
++
++#import "IOFWSimplePhysicalAddressSpace.h"
++
++OSDefineMetaClassAndStructors( IOFWSimplePhysicalAddressSpace, IOFWPhysicalAddressSpace )
++
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 0);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 1);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 2);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 3);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 4);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 5);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 6);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 7);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 8);
++OSMetaClassDefineReservedUnused(IOFWSimplePhysicalAddressSpace, 9);
++
++struct SimplePhysicalMembers
++{
++	IOBufferMemoryDescriptor *	fBuffer;
++	vm_size_t					fSize;
++	IODirection					fDirection;
++	bool						fContiguous;
++};
++
++#define _members ((SimplePhysicalMembers *) fSimplePhysSpaceMembers)
++
++bool IOFWSimplePhysicalAddressSpace::init( IOFireWireBus * control, vm_size_t size, IODirection direction, bool contiguous )
++{
++	fSimplePhysSpaceMembers = NULL;
++
++	if( !createMemberVariables() )
++		return false;
++
++	_members->fSize = size;
++	_members->fDirection = direction;
++	_members->fContiguous = contiguous;
++
++	if( allocateMemory() != kIOReturnSuccess )
++		return false;
++
++	return IOFWPhysicalAddressSpace::initWithDesc( control, _members->fBuffer );
++}
++
++void IOFWSimplePhysicalAddressSpace::free( void )
++{
++	deallocateMemory();
++	destroyMemberVariables();
++	IOFWPhysicalAddressSpace::free();
++}
++
++bool IOFWSimplePhysicalAddressSpace::createMemberVariables( void )
++{
++	if( fSimplePhysSpaceMembers == NULL )
++	{
++		fSimplePhysSpaceMembers = IOMalloc( sizeof(SimplePhysicalMembers) );
++		if( fSimplePhysSpaceMembers == NULL )
++			return false;
++		bzero( fSimplePhysSpaceMembers, sizeof(SimplePhysicalMembers) );
++	}
++
++	return true;
++}
++
++void IOFWSimplePhysicalAddressSpace::destroyMemberVariables( void )
++{
++	if( fSimplePhysSpaceMembers != NULL )
++	{
++		IOFree( fSimplePhysSpaceMembers, sizeof(SimplePhysicalMembers) );
++		fSimplePhysSpaceMembers = NULL;
++	}
++}
++
++IOReturn IOFWSimplePhysicalAddressSpace::allocateMemory( void )
++{
++	IOOptionBits options = _members->fDirection;
++	if( _members->fContiguous )
++		options |= kIOMemoryPhysicallyContiguous;
++
++	_members->fBuffer = IOBufferMemoryDescriptor::withOptions( options, _members->fSize, PAGE_SIZE );
++	if( _members->fBuffer == NULL )
++		return kIOReturnNoMemory;
++
++	bzero( _members->fBuffer->getBytesNoCopy(), _members->fSize );
++
++	return kIOReturnSuccess;
++}
++
++void IOFWSimplePhysicalAddressSpace::deallocateMemory( void )
++{
++	if( fSimplePhysSpaceMembers != NULL && _members->fBuffer != NULL )
++	{
++		_members->fBuffer->release();
++		_members->fBuffer = NULL;
++	}
++}
++
++IOVirtualAddress IOFWSimplePhysicalAddressSpace::getVirtualAddress( void )
++{
++	if( fSimplePhysSpaceMembers == NULL || _members->fBuffer == NULL )
++		return 0;
++
++	return (IOVirtualAddress) _members->fBuffer->getBytesNoCopy();
++}
