@@ -1,0 +1,22 @@
+PowerDarwin D116, 2026-11-25: changes to IOGraphics 305.14, under the licence of the files changed.
+--- a/IOGraphicsFamily/IODisplayWrangler.cpp
++++ b/IOGraphicsFamily/IODisplayWrangler.cpp
+@@ -181,6 +181,8 @@
+     if (gIODisplayWrangler)
+     {
+ 	gIODisplayWrangler->fOpen = true;
++	if (gIODisplayWrangler->fMinutesToDim)
++	    gIODisplayWrangler->setIdleTimerPeriod(gIODisplayWrangler->fMinutesToDim*60 / 2);
+ 	gIODisplayWrangler->activityTickle(0, 0);
+     }
+ 
+@@ -238,9 +240,6 @@
+ 
+     // initialize power managment
+     gIODisplayWrangler->initForPM();
+-    // set default screen-dim timeout
+-    gIODisplayWrangler->setAggressiveness( kPMMinutesToDim, 30 );
+-
+     getPMRootDomain()->publishFeature("AdaptiveDimming");
+ 
+     return (true);
