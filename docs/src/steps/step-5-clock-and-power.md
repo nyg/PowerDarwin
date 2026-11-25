@@ -171,7 +171,7 @@ The image held 12,165 files, all from the project's builds except the eight that
 ## What is still missing
 
 - OpenSMU replaces only what the image needs from AppleSMU. It does not put the machine to sleep or wake it, and does not publish the nubs that AppleSMU gives other drivers for the fans, the sensors and the SMU's own I²C buses. The fans came in [Step 7](step-7-fans.md).
-- Macs with a PMU, QEMU's `mac99` among them, still have no driver for it, since Apple's ApplePMU is closed too. In QEMU, the clock still starts at 1970, `reboot` still stops at `MACH Reboot`, and the processor driver still waits for ApplePMU, as [Step 8](step-8-clean-boot.md) explains; [What's next](whats-next.md) lists an open PMU driver as a candidate.
+- Macs with a PMU, QEMU's `mac99` among them, had no driver for it, since Apple's ApplePMU is closed too. In QEMU, the clock started at 1970, `reboot` stopped at `MACH Reboot`, and the processor driver waited for ApplePMU, as [Step 8](step-8-clean-boot.md) explains, until OpenPMU, the PMU's counterpart of OpenSMU, came in [Step 11](step-11-pmu.md).
 
 ## Where to look
 

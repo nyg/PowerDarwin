@@ -3,7 +3,7 @@
 ## What you will learn
 
 - What a clean boot means here: a log in which every line left comes from Apple's own files, from a closed part the image lacks, or from a stand-in for one.
-- Why IOKit never went quiet, and how that held the network back for 60 seconds, on an iMac G5 (`PowerMac12,1`) and still in QEMU's `mac99`.
+- Why IOKit never went quiet, and how that held the network back for 60 seconds, on an iMac G5 (`PowerMac12,1`) and, until Step 11, in QEMU's `mac99`.
 - Why `ntpdate` failed at boot, how a fix from a later Apple release made it wait, and how a silent success was proved.
 - What the time zone, BootCache, `hfs.util`, `rc.common` and a version file each needed.
 - How every line left in `/var/log/system.log` was traced to its source.
@@ -70,7 +70,7 @@ QEMU's machine is a MacRISC2 Mac with a PMU, and its processor driver, in AppleM
     pmu = waitForService(serviceMatching("ApplePMU"));
 ```
 
-This waits for a driver of the class `ApplePMU`, Apple's closed driver, not for a resource that another driver could publish. Without an open PMU driver of that name, QEMU keeps the 60-second wait.
+This waits for a driver of the class `ApplePMU`, Apple's closed driver, not for a resource that another driver could publish. Without an open PMU driver of that name, QEMU kept the 60-second wait, until OpenPMU, whose class derives from one named `ApplePMU`, ended it in [Step 11](step-11-pmu.md).
 
 ### Before and after
 
@@ -221,7 +221,7 @@ The image held 12,232 files, all from the project's builds except eleven that `m
 
 ## What is still missing
 
-- In QEMU, the 60-second wait remains until an open driver for the PMU exists; [What's next](whats-next.md) lists one.
+- In QEMU, the 60-second wait remained until an open driver for the PMU existed: OpenPMU, in [Step 11](step-11-pmu.md).
 - ReportCrash, which is closed.
 - `logger`, from remote_cmds, which is not built, so D83's time-out message would go unseen.
 - IOATAPIProtocolTransport and the optical drive, which came back in [Step 9](step-9-disks-and-devices.md).

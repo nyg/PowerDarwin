@@ -272,3 +272,4 @@ prepare D99
 build python
 build OpenSMU 1.0
 build OpenRadeonPM 1.0
+build OpenPMU 1.0
