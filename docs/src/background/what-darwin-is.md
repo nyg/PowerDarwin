@@ -128,7 +128,7 @@ Apple publishes only part of Mac OS X. What it keeps closed, it ships as binarie
 
 None of Mac OS X's graphical system is in Darwin: not WindowServer, which draws the screen; not Quartz, its drawing engine; not Aqua, its look; not Cocoa (Foundation and AppKit), Carbon, or the applications built on them, from the Finder to loginwindow, the graphical login. Nor are CoreAudio, through which Leopard plays sound, or OpenDirectory, the framework through which Leopard changes accounts. The full CoreFoundation, too, is closed: CF-Lite lacks, for example, `CFNotificationCenter`, which sends notifications between processes.
 
-So the image has no graphical login, and its console login is getty's `login:` prompt instead of loginwindow ([Step 2](../steps/step-2-console-login.md)). It plays sound through its own small command, `openplay`, since CoreAudio and Leopard's `afplay` are closed ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
+So the image has no graphical login, and its console login is getty's `login:` prompt instead of loginwindow ([Step 2](../steps/step-2-console-login.md)). It plays and records sound through its own small command, `openplay`, since CoreAudio and Leopard's `afplay` are closed ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
 
 ### Pieces of open projects
 
@@ -157,7 +157,7 @@ Where a system without a closed piece would not work, the project writes its own
 - OpenSMU, a new kext in place of AppleSMU, which keeps the clock, restarts, powers off and drives the fans of the iMac ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](../synthesis/opensmu.md));
 - OpenOnyx, in place of the codec plug-in that Apple published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94));
 - stubs for Leopard's closed sandbox and quarantine libraries, so that libSystem exports the same symbols as Apple's ([D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15));
-- `openplay`, a small command that plays sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95));
+- `openplay`, a small command that plays and records sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95));
 - Panther's IOATABlockStorage 130.3.1 and IOSCSIArchitectureModelFamily 139.0.2, Apple's last published versions, built in place of Leopard's unpublished ones ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85)).
 
 Everything else on the image is Apple's open source, at Leopard 10.5.8's versions, built by the project. [Darwin's history](history.md) says how this compares with what was done before, and [The rules](../method/rules.md) why the project is so strict about which code reaches the image.

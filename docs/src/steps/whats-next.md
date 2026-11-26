@@ -16,7 +16,7 @@ FireWire disks needed `AppleFWOHCI`, the driver of the iMac's FireWire controlle
 
 ### What Step 9 leaves
 
-A CD test on the iMac; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. 9L30's build list has no UDF project, so a DVD with only a UDF volume has no file system to mount it.
+A CD test on the iMac; the line input, which no test has used; and AppleOnboardAudio's DSP, whose sources are empty. 9L30's build list has no UDF project, so a DVD with only a UDF volume has no file system to mount it.
 
 ### Unpublished sources
 
@@ -63,7 +63,7 @@ None of Step 10's rows is `deferred`: what it turned off waits for closed code, 
 
 - ReportCrash, the crash reporter, whose absence launchd and configd still log ([Step 8](step-8-clean-boot.md)).
 - loginwindow, which registers the console user; `autodiskmount.plist` works around its absence for disks ([Step 9](step-9-disks-and-devices.md)).
-- CoreAudio: `openplay` plays a sound, and no more; a sound server for other programs would be new code ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
+- CoreAudio: `openplay` plays or records a sound, and no more; a sound server for other programs would be new code ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
 
 [What stays closed](../synthesis/what-stays-closed.md) lists them all.
 
@@ -94,7 +94,7 @@ mindmap
   root((Open items))
     Drivers
       open AppleFWOHCI
-      CDs, sound input, UDF
+      CDs, line input, DSP, UDF
       unpublished sources
     Machines
       other PowerPC Macs

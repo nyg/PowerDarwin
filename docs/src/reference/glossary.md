@@ -422,7 +422,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Open Firmware**: the firmware of PowerPC Macs. It describes the hardware in the device tree, offers a Forth prompt, and boots from a device path. See [the boot chain](../background/boot-chain.md).
 
-**`openplay`**: the project's command that plays a tone or a WAV file through IOAudioFamily's engine interface, without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)). See [Step 9](../steps/step-9-disks-and-devices.md).
+**`openplay`**: the project's command that plays a tone or a WAV file, or records a WAV file, through IOAudioFamily's engine interface, without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)). See [Step 9](../steps/step-9-disks-and-devices.md).
 
 **OpenFWOHCI**: this project's link driver for the iMac G5's FireWire controller, in place of Apple's closed `AppleFWOHCI` ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)). See [Step 12](../steps/step-12-firewire.md).
 

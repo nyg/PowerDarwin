@@ -5,7 +5,7 @@
 - How a disk travels from its controller to a folder in `/Volumes`: the driver stack, the SCSI family in its middle, and DiskArbitration at its end.
 - Why Panther's SCSI family can stand in for Leopard's unpublished one, and how that was checked.
 - Why DiskArbitration mounts nothing removable on a system without loginwindow, and the setting that changes it.
-- How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for five boot tests.
+- How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, why it stayed silent for five boot tests, and why its microphone's levels did not move at first.
 - Why FireWire disks were left out of the step, and why CDs were mounted in QEMU's `mac99` only.
 
 ## The goal
@@ -100,18 +100,26 @@ The eighteenth boot test on the iMac G5 stopped at `Sound assertion "1" failed i
 
 Then `openplay` played a tone on Leopard and nothing on Darwin 9. OpenOnyx now released the codec's reset line, which AppleOnboardAudio holds at start-up and leaves to the plug-in: still silent. The twenty-second test compared AppleOnboardAudio's state with Leopard's while `openplay` played. I²S, the reset line, the amplifier mutes and the DMA (16 loops of the buffer in 6 seconds on both) were the same; but the codec's register 68 read `0x03`, the DAC muted. AppleOnboardAudio mutes the digital output whenever no S/PDIF cable is in, and OpenOnyx had applied that mute to the DAC. With the mute kept to the digital stream, register 68 read `0x00`, and the tone and a speech file were heard on the speakers and the headphone socket.
 
+### The microphone
+
+The microphone's levels did not move on Darwin 9. AppleOnboardAudio had selected the internal microphone, `'imic'`, but the codec's register 72 read `0x07`. TI's data sheet for the PCM3052A gives that register two fields: bit 5, AML, picks the analog input, 0 for the line input and 1 for the microphone; bits 0 to 4, `PG[4:0]`, hold the input's gain as the gain in dB plus 8, from 4 (−4 dB) to 28 (+20 dB), every other code being a digital mute. OpenOnyx had never written AML, so the codec listened to the empty line input, and it coded the gain in four bits, from 0 to 15, of which 0 to 3 are a mute. Now it sets AML for `'imic'` and clears it for `'line'`, and gives AppleOnboardAudio the gain's range as 4 to 28 ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)).
+
+Nothing on the image could record without CoreAudio either, so `openplay` gained a record mode ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)): `openplay -r file.wav` registers a buffer with the engine's input stream, starts the engine, and copies what the hardware wrote into it, a chunk at a time, through IOAudioFamily's `performClientInput`, to a 16-bit WAV file, printing the peak level every half second.
+
 ## How it was proved
 
 In QEMU, the seventh multi-user boot test mounted an ISO 9660 CD at `/Volumes/D9ISO`, read-only, and HFS+ and FAT32 USB disks, the second plugged in through QEMU's monitor while the guest ran; both read back the files written on them, and `disktool -e disk3` unmounted and ejected the FAT32 one. QEMU's OHCI model stopped 90 seconds after boot (`Watchdog detected dead controller`), so the disks went on its EHCI controller, as on the iMac.
 
 On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test only to keep them read-only, mounted `Tiger` and `Leopard` at boot, and a USB key as soon as it was plugged in, with `nodev, nosuid, noowners` as Leopard does, reading 128 MB from it in 13.7 seconds. `bless --mount / --setOF` set `boot-device` to `sata/k2-sata@0/@0:4,\\:tbxi`, and `reboot` started Darwin 9 without the Startup Manager; `bless --mount /Volumes/Leopard --setOF` and `reboot` went back. The optical drive was found. The eighteenth to twenty-third tests brought the sound, as above. The last image held 12,340 files, all from the project's builds except the 12 that `make-test-image` writes.
 
+A later boot test on the iMac checked the microphone. Register 72 read `0x27` with `'imic'` selected: AML set, and the gain at OpenOnyx's default, code 7, −1 dB. `openplay -r` recorded 15 seconds of silence and then speech: 661,500 frames, none late, at an RMS level of −57 to −67 dBFS for the first 5 seconds and −38 to −42 dBFS from 5.5 seconds on. `openplay` played it back through the speakers, and the speech was heard. With the gain at its maximum (`-g 100`), register 72 read `0x3c`, code 28: the silence rose to −48 dBFS and the speech peaked at −2.0 dBFS, with no sample clipped. The microphone is mono, its two channels equal in every frame. The line input was not tested.
+
 Step 9 was reached on the iMac for the internal volumes, USB disks, `bless` and sound. CDs were mounted in QEMU only, as the iMac's optical drive is unreliable.
 
 ## What is still missing
 
 - A CD on the iMac: the drive is found, but it is unreliable, and CDs were mounted in QEMU only.
-- Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further.
+- The line input, which no test has used.
 - AppleOnboardAudio's DSP, whose sources are empty.
 
 ## Where to look
