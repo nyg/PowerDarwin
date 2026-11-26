@@ -1,6 +1,6 @@
 # iMac G5 (iSight), PowerMac12,1
 
-Tested: PowerDarwin reaches Steps 1 to 10 and 13 on this model, and runs `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, built after Step 10. Wi-Fi, graphics acceleration and sleep do not work, since their drivers are closed or not yet replaced. The optical drive did not see a DVD even under Leopard, so CDs and DVDs were tested through a USB drive. FireWire has our `OpenFWOHCI` in place of the closed `AppleFWOHCI`, and its bus comes up with no device attached; no FireWire device has been tested yet.
+Tested: PowerDarwin reaches Steps 1 to 10 and 13 on this model, and runs `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, built after Step 10. A release image, restored by hand, asks for root's password on the console at its first boot and turns SSH on after it. Wi-Fi, graphics acceleration and sleep do not work, since their drivers are closed or not yet replaced. The optical drive did not see a DVD even under Leopard, so CDs and DVDs were tested through a USB drive. FireWire has our `OpenFWOHCI` in place of the closed `AppleFWOHCI`, and its bus comes up with no device attached; no FireWire device has been tested yet.
 
 ## Drivers
 
