@@ -6,11 +6,11 @@
 - Why Panther's SCSI family can stand in for Leopard's unpublished one, and how that was checked.
 - Why DiskArbitration mounts nothing removable on a system without loginwindow, and the setting that changes it.
 - How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for five boot tests.
-- Why FireWire disks and UDF were left out of the step, and why CDs were mounted in QEMU's `mac99` only.
+- Why FireWire disks and UDF were left out of the step, and how CDs and DVDs were tested on the iMac through a USB drive.
 
 ## The goal
 
-README.md sets it as: "DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound."
+README.md sets it as: "DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested on the iMac through a USB drive), `bless` makes a partition the startup disk, and the built-in audio plays sound."
 
 By Step 8 the image booted cleanly from its own partition, and saw nothing else. The iMac's other volumes stayed unmounted, a USB key did nothing, and there was no CD drive and no sound.
 
@@ -110,11 +110,13 @@ A later boot test in QEMU inserted two discs made with `hdiutil makehybrid` thro
 
 On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test only to keep them read-only, mounted `Tiger` and `Leopard` at boot, and a USB key as soon as it was plugged in, with `nodev, nosuid, noowners` as Leopard does, reading 128 MB from it in 13.7 seconds. `bless --mount / --setOF` set `boot-device` to `sata/k2-sata@0/@0:4,\\:tbxi`, and `reboot` started Darwin 9 without the Startup Manager; `bless --mount /Volumes/Leopard --setOF` and `reboot` went back. The optical drive was found. The eighteenth to twenty-third tests brought the sound, as above. The last image held 12,340 files, all from the project's builds except the 12 that `make-test-image` writes.
 
-Step 9 was reached on the iMac for the internal volumes, USB disks, `bless` and sound. CDs were mounted in QEMU only, as the iMac's optical drive is unreliable.
+The iMac's own optical drive did not see a DVD even under Leopard, and ejected it after half a minute, so a later boot test on the iMac read CDs and DVDs through a USB DVD writer, each first under Leopard for reference. Darwin 9 mounted each one read-only, the DVD-RW at boot and the others as they went in: a CD-R through `cd9660.fs`, the HFS+ partition of a Mac OS X 10.4 install DVD, and a DVD-RW with UDF and ISO 9660 volumes through `cd9660.fs`, where Leopard had used its UDF. The CD-R's 40 files, five files of 583 MB from the install DVD, and 39 of the DVD-RW's 40 files read back with Leopard's MD5, and so did the raw sectors: the CD-R's whole track, the first 256 MB of the install DVD and the first 181 MB of the DVD-RW. The 40th file is `syslinux/boot.cat`, the disc's El Torito boot catalog, to which its UDF side gives no data and its ISO 9660 side the 2,048 bytes of the catalog's sector. `disktool -e` ejected each disc. The image held 28,316 files, all from the project's builds except the 23 that `make-test-image` writes.
+
+Step 9 was reached on the iMac for the internal volumes, USB disks, CDs and DVDs through a USB drive, `bless` and sound.
 
 ## What is still missing
 
-- A CD on the iMac: the drive is found, but it is unreliable, and CDs were mounted in QEMU only.
+- The iMac's own optical drive, which did not see a DVD even under Leopard, and audio CDs: none was at hand, so `cddafs` is untested.
 - Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further.
 - AppleOnboardAudio's DSP, whose sources are empty.
 - UDF: Leopard's is closed and no release published one, so a disc with only a UDF volume is ejected; a bridge disc mounts through its ISO 9660 volume.
