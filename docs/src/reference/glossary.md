@@ -74,6 +74,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **bridge**: a chip that joins two buses and passes traffic between them, such as a PCI-to-PCI bridge. See [Hardware and boot basics](../background/hardware-basics.md).
 
+**bridge disc**: a disc with both a UDF and an ISO 9660 volume over the same files. The image, which has no UDF, mounts its ISO 9660 one. See [Step 9](../steps/step-9-disks-and-devices.md).
+
 **BSD layer**: the part of xnu, mostly from FreeBSD, that gives programs processes, files, sockets and the POSIX system calls. See [What Darwin is](../background/what-darwin-is.md).
 
 **`bug`**: the kind of deviation for a fix to Apple's source or build. See [The rules](../method/rules.md).
@@ -620,7 +622,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **U4**: the iMac G5's north bridge, which joins the processor, the memory and the I/O controller. See [PowerPC Macs](../background/powerpc-macs.md).
 
-**UDF**: the file system of many DVDs. The `9L30` build list has no UDF project. See [What's next](../steps/whats-next.md).
+**UDF**: Universal Disk Format, the file system of DVDs and Blu-ray discs. Leopard's is closed and no Darwin release published one, so the image has none. See [Step 9](../steps/step-9-disks-and-devices.md) and [What's next](../steps/whats-next.md).
 
 **umbrella header**: a framework's main header, which includes all its others, such as `CoreServices/CoreServices.h` ([D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67)). See [Kinds of deviation](../synthesis/kinds-of-deviation.md).
 
