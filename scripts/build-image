@@ -117,7 +117,7 @@ run_build() {
    mkdir -p "$folder/Logs/build-image"
    start=$(date +%s)
    status=0
-   (cd "$folder" && "$darwinbuild" "$@" < /dev/null > "$out" 2>&1) || status=$?
+   "$root/scripts/run-darwinbuild" "$folder" "$@" < /dev/null > "$out" 2>&1 || status=$?
    if [[ $status -ne 0 ]]; then
       for project; do [[ $project == -* ]] || break; done
       newest=$(ls -t "$folder/Logs/$project"/* 2>/dev/null | head -1 || true)

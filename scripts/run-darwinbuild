@@ -1,0 +1,62 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: sudo run-darwinbuild <build folder> <darwinbuild argument>...
+
+Run on the build machine. Runs darwinbuild in the build folder, as build-image
+does for every build, so that the programs which record who built them and where
+name no machine or user of it: the machine's host name is powerdarwin.invalid
+until darwinbuild ends, then the one it had, and darwinbuild runs in a session of
+its own whose login name is root."
+
+name=powerdarwin.invalid
+darwinbuild=/usr/local/bin/darwinbuild
+
+die() { echo "run-darwinbuild: $*" >&2; exit 1; }
+
+[[ $# -ge 2 ]] || { echo "$usage" >&2; exit 1; }
+folder=$1
+shift
+[[ $(id -u) -eq 0 ]] || die "run it as root: sudo $0"
+[[ -f $folder/.build/xref.db ]] || die "$folder is not a build folder"
+
+session='
+import ctypes, errno, os, signal, sys
+child = os.fork()
+if child == 0:
+    try:
+        os.setsid()
+        if ctypes.CDLL("/usr/lib/libSystem.B.dylib").setlogin("root") != 0:
+            raise OSError("setlogin failed")
+        os.execv(sys.argv[1], sys.argv[1:])
+    except Exception, e:
+        sys.stderr.write("run-darwinbuild: %s\n" % e)
+        os._exit(127)
+def forward(number, frame):
+    try:
+        os.killpg(child, number)
+    except OSError:
+        pass
+for number in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
+    signal.signal(number, forward)
+while True:
+    try:
+        status = os.waitpid(child, 0)[1]
+        break
+    except OSError, e:
+        if e.errno != errno.EINTR:
+            raise
+if os.WIFSIGNALED(status):
+    signal.signal(os.WTERMSIG(status), signal.SIG_DFL)
+    os.kill(os.getpid(), os.WTERMSIG(status))
+sys.exit(os.WEXITSTATUS(status))
+'
+
+previous=$(hostname)
+[[ $previous != "$name" ]] || previous=$(scutil --get LocalHostName).local
+trap 'hostname "$previous"' EXIT
+hostname "$name"
+status=0
+(cd "$folder" && python -c "$session" "$darwinbuild" "$@") || status=$?
+[[ $(hostname) == "$name" ]] || die "the host name changed while darwinbuild ran, and the build may have recorded it: build it again"
+exit $status

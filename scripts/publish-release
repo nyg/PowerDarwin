@@ -1,0 +1,94 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: publish-release <release folder> [--commit=<commit>] [--repo=<owner/name>] [--yes]
+
+Run on a current computer, in a clone of PowerDarwin, with the folder that
+make-release wrote, copied from the build machine. Checks the files against
+SHA256SUMS, the source tar's repository files against the commit's tree (default
+HEAD), which must be on GitHub, and its sources against its manifest/9L30.sha256.
+Then prints the gh command that creates the release, named after the folder's
+image, at that commit, in nyg/PowerDarwin unless --repo says otherwise, with the
+three files and release-notes.md. With --yes it runs that command."
+
+folder= commit=HEAD repo=nyg/PowerDarwin yes=
+for arg; do
+   case $arg in
+      --commit=*) commit=${arg#--commit=} ;;
+      --repo=*) repo=${arg#--repo=} ;;
+      --yes) yes=1 ;;
+      -*) echo "$usage" >&2; exit 1 ;;
+      *) [[ -z $folder ]] || { echo "$usage" >&2; exit 1; }; folder=$arg ;;
+   esac
+done
+[[ -n $folder ]] || { echo "$usage" >&2; exit 1; }
+
+die() { echo "publish-release: $*" >&2; exit 1; }
+root=$(cd "$(dirname "$0")/.." && pwd)
+for tool in git gh tar; do
+   command -v "$tool" > /dev/null || die "$tool is missing"
+done
+if command -v sha256sum > /dev/null; then sha256() { sha256sum "$@"; }; else sha256() { shasum -a 256 "$@"; }; fi
+
+[[ -d $folder ]] || die "no folder at $folder"
+folder=$(cd "$folder" && pwd)
+image=$(cd "$folder" && ls PowerDarwin-*.img.gz 2> /dev/null || true)
+[[ $(echo "$image" | grep -c .) -eq 1 ]] || die "$folder holds no single PowerDarwin-<name>.img.gz"
+name=${image#PowerDarwin-}
+name=${name%.img.gz}
+source=PowerDarwin-$name-source.tar
+for file in "$image" "$source" SHA256SUMS release-notes.md; do
+   [[ -f $folder/$file ]] || die "$folder has no $file"
+done
+
+echo "checking $image and $source against SHA256SUMS"
+(cd "$folder" && sha256 -c SHA256SUMS) || die "the files differ from SHA256SUMS"
+[[ $(cut -d' ' -f3 "$folder/SHA256SUMS" | sort | tr '\n' ' ') == "$source $image " ]] || die "SHA256SUMS does not list exactly the two files"
+
+commit=$(git -C "$root" rev-parse --verify "$commit^{commit}") || die "no commit $commit in $root"
+gh api "repos/$repo/commits/$commit" --jq .sha > /dev/null 2>&1 || die "commit $commit is not on GitHub in $repo: push it first"
+if gh release view "$name" --repo "$repo" > /dev/null 2>&1; then die "$repo already has a release $name"; fi
+if git -C "$root" ls-remote --exit-code --tags "https://github.com/$repo.git" "refs/tags/$name" > /dev/null 2>&1; then die "$repo already has a tag $name"; fi
+
+work=$(mktemp -d "${TMPDIR:-/tmp}/publish-release.XXXXXX")
+trap 'rm -rf "$work"' EXIT
+echo "unpacking $source"
+tar -xf "$folder/$source" -C "$work"
+[[ -d $work/PowerDarwin ]] || die "$source has no PowerDarwin folder"
+
+echo "checking its repository files against the tree of $commit"
+(cd "$work/PowerDarwin" && find . -type f ! -path './sources/*' ! -path './inputs/*' | sed 's|^\./||' | sort) > "$work/files.txt"
+git -C "$root" ls-tree -r --name-only "$commit" | sort > "$work/tree.txt"
+cmp -s "$work/files.txt" "$work/tree.txt" || {
+   diff "$work/tree.txt" "$work/files.txt" | sed -n 's/^[<>] /   /p' | head -20 >&2
+   die "the files in $source differ from those of commit $commit: make the kit again from that commit"
+}
+tree=$(
+   cd "$work/PowerDarwin"
+   export GIT_DIR=$work/git GIT_WORK_TREE=$work/PowerDarwin
+   git init -q
+   git config core.fileMode true
+   git add -f --pathspec-from-file="$work/files.txt"
+   git write-tree
+)
+[[ $tree == "$(git -C "$root" rev-parse "$commit^{tree}")" ]] || die "the files in $source differ in content or mode from those of commit $commit"
+
+echo "checking its sources against its manifest/9L30.sha256"
+(cd "$work/PowerDarwin/sources" && sha256 -c ../manifest/9L30.sha256 > "$work/sources.txt" 2>&1) || {
+   grep -v ': OK$' "$work/sources.txt" | head -20 >&2
+   die "the sources in $source differ from its manifest/9L30.sha256"
+}
+extra=$(cd "$work/PowerDarwin/sources" && ls | sort | comm -23 - <(awk '{ print $2 }' ../manifest/9L30.sha256 | sort))
+[[ -z $extra ]] || die "$source holds sources its manifest does not list: $extra"
+
+command=(gh release create "$name" --repo "$repo" --target "$commit" --title "PowerDarwin $name"
+   --notes-file "$folder/release-notes.md" "$folder/$image" "$folder/$source" "$folder/SHA256SUMS")
+echo
+echo "The release $name of $repo, at commit $commit:"
+printf ' %q' "${command[@]}"
+echo
+if [[ -n $yes ]]; then
+   "${command[@]}"
+else
+   echo "Nothing was published: run it again with --yes to publish."
+fi

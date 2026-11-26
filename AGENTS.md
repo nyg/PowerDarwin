@@ -23,6 +23,8 @@ A guide for coding agents working in this repo. The project's goal, rules and st
 - Patches go in `patches/<project>-<version>/`, one file per fix, whose first line gives the deviation, the date of its last change and its licence, as the others do. Build-environment workarounds go in `env/`, each with a step in `scripts/prepare-buildroot`. New code that stands in for a closed Apple part goes in `replacements/`, with its own copy of the licence.
 - A new build, or a new `prepare-buildroot` step, goes into `manifest/build-order` where the builds first need it; a `prepare` step that says `waiting` there stops `build-image`.
 - Check each image with `scripts/check-image`: only the files that `scripts/make-test-image` writes may come from outside the builds.
+- `scripts/build-image` runs every darwinbuild through `scripts/run-darwinbuild`, in UTC and under the host name `powerdarwin.invalid` and the login name `root` (D125); build by hand through it too for any Root that goes into a release.
+- A release image is made with `make-test-image --release=<name>` and checked and packed by `scripts/make-release` on the build machine; `scripts/publish-release` uploads it from a current computer, only with `--yes` and the owner's agreement.
 - Ask the machine's owner before restoring an image onto a partition or changing what a machine boots.
 
 ## On the build machine

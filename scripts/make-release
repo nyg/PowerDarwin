@@ -1,0 +1,208 @@
+#!/bin/bash
+set -euo pipefail
+
+usage="usage: sudo make-release --name=<name> [--folder=<build folder>] [--image=<image.dmg>] [--out=<folder>]
+          [--public=<string>]...
+
+Run on the build machine, from the kit that built the image, after
+make-test-image --release=<name>. Checks that the image is fit to publish: no
+password, host key or first-boot mark on it, nothing of the build machine in any
+file, and no file from outside the builds but those make-test-image writes. Then
+writes into <folder> (default /private/var/tmp/PowerDarwin-<name>):
+PowerDarwin-<name>.img.gz, the raw image, gzipped; PowerDarwin-<name>-source.tar,
+this kit without its Roots; SHA256SUMS; and release-notes.md, the text of the
+release. scripts/publish-release uploads them from a current computer.
+--public names a host or user name of the build machine that the release may
+hold: Perl, Vim, Samba and lsof record the host and user that built them.
+build-image builds them as root on powerdarwin.invalid, which needs no --public."
+
+name= folder=~/9L30 image=/private/var/tmp/PowerDarwin.dmg out= public=(powerdarwin.invalid powerdarwin)
+for arg; do
+   case $arg in
+      --name=*) name=${arg#--name=} ;;
+      --folder=*) folder=${arg#--folder=} ;;
+      --image=*) image=${arg#--image=} ;;
+      --out=*) out=${arg#--out=} ;;
+      --public=*) public+=("${arg#--public=}") ;;
+      *) echo "$usage" >&2; exit 1 ;;
+   esac
+done
+[[ -n $name ]] || { echo "$usage" >&2; exit 1; }
+[[ -n $out ]] || out=/private/var/tmp/PowerDarwin-$name
+
+die() { echo "make-release: $*" >&2; exit 1; }
+[[ $(id -u) -eq 0 ]] || die "run it as root: sudo $0"
+[[ $name =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]] || die "a release name holds only letters, digits, dots and hyphens"
+[[ -f $image ]] || die "no image at $image"
+[[ -d $folder/Roots ]] || die "no build folder at $folder"
+[[ ! -e $out ]] || die "$out exists: remove it or give --out"
+repo=$(cd "$(dirname "$0")/.." && pwd)
+limit=$((2 * 1024 * 1024 * 1024))
+
+work=$(mktemp -d /private/var/tmp/make-release.XXXXXX)
+mount=$work/mount
+cleanup() {
+   hdiutil detach "$mount" > /dev/null 2>&1 || true
+   rm -rf "$work"
+}
+trap cleanup EXIT
+
+problems=0
+problem() { echo "  NOT FIT: $*"; problems=$((problems + 1)); }
+
+echo "checking every file of $image against the Roots of $folder"
+"$repo/scripts/check-image" "$image" "$folder" > "$work/check-image.txt"
+written='^/(Library/Preferences/SystemConfiguration/(com\.apple\.Boot|autodiskmount)\.plist|System/Library/Extensions\.mkext|System/Library/LaunchDaemons/(com\.apple\.getty|smbd)\.plist|System/Library/CoreServices/SystemVersion\.plist|private/etc/(ntp\.conf|rc\.common|hostconfig|smb\.conf)|private/var/db/dyld/shared_region_roots/Darwin\.paths|usr/bin/dsymutil|usr/libexec/first-boot|usr/include/(AssertMacros|Availability|AvailabilityInternal|AvailabilityMacros|ConditionalMacros|Endian|MacErrors|MacTypes|TargetConditionals)\.h|System/Library/Frameworks/CoreServices\.framework/Versions/A/Frameworks/CarbonCore\.framework/Versions/A/Headers/MacTypes\.h|usr/share/doc/PowerDarwin/.*)$'
+sed -n '1p' "$work/check-image.txt"
+sed '1d; s/^/  /' "$work/check-image.txt"
+sed '1d' "$work/check-image.txt" | grep -Ev "$written" > "$work/unexpected.txt" || true
+while IFS= read -r file; do problem "$file is from no Root, and make-test-image does not write it"; done < "$work/unexpected.txt"
+
+mkdir "$mount"
+hdiutil attach -readonly -nobrowse -owners on -mountpoint "$mount" "$image" > /dev/null
+
+echo "checking the release's own files"
+grep -q "release $name of PowerDarwin" "$mount/usr/share/doc/PowerDarwin/NOTICE" 2> /dev/null || problem "its NOTICE does not name the release $name: make it with make-test-image --release=$name"
+[[ $(ls "$mount/usr/share/doc/PowerDarwin/notices" 2> /dev/null | wc -l) -gt 0 ]] || problem "it has no notices in /usr/share/doc/PowerDarwin/notices"
+for licence in APSL-2.0.txt APSL-1.1.txt Apache-2.0.txt; do
+   cmp -s "$repo/LICENSES/$licence" "$mount/usr/share/doc/PowerDarwin/licenses/$licence" || problem "it lacks /usr/share/doc/PowerDarwin/licenses/$licence"
+done
+
+echo "checking that it holds no password, host key or first-boot mark"
+awk -F: '!/^#/ && NF > 1 && $2 != "*" { print $1 }' "$mount/private/etc/master.passwd" > "$work/passwords.txt"
+while IFS= read -r user; do problem "$user has a password in /etc/master.passwd"; done < "$work/passwords.txt"
+for record in "$mount"/private/var/db/dslocal/nodes/Default/users/*.plist; do
+   value=$(sed -n '/<key>passwd<\/key>/{n;n;s|.*<string>\(.*\)</string>.*|\1|p;}' "$record")
+   [[ -z $value || $value == '*' ]] || problem "$(basename "$record" .plist) has a password in the local directory"
+   ! grep -q ShadowHash "$record" || problem "$(basename "$record" .plist) has a shadow hash in the local directory"
+done
+[[ -z $(ls -A "$mount/private/var/db/shadow" 2> /dev/null) ]] || problem "/var/db/shadow holds password hashes"
+[[ -z $(ls -A "$mount/private/var/db/samba" 2> /dev/null) ]] || problem "/var/db/samba holds Samba's accounts"
+ls "$mount"/private/etc/ssh_host_* > /dev/null 2>&1 && problem "it holds SSH host keys"
+[[ ! -e $mount/private/var/db/.PowerDarwinSetupDone ]] || problem "it was started once: /var/db/.PowerDarwinSetupDone exists"
+grep -A1 '<key>Disabled</key>' "$mount/System/Library/LaunchDaemons/ssh.plist" | grep -q '<true/>' || problem "SSH is on before the first boot"
+grep -A1 '<key>Program</key>' "$mount/System/Library/LaunchDaemons/com.apple.getty.plist" | grep -q '/usr/libexec/first-boot' || problem "launchd does not run first-boot before getty"
+[[ -x $mount/usr/libexec/first-boot ]] || problem "it has no /usr/libexec/first-boot"
+
+echo "checking that no file was left by a boot or by the build machine"
+find "$mount" \( -name .DS_Store -o -name '._*' -o -name .fseventsd -o -name .Spotlight-V100 -o -name .Trashes \
+   -o -name .TemporaryItems -o -name '*.first-boot' -o -name '.*_history' -o -name 'swapfile*' -o -name 'dyld_shared_cache_*' \
+   -o -name 'BootCache.playlist' -o -name .com.apple.timemachine.supported \) -print | sed "s|^$mount||" > "$work/leftovers.txt"
+find "$mount/private/var/log" "$mount/Library/Logs" "$mount/private/var/tmp" "$mount/private/tmp" -type f -size +0 2> /dev/null | sed "s|^$mount||" >> "$work/leftovers.txt"
+while IFS= read -r file; do problem "$file was left by a boot or a build"; done < "$work/leftovers.txt"
+[[ $(stat -f %Su:%Sg:%Sp "$mount") == root:admin:drwxrwxr-t ]] || problem "/ is $(stat -f %Su:%Sg:%Sp "$mount"), not root:admin:drwxrwxr-t, as on Leopard"
+if [[ -n ${SUDO_UID:-} && $SUDO_UID != 0 ]]; then
+   find "$mount" -user "$SUDO_UID" | sed "s|^$mount||" > "$work/owned.txt"
+   while IFS= read -r file; do problem "${file:-/} belongs to the build machine's user"; done < "$work/owned.txt"
+fi
+
+{
+   if [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]]; then echo "/Users/$SUDO_USER"; fi
+   (cd "$folder" && pwd -P)
+   echo "$repo"
+   hostname
+   hostname -s | sed 's/-[0-9]*$//'
+   scutil --get LocalHostName 2> /dev/null | sed 's/-[0-9]*$//' || true
+   scutil --get ComputerName 2> /dev/null || true
+   ifconfig -a | awk '$1 == "ether" { print $2; u = toupper($2); print u; gsub(":", "", $2); print $2 }'
+   ifconfig -a | awk '$1 == "inet" && $2 != "127.0.0.1" { print $2 }'
+   if [[ -f $folder/root-password.hash ]]; then cat "$folder/root-password.hash"; fi
+} | grep -v '^$' | sort -u > "$work/found.txt"
+printf '%s\n' ${public[@]+"${public[@]}"} > "$work/public.txt"
+grep -v -x -F -f "$work/public.txt" "$work/found.txt" > "$work/patterns.txt" || true
+echo "searching every file for $(wc -l < "$work/patterns.txt" | tr -d ' ') names and addresses of the build machine"
+find "$mount" -type f -print0 | xargs -0 grep -l -a -F -f "$work/patterns.txt" 2> /dev/null | sed "s|^$mount||" > "$work/identifying.txt" || true
+while IFS= read -r file; do problem "$file holds the build machine's user, folder, host name or address"; done < "$work/identifying.txt"
+
+zone=$(readlink "$mount/private/etc/localtime")
+ntp=$(sed -n 's/^server[[:space:]]*//p' "$mount/private/etc/ntp.conf")
+hdiutil detach "$mount" > /dev/null
+
+if [[ $problems -gt 0 ]]; then
+   die "$problems problems: the image is not fit to publish"
+fi
+echo "the image is fit to publish: time zone ${zone#/usr/share/zoneinfo/}, NTP server $ntp"
+
+mkdir -p "$out"
+echo "writing $out/PowerDarwin-$name.img.gz"
+hdiutil convert "$image" -format UDTO -o "$work/PowerDarwin-$name" > /dev/null
+gzip -9 -c "$work/PowerDarwin-$name.cdr" > "$out/PowerDarwin-$name.img.gz"
+raw_size=$(stat -f %z "$work/PowerDarwin-$name.cdr")
+rm -f "$work/PowerDarwin-$name.cdr"
+
+echo "checking the SHA-256 of the kit's sources against manifest/9L30.sha256"
+python - "$repo/manifest/9L30.sha256" "$repo/sources" <<'EOF'
+import hashlib, os, sys
+manifest, folder = sys.argv[1:3]
+bad = 0
+for line in open(manifest):
+    digest, name = line.split(None, 1)
+    name = name.strip()
+    path = os.path.join(folder, name)
+    if not os.path.exists(path):
+        print 'missing: sources/%s' % name
+        bad += 1
+        continue
+    h = hashlib.sha256()
+    f = open(path, 'rb')
+    for block in iter(lambda: f.read(1048576), ''):
+        h.update(block)
+    f.close()
+    if h.hexdigest() != digest:
+        print 'differs from the manifest: sources/%s' % name
+        bad += 1
+sys.exit(bad and 1 or 0)
+EOF
+
+echo "writing $out/PowerDarwin-$name-source.tar"
+stage=$work/stage
+mkdir "$stage"
+ln -s "$repo" "$stage/PowerDarwin"
+{
+   (cd "$repo" && find . -type f ! -path './.git/*' ! -path './sources/*' ! -path './roots/*' ! -path './images/*' \
+      ! -path './inputs/*' ! -path '*/node_modules/*' ! -name '*.tar' ! -name .DS_Store ! -name CLAUDE.local.md ! -name '.dev.vars*' ! -path '*/.wrangler/*' | sed 's|^\./||')
+   awk '{ print "sources/" $2 }' "$repo/manifest/9L30.sha256"
+   if [[ -d $repo/inputs ]]; then (cd "$repo" && find -H inputs -type f); fi
+} | sed 's|^|PowerDarwin/|' | sort -u > "$work/source-files.txt"
+tar -chf "$out/PowerDarwin-$name-source.tar" --format=ustar -C "$stage" -T "$work/source-files.txt"
+
+for file in "$out"/*; do
+   [[ $(stat -f %z "$file") -lt $limit ]] || die "$(basename "$file") is over GitHub's 2 GiB limit for a release asset"
+done
+
+echo "writing $out/SHA256SUMS"
+(cd "$out" && python - "PowerDarwin-$name.img.gz" "PowerDarwin-$name-source.tar" <<'EOF'
+import hashlib, sys
+for name in sys.argv[1:]:
+    h = hashlib.sha256()
+    f = open(name, 'rb')
+    for block in iter(lambda: f.read(1048576), ''):
+        h.update(block)
+    f.close()
+    print '%s  %s' % (h.hexdigest(), name)
+EOF
+) > "$out/SHA256SUMS"
+
+size() { awk -v b="$(stat -f %z "$1")" 'BEGIN { printf "%.0f MB", b / 1000000 }'; }
+cat > "$out/release-notes.md" <<EOF
+Darwin 9.8 for PowerPC Macs, built from the sources Apple published for Mac OS X 10.5.8 (build 9L30), with the changes listed in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/$name/DEVIATIONS.md). It boots in QEMU \`mac99\` and on an iMac G5; [README.md](https://github.com/nyg/PowerDarwin/blob/$name/README.md#install-it) says how to install it.
+
+- \`PowerDarwin-$name.img.gz\` ($(size "$out/PowerDarwin-$name.img.gz"), $(awk -v b="$raw_size" 'BEGIN { printf "%.0f MB", b / 1000000 }') unpacked): the image, a raw disk with an Apple Partition Map and one HFS+ volume. Unpack it with \`gunzip\`, then start it with \`scripts/boot-qemu\`, or install it from Leopard with \`sudo scripts/install-image --image=PowerDarwin-$name.img\`.
+- \`PowerDarwin-$name-source.tar\` ($(size "$out/PowerDarwin-$name-source.tar")): the source of every binary on the image: every source tarball as Apple and the others published it, each checked by its SHA-256 in \`manifest/9L30.sha256\`, and this repository at the commit of this release, with its patches, replacements and build scripts. With the Roots that \`scripts/fetch-roots\` downloads, \`scripts/build-image\` builds the image again.
+- \`SHA256SUMS\`: check the two files with \`shasum -a 256 -c SHA256SUMS\`, or \`sha256sum -c SHA256SUMS\`.
+
+Root has no password: at the first boot, the console asks for one, and SSH stays off until it is set. Each program on the image is under the licence of the project it is built from, the Apple Public Source License 2.0 for most of Darwin; \`/usr/share/doc/PowerDarwin\` on the image holds the licence texts and notices. PowerDarwin is not affiliated with, endorsed or sponsored by Apple Inc.
+
+\`\`\`text
+$(cat "$out/SHA256SUMS")
+\`\`\`
+EOF
+
+ls -l "$out"
+cat <<EOF
+
+Copy $out to a current computer with a clone of PowerDarwin at the commit this kit
+was made from, then run there:
+
+   scripts/publish-release <copied folder> --commit=<that commit>
+EOF

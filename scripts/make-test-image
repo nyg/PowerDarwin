@@ -1,25 +1,38 @@
 #!/bin/sh
 set -e
 
-usage="usage: make-test-image [--folder=<build folder>] [--ntp-server=<host>] [--time-zone=<zone>]"
+usage="usage: make-test-image [--folder=<build folder>] [--ntp-server=<host>] [--time-zone=<zone>] [--release=<name>]"
 folder=~/9L30
-ntp_server=$(sed -n 's/^server[[:space:]]*\([^[:space:]]*\).*/\1/p' /etc/ntp.conf 2>/dev/null | head -1)
-[ -n "$ntp_server" ] || ntp_server=time.apple.com
-zone=$(readlink /etc/localtime || true)
-zone=${zone#/usr/share/zoneinfo/}
+ntp_server= zone= release=
 for arg; do
    case $arg in
       --folder=*) folder=${arg#--folder=} ;;
       --ntp-server=*) ntp_server=${arg#--ntp-server=} ;;
       --time-zone=*) zone=${arg#--time-zone=} ;;
+      --release=*) release=${arg#--release=} ;;
       *) echo "$usage" >&2; exit 1 ;;
    esac
 done
+if [ -n "$release" ]; then
+   case $release in
+      ''|-*|*[!A-Za-z0-9.-]*) echo "make-test-image: a release name holds only letters, digits, dots and hyphens" >&2; exit 1 ;;
+   esac
+   [ -n "$ntp_server" ] || ntp_server=time.apple.com
+   [ -n "$zone" ] || zone=UTC
+fi
+[ -n "$ntp_server" ] || ntp_server=$(sed -n 's/^server[[:space:]]*\([^[:space:]]*\).*/\1/p' /etc/ntp.conf 2>/dev/null | head -1)
+[ -n "$ntp_server" ] || ntp_server=time.apple.com
+if [ -z "$zone" ]; then
+   zone=$(readlink /etc/localtime || true)
+   zone=${zone#/usr/share/zoneinfo/}
+fi
+repo=$(cd "$(dirname "$0")/.." && pwd)
 roots=$folder/Roots
 sources=$folder/Sources
 image=/private/var/tmp/PowerDarwin
 mount=/Volumes/PowerDarwin-image
 root_hash=$folder/root-password.hash
+doc=$mount/usr/share/doc/PowerDarwin
 userland_projects="Libm dyld bash ncurses libiconv libgcc bsm libutil libedit file_cmds shell_cmds diskdev_cmds IOKitUser ICU objc4 autozone libstdcxx zlib Libsystem launchd files pam pam_modules system_cmds text_cmds CF Security configd configd_plugins configd_executables notify DiskArbitration libresolv ipsec network_cmds tcp_wrappers OpenSSL bootp Kerberos OpenSSH tcl SQLite passwordserver_sasl passwordserver_saslkerberos DSPasswordServerFramework LDAPFramework DirectoryService DirectoryServiceDaemon grep less adv_cmds syslog ntp vim SmartCardServices SecurityTokend securityd IOKitTools BootCache hfs bless isoutil msdosfs cddafs OpenPlay Csu SystemStubs cctools ld64 gcc gcc_42 gcc_select gnumake perl expat libffi python ruby samba DarwinTools gnuzip awk gnutar file lsof top curl"
 header_projects="Libc_headers architecture Librpcsvc Libsyscall Libinfo Libm libdyld launchd_libs CommonCrypto removefile copyfile Libnotify bsm mDNSResponder cctools_ofiles objc4"
 kext_projects="IOPCIFamily IOStorageFamily IOATAFamily AppleMacRiscPCI AppleMacRISC2PE AppleKeyLargo AppleMPIC AppleCore99NVRAM AppleVIA AppleGPIO KeyLargoATA AppleFileSystemDriver IOI2CFamily IOHIDFamily IOUSBFamily IOATAPIProtocolTransport IOCDStorageFamily IODVDStorageFamily IOBDStorageFamily AppleMediaBay AppleKauaiATA AppleK2SATARoot AppleK2SATA IOGraphics AppleMacRISC4PE AppleFlashNVRAM AppleI2C IOATABlockStorage IONetworkingFamily AppleGMACEthernet OpenSMU OpenPMU IOSCSIArchitectureModelFamily IOUSBMassStorageClass IOAudioFamily AppleI2S AppleOnboardAudio OpenOnyx OpenRadeonPM IOFireWireFamily IOFireWireSBP2 IOFireWireSerialBusProtocolTransport OpenFWOHCI"
@@ -33,6 +46,8 @@ done
 rm -f $image.dmg $image.cdr $image.cdr.gz
 hdiutil create -size 1600m -layout SPUD -fs HFS+J -volname PowerDarwin $image.dmg
 hdiutil attach -owners on -nobrowse -mountpoint $mount $image.dmg
+sudo chown root:admin $mount
+sudo chmod 1775 $mount
 
 for project in $userland_projects; do
    sudo ditto "$(latest $project)" $mount
@@ -44,6 +59,7 @@ for project in $header_projects; do
 done
 carbon=$(mktemp -d /tmp/carbonheaders.XXXXXX)
 make -s -C $sources/CarbonHeaders-18.1 install DSTROOT=$carbon KERNEL_SYLINKS= DO_CARBON_CORE_FILES=install_carbon_core_headers
+sudo chown -R root:wheel $carbon
 sudo ditto $carbon/usr/include $mount/usr/include
 core_services=$mount/System/Library/Frameworks/CoreServices.framework
 carbon_core=$core_services/Versions/A/Frameworks/CarbonCore.framework
@@ -54,7 +70,7 @@ sudo ln -s Versions/Current/Frameworks $core_services/Frameworks
 sudo ln -s A $carbon_core/Versions/Current
 sudo ln -s Versions/Current/Headers $carbon_core/Headers
 sudo install -m 644 $carbon/usr/include/MacTypes.h $carbon_core/Versions/A/Headers/MacTypes.h
-rm -rf $carbon
+sudo rm -rf $carbon
 sudo rm -f $mount/mach_kernel.ctfsys
 sudo rm -rf $mount/usr/local/lib/SystemConfiguration
 sudo rm -rf $mount/AppleInternal
@@ -79,13 +95,14 @@ sudo mkdir -p $mount/System/Library/CoreServices
 sudo mkdir -p $mount/Volumes $mount/Library/Preferences/SystemConfiguration
 sudo install -m 644 $sources/system_cmds-433.8/getty.tproj/com.apple.getty.plist $mount/System/Library/LaunchDaemons/
 sudo install -m 644 $sources/launchd-258.25/launchd/src/rc.common $sources/launchd-258.25/launchd/src/hostconfig $mount/private/etc/
-sudo sed -i '' "/<key>Disabled<\/key>/{n;s|<true/>|<false/>|;}" $mount/System/Library/LaunchDaemons/ssh.plist
+sudo /usr/libexec/PlistBuddy -c "Add :Program string /usr/libexec/first-boot" $mount/System/Library/LaunchDaemons/com.apple.getty.plist
+sudo install -o root -g wheel -m 755 $repo/overlay/usr/libexec/first-boot $mount/usr/libexec/first-boot
 [ -f "$mount/usr/share/zoneinfo/$zone" ] || zone=UTC
 sudo ln -sfh "/usr/share/zoneinfo/$zone" $mount/private/etc/localtime
 echo "server $ntp_server" | sudo tee $mount/private/etc/ntp.conf > /dev/null
 sudo mkdir -p $mount/private/var/db/dyld/shared_region_roots
 printf '%s\n' /bin/sh /bin/bash /usr/sbin/configd /usr/sbin/DirectoryService /usr/sbin/sshd | sudo tee $mount/private/var/db/dyld/shared_region_roots/Darwin.paths > /dev/null
-if [ -f $root_hash ]; then
+if [ -z "$release" ] && [ -f $root_hash ]; then
    sudo sed -i '' "s|^root:\*:|root:$(cat $root_hash):|" $mount/private/etc/master.passwd
    sudo sed -i '' "/<key>passwd<\/key>/{n;n;s|<string>\*</string>|<string>$(cat $root_hash)</string>|;}" $mount/private/var/db/dslocal/nodes/Default/users/root.plist
 fi
@@ -147,12 +164,54 @@ sudo tee $mount/Library/Preferences/SystemConfiguration/com.apple.Boot.plist > /
 </plist>
 EOF
 
+sudo mkdir -p $doc/licenses $doc/notices
+sudo install -m 644 $repo/LICENSES/APSL-2.0.txt $repo/LICENSES/APSL-1.1.txt $repo/LICENSES/Apache-2.0.txt $doc/licenses/
+built_sources=CarbonHeaders-18.1
+for project in $(cd $roots && ls); do
+   root=$(latest $project)
+   [ -n "$root" ] || continue
+   version=$(basename $root | sed "s/^$project-//; s/\.root~[0-9]*\$//")
+   original=$(cd $folder && /usr/local/bin/darwinxref original $project)
+   built_sources="$built_sources ${original:-$project}-$version"
+done
+for name in $(echo $built_sources | tr ' ' '\n' | sort -u); do
+   if [ -d $sources/$name ]; then
+      sudo $repo/scripts/collect-notices $sources/$name $repo/LICENSES/APSL-2.0.txt $doc/notices/$name.txt
+   elif [ -n "$release" ]; then
+      echo "no source of $name in $sources for its notices" >&2
+      exit 1
+   else
+      echo "no source of $name in $sources: its notices are left out"
+   fi
+done
+sudo chmod 644 $doc/notices/*
+if [ -n "$release" ]; then
+   where="It is the release $release of PowerDarwin, whose page, https://github.com/nyg/PowerDarwin/releases/tag/$release, holds this image and PowerDarwin-$release-source.tar, the source of every binary on it: every source tarball as Apple and the others published it, and the PowerDarwin repository at the commit that built it, with its patches, replacements and build scripts."
+else
+   where="It is a test image, not a release: the source of its binaries is in the build folder it was made from. Each release at https://github.com/nyg/PowerDarwin/releases holds the source of its own image."
+fi
+sudo tee $doc/NOTICE > /dev/null <<EOF
+PowerDarwin
+
+This system is Darwin 9.8 for PowerPC Macs, built from the sources that Apple and others published for Mac OS X 10.5.8 (build 9L30), with the changes listed in DEVIATIONS.md at https://github.com/nyg/PowerDarwin. It is not Mac OS X, and it is not made, endorsed or sponsored by Apple Inc.
+
+$where
+
+Each program, library and driver on it is under the licence of the project it is built from: the Apple Public Source License 2.0 for most of Darwin, and its own licence for each of the others, such as the GNU General Public License for bash, gcc, cctools, GNU make, grep and Samba. Their source code is available under the terms of those licences, where the paragraph above says.
+
+In this folder, licenses/ holds the texts of the Apple Public Source License 2.0 and 1.1 and of the Apache License 2.0, and notices/ holds one file per project built, with the licence files of its source and the notices that head its source files. /usr/local/OpenSourceLicenses holds those that Apple's builds of some projects install.
+EOF
+sudo chmod 644 $doc/NOTICE
+
 sudo "$(latest kext_tools)/usr/sbin/kextcache" -a ppc -l -m $mount/System/Library/Extensions.mkext $mount/System/Library/Extensions
 sudo bless --folder $mount/System/Library/CoreServices --bootinfo $mount/usr/standalone/ppc/bootx.bootinfo
 /Developer/Tools/GetFileInfo $mount/System/Library/CoreServices/BootX | grep -E 'type|creator'
 bless --info $mount | head -3
 df -h $mount | tail -1
 
+sudo rm -rf $mount/.Trashes $mount/.com.apple.timemachine.supported
+sudo dd if=/dev/zero of=$mount/.zero bs=1048576 2> /dev/null || true
+sudo rm -f $mount/.zero
 hdiutil detach $mount
 hdiutil convert $image.dmg -format UDTO -o $image
 gzip -1 -c $image.cdr > $image.cdr.gz

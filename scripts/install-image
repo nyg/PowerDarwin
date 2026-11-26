@@ -6,8 +6,9 @@ usage="usage: sudo install-image [--image=<image.dmg>]
           [--time-zone=<zone>] [--ntp-server=<host>] [--startup-disk | --no-startup-disk] [--yes]
 
 Run on a PowerPC Mac under Leopard. Restores the image that build-image made
-(default /private/var/tmp/PowerDarwin.dmg) onto one partition, then sets its time
-zone, NTP server and root password, and makes its SSH host keys. The partition is
+(default /private/var/tmp/PowerDarwin.dmg), or a release's unpacked
+PowerDarwin-<name>.img, onto one partition, then sets its time zone, NTP server
+and root password, and makes its SSH host keys. The partition is
 either a new one, made by shrinking a Journaled HFS+ volume that keeps its files
 (--shrink, such as --shrink=disk0s3 --size=10G), an existing one that is erased
 (--partition=disk0s4), or a whole disk that is erased (--disk=disk1). It asks for
@@ -145,7 +146,10 @@ if [[ -z $yes ]]; then
    [[ $(ask "type yes to go on") == yes ]] || die "nothing was changed"
 fi
 
-asr_image=${image%.dmg}-asr.dmg
+case $image in
+   *.dmg|*.img|*.cdr) asr_image=${image%.*}-asr.dmg ;;
+   *) asr_image=$image-asr.dmg ;;
+esac
 if [[ ! -f $asr_image || $asr_image -ot $image ]]; then
    echo "preparing $asr_image for asr"
    hdiutil convert "$image" -format UDZO -ov -o "$asr_image" > /dev/null
@@ -231,7 +235,7 @@ cat <<EOF
 
 PowerDarwin is on $target, mounted at $mount_point.
 $(if [[ $startup == yes ]]; then echo "It is the startup disk: restart to start it."; else echo "To start it, restart holding Option and choose it in the Startup Manager."; fi)
-Log in as root, on the console or over SSH, which is on: a current OpenSSH client needs
+Log in as root, on the console or over SSH, which its first boot turns on: a current OpenSSH client needs
    ssh -o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1 root@<its address>
 To make $startup_volume the startup disk again, run this on PowerDarwin, then reboot:
    bless --mount "/Volumes/$startup_volume" --setOF

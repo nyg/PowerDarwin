@@ -244,6 +244,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **firmware**: the program stored on the machine itself, which runs at power-on, tests and describes the hardware and starts a boot loader. On PowerPC Macs it is Open Firmware. See [Hardware and boot basics](../background/hardware-basics.md).
 
+**first-boot**: the script that `make-test-image` puts in `/usr/libexec` and that launchd runs before getty: at the first boot it asks on the console for root's password, makes the SSH host keys and turns SSH on ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). See [Making the image](../method/making-the-image.md#the-first-boot).
+
 **`fixincludes`**: the step of gcc's build that copies the system's headers into gcc's own folder, repairing what it needs to. See [Step 10](../steps/step-10-working-unix.md).
 
 **Forth**: Open Firmware's stack-based language, in which its prompt, its scripts and the FCode drivers of expansion cards are written. See [the boot chain](../background/boot-chain.md).
@@ -513,6 +515,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **`rc.common`, `hostconfig`**: shell files from launchd's source that boot scripts such as `rc.audit` read for settings. See [Step 8](../steps/step-8-clean-boot.md).
 
 **real-time clock (RTC)**: a clock that keeps counting while the machine is off, on standby power or a battery. On the iMac G5 it is part of the SMU. See [Step 5](../steps/step-5-clock-and-power.md).
+
+**release image**: the image that `make-test-image --release=<name>` makes for publishing: no password, UTC, `time.apple.com`, and a notice naming the release whose page holds its source. See [Making the image](../method/making-the-image.md#releases).
 
 **ReportCrash**: Leopard's crash reporter, closed and not on the image. launchd and configd log failed lookups of it. See [Step 6](../steps/step-6-securityd.md) and [Step 8](../steps/step-8-clean-boot.md).
 
