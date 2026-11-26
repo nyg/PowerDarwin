@@ -13,10 +13,10 @@ PowerDarwin-<name>.img.gz, the raw image, gzipped; PowerDarwin-<name>-source.tar
 this kit without its Roots; SHA256SUMS; and release-notes.md, the text of the
 release. scripts/publish-release uploads them from a current computer.
 --public names a host or user name of the build machine that the release may
-hold, such as a neutral host name given to it for the build: Perl, Vim and Samba
-record the host and user that built them."
+hold: Perl, Vim, Samba and lsof record the host and user that built them.
+build-image builds them as root on powerdarwin.invalid, which needs no --public."
 
-name= folder=~/9L30 image=/private/var/tmp/PowerDarwin.dmg out= public=()
+name= folder=~/9L30 image=/private/var/tmp/PowerDarwin.dmg out= public=(powerdarwin.invalid powerdarwin)
 for arg; do
    case $arg in
       --name=*) name=${arg#--name=} ;;

@@ -19,6 +19,7 @@
 		SEPARATE_STRIP = YES;
 		APPLE_INTERNAL_DEVELOPER_DIR = /AppleInternal/Developer;
 		SYSTEM_LIBRARY_DIR = /System/Library;
+		TZ = UTC;
 		UNAME_RELEASE = 9.0;
 		UNAME_SYSNAME = Darwin;
 	};
