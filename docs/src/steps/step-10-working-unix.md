@@ -250,7 +250,7 @@ The seven everyday tools were compared with three sets of Apple's binaries: Sorb
 - `tar` imports six functions fewer than Leopard's, the `__qtn_*` functions that D122's stubs replace.
 - The data files are the same but for two kinds of difference: the compressed manual pages differ in their gzip headers only, and `file`'s compiled `magic.mgc` in byte order only, as Apple compiled Leopard's on an Intel Mac; `file` reads either.
 
-On an image made with them, `check-image` found 28,451 files, all from the builds but the 25 of the table in [Making the image](../method/making-the-image.md). Booted in QEMU `mac99`, each did a real task, with files served by the current Mac:
+On an image made with them, `check-image` found 28,451 files, all from the builds but the 25 of the table in [Making the image](../method/making-the-image.md). Booted in QEMU `mac99`, and then installed with `install-image` on the iMac and started there, each did a real task, both times the same, with files served by the current Mac:
 
 - `awk` summed a column, counted the regular files of `/usr/bin` and their bytes, and found the account with user ID 0 in `/etc/passwd`;
 - `tar` made, listed and extracted an archive of a folder holding a symbolic link, plain and with `-z`, and every file kept its MD5;
@@ -260,9 +260,11 @@ On an image made with them, `check-image` found 28,451 files, all from the build
 - `top -l 1` printed the process table, and `top -l 2 -o cpu` sorted it by processor use;
 - `curl` downloaded a 300,000-byte file from the current Mac over HTTP with its MD5 unchanged, and pages from the internet over HTTP.
 
+On the iMac, sshd answered 87 seconds after the restart, the system log held only the two lines that Step 8 accepts, and our `bless` then made Leopard the startup disk again.
+
 ### HTTPS
 
-The image's `curl`, like Leopard's, is curl 7.16.3 on OpenSSL 0.9.7l, the version of the OpenSSL 46.11 project. Its newest protocol is TLS 1.0, and it checks certificates signed with SHA-1 or MD5, not SHA-256, which OpenSSL added in 0.9.8. Its bundle of trusted certificates, `/usr/share/curl/curl-ca-bundle.crt`, is curl's own of 2007, 59 certificates, the same file as Leopard's. In QEMU, against a server on the current Mac that accepts TLS 1.0:
+The image's `curl`, like Leopard's, is curl 7.16.3 on OpenSSL 0.9.7l, the version of the OpenSSL 46.11 project. Its newest protocol is TLS 1.0, and it checks certificates signed with SHA-1 or MD5, not SHA-256, which OpenSSL added in 0.9.8. Its bundle of trusted certificates, `/usr/share/curl/curl-ca-bundle.crt`, is curl's own of 2007, 59 certificates, the same file as Leopard's. In QEMU and on the iMac, against a server on the current Mac that accepts TLS 1.0:
 
 - with the server's test certificate authority given by `--cacert`, curl checked the certificate (`SSL certificate verify ok`), used AES256-SHA, and the file kept its MD5;
 - without `--cacert`, it stopped with `SSL certificate problem` (exit 60), as the bundle does not hold the test authority, and with `-k` it went on unchecked;
@@ -278,7 +280,7 @@ Current sites refuse the handshake: example.com with `sslv3 alert handshake fail
 - `.dSYM` bundles for one-step `-g` builds ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
 - In Samba: SPNEGO, the byte-range locks of `darwin_streams`, and file sharing set from a preference pane ([D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). Samba 3.0.25b speaks SMB1 only.
 - Intel code: the compilers are PowerPC only, but Perl, Python, Ruby, Samba and most libraries still carried `i386` slices, and some `x86_64`, until [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) built every project for PowerPC only.
-- A test in QEMU of the compiler, the languages and Samba, which were proved in a chroot and on the iMac only; only the everyday tools were tried in QEMU, and not on the iMac.
+- A test in QEMU of the compiler, the languages and Samba, which were proved in a chroot and on the iMac only; of this step's work, only the everyday tools were tried in QEMU.
 
 ## Where to look
 
