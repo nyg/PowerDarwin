@@ -142,6 +142,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **combined mode**: an I²C transfer that writes a register number, then reads from that register, in one go. See [OpenSMU](../synthesis/opensmu.md).
 
+**combo update**: Apple's one installer that takes any Leopard 10.5 release to 10.5.8. The one Apple publishes today installs build `9L31a`, not `9L30`. See [darwinbuild and the build machine](../method/darwinbuild.md).
+
 **command page**: the page of memory into which OpenSMU writes a command for the SMU, and the SMU writes its reply. See [OpenSMU](../synthesis/opensmu.md) and [Step 5](../steps/step-5-clock-and-power.md).
 
 **compiler driver, `cc1`**: `cc` (or `gcc`) is a driver that runs `cc1`, the compiler proper, then `as` and `ld`. See [Step 10](../steps/step-10-working-unix.md).

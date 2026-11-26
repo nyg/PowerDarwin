@@ -86,7 +86,7 @@ No release is published yet. The first is to be the image of a rebuild on an unm
 
 ### A second build machine
 
-Every image so far was built on one build machine, which runs Sorbet Leopard, a community update of Leopard 10.5.8. A rebuild from scratch on another, with an unmodified Leopard 10.5.8, would show that the scripts repeat the build, and would settle the comparisons with Leopard's binaries, which are provisional until then ([How testing is done](../method/testing.md)).
+Every image so far was built on one build machine, which runs Sorbet Leopard, a community update of Leopard 10.5.8. A rebuild from scratch on another, with an unmodified Leopard 10.5.8, would show that the scripts repeat the build, and would settle the comparisons with Leopard's binaries, which are provisional until then ([How testing is done](../method/testing.md)). That build machine is now installed: an unmodified Leopard 10.5.8, build `9L31a`, with Xcode 3.1.4, on another partition of the same Mac ([darwinbuild and the build machine](../method/darwinbuild.md)). The rebuild on it has not run yet.
 
 ## A map of the open items
 
