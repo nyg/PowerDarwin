@@ -275,3 +275,10 @@ build OpenSMU 1.0
 build OpenRadeonPM 1.0
 build OpenPMU 1.0
 build -target=sw_vers DarwinTools
+build gnuzip
+build awk
+build gnutar
+build file
+build lsof
+build top
+build curl

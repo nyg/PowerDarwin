@@ -49,13 +49,14 @@ Several pieces wait for OpenDirectory, Leopard's interface to directory services
 
 [Step 10](step-10-working-unix.md) made the image a working Unix system, and left these open:
 
-- Everyday tools that no step has built: `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`. Each is a project of the 9L30 build list (awk 11, gnutar 442.0.1, gnuzip 25, file 23, lsof 33, top 39 and curl 42), so each is one more build, with whatever its entry in the build list lacks.
+- More everyday commands that no step has built, each a project of the 9L30 build list: `cmp` and `diff` (gnudiff 14), `patch` (patch_cmds 11), `man` (man 12, with groff 31), `crontab` (cron 30), `nc` (netcat 7), `dig` and `host` (bind9 26.1.5), `telnet` and `logger` (remote_cmds 13.0.2), `rsync` (rsync 35.2), `zip` (zip 9), `screen` (screen 12) and `nano` (nano 4); and `bzip2`, whose 16.5 is built for the build environment only ([D19](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d19)). `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl` were built after the step ([D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)).
+- HTTPS to current sites. The image's `curl`, on OpenSSL 0.9.7l as Leopard's is, speaks TLS 1.0 at most and checks no certificate signed with SHA-256, so current sites refuse it, as they refuse Leopard's; they need TLS 1.2, which no project of the 9L30 build list has.
 - DTrace. The probes of Perl and Python compile to nothing through a stand-in `dtrace` in the build environment ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)), and Ruby's through a patched header ([D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103)), as Libc's and DirectoryService's do ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75)). dtrace-48.1 is published, but its library needs the closed Foundation and Symbolication even when built from it, in `libdtrace/dt_ld.m` and `dt_pid_apple.m`; tracing on the image would take a library without them.
 - Python's 36 Carbon modules, its Build Applet and its Python Launcher, which need the closed Carbon and ApplicationServices ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, since Tk needs the closed Aqua frameworks ([D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71)).
 - `.dSYM` bundles: the image's `dsymutil` is a script that does nothing, since Apple's is closed ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
 - In Samba: SPNEGO, which `smb.conf` turns off because Samba 3.0.25b's `spnego_parse_auth` rejects the `mechListMIC` field that the current Mac's client sends ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)); the byte-range locks of the `darwin_streams` module, which need the closed `ByteRangeLocking.framework` ([D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108)); and file sharing switched on from a preference pane: on Leopard the closed Sharing pane writes the file that `synchronize-preferences` reads, and that tool no longer posts its change notices ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), D113), so the image's `smb.conf` and `smbd.plist` are written by `make-test-image` instead. Samba 3.0.25b speaks SMB1 only.
 - CarbonHeaders at Leopard's version: the image has 18.1's, of Mac OS X 10.6 ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)), and would take 9L30's if its source appeared.
-- A test in QEMU, where Step 10 was not tried.
+- A test in QEMU of the compiler, the languages and Samba: only the everyday tools built after the step were tried there.
 
 None of Step 10's rows is `deferred`: what it turned off waits for closed code, not for an open project.
 
@@ -103,7 +104,8 @@ mindmap
       OpenDirectory
       ReportCrash, loginwindow, CoreAudio
       MySQL for SASL
-      awk, tar, gzip and more
+      cmp, diff, man and more
+      HTTPS with TLS 1.2
       DTrace, Samba's SPNEGO
       Darwin 10 for PowerPC
     Distribution
@@ -115,7 +117,7 @@ Some items help others: OpenDirectory would bring back `passwd`, with which an i
 
 ## Where to look
 
-- README.md: "Status", which ends with what does not work yet and the tools still missing.
+- README.md: "Status", which ends with what does not work yet, the tools tested in QEMU only, and the commands still missing.
 - DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), the `closed-*` rows, among them [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), Step 10's [D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112) and [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): the closed drivers of the iMac G5.
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.

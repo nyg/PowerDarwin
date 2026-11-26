@@ -2,7 +2,7 @@
 
 QEMU's `mac99` machine, run by [scripts/boot-qemu](../scripts/boot-qemu), models a PowerPC G4 Mac (`PowerMac3,1`) with a KeyLargo I/O controller, two ATA buses, a `sungem` Ethernet card (Apple's GMAC) and USB.
 
-Tested: the image boots to a single-user shell and to a console `login:`, brings up `en0` by DHCP and accepts SSH logins, runs the everyday commands, starts securityd, and mounts CDs and HFS+ and FAT32 USB disks plugged in while it runs. With OpenPMU (Step 11), it reads the clock from the PMU at boot, `reboot` restarts the machine, `shutdown -h now` ends QEMU, and `en0` is named without the 60-second wait.
+Tested: the image boots to a single-user shell and to a console `login:`, brings up `en0` by DHCP and accepts SSH logins, runs the everyday commands, starts securityd, mounts CDs and HFS+ and FAT32 USB disks plugged in while it runs, and runs `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, built after Step 10. With OpenPMU (Step 11), it reads the clock from the PMU at boot, `reboot` restarts the machine, `shutdown -h now` ends QEMU, and `en0` is named without the 60-second wait.
 
 What differs from a real Mac:
 

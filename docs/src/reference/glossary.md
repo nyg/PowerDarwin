@@ -256,6 +256,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **getty**: the program that opens a terminal, prints `login:` and runs `login`. launchd starts it from system_cmds' `com.apple.getty.plist`. See [Step 2](../steps/step-2-console-login.md).
 
+**gnutar, gnuzip**: the projects of GNU tar 1.15.1 and gzip 1.3.10, which make `/usr/bin/tar` and `/usr/bin/gzip`; with awk, file, lsof, top and curl, they were built after Step 10 ([D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)). See [Step 10](../steps/step-10-working-unix.md).
+
 **GPIO**: general-purpose input and output, a single wire that a driver can set or read. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **GUID partition map**: the partition table of current Macs. Open Firmware reads the Apple Partition Map instead. See [Step 14](../steps/step-14-usb-boot.md).
