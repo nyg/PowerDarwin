@@ -192,7 +192,7 @@ CFBase.h:67:79: error: CoreServices/../Frameworks/CarbonCore.framework/Headers/M
 
 `sw_vers` prints the system's name, version and build, and scripts ask it which release they run on: Perl's build does, for its deployment target (above), and so do `build-image` and `install-image`, which stop unless the version starts with 10.5. The images of this step had none, and a script that called it got `sw_vers: command not found`. Leopard's `/usr/bin/sw_vers` comes from a closed project, which no Darwin 9 build list names, and none of the Roots the build uses holds it.
 
-Apple published an open `sw_vers` once, in DarwinTools 1, a project of darwinbuild's Darwin 8.0 build list, `8A428`: one C file under its author's BSD licence, which reads `/System/Library/CoreServices/SystemVersion.plist` through CF's private `_CFCopySystemVersionDictionary`. Its tarball is gone from Apple's site, and the Wayback Machine keeps it. [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121) builds it with the dependencies of its 8A428 entry, renamed for Darwin 9's toolchain. Its Makefile also builds `startupfiletool`, a tool to fill an HFS+ volume's startup file that Leopard does not ship, and installs a `SystemVersion.plist` for Darwin 8.0, so the build runs only its `sw_vers` target, and the image keeps the `SystemVersion.plist` that `make-test-image` writes.
+Apple published an open `sw_vers` once, in DarwinTools 1, a project of darwinbuild's Darwin 8.0 build list, `8A428`: one C file under its author's BSD licence, which reads `/System/Library/CoreServices/SystemVersion.plist` through CF's private `_CFCopySystemVersionDictionary`. Its tarball is gone from Apple's site; the Wayback Machine keeps it, and so does nyg/PowerDarwin-roots, from which `fetch-sources` takes it first. [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121) builds it with the dependencies of its 8A428 entry, renamed for Darwin 9's toolchain. Its Makefile also builds `startupfiletool`, a tool to fill an HFS+ volume's startup file that Leopard does not ship, and installs a `SystemVersion.plist` for Darwin 8.0, so the build runs only its `sw_vers` target, and the image keeps the `SystemVersion.plist` that `make-test-image` writes.
 
 For `-productVersion`, this `sw_vers` prints the file's `MacOSXProductVersion` key if there is one, which Darwin 8's file set to 10.4 for scripts that take their deployment target from it, and `ProductVersion` otherwise. The image's file has no such key, so it prints `9.8`, and `build-image` and `install-image`, run on the image, stop with their message that they need Leopard, as they should. The build environment keeps D98's stand-in: it has no `SystemVersion.plist`, so this `sw_vers` would print nothing there and exit with status 1.
 
@@ -223,7 +223,7 @@ ProductVersion: 9.8
 BuildVersion:   9L30
 ```
 
-and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`.
+and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`. Installed with `install-image` on the iMac and started there, it printed the same, and our `bless` then made Leopard the startup disk again.
 
 ## What is still missing
 
