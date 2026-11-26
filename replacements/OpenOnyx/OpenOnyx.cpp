@@ -14,14 +14,17 @@ enum {
    kOnyxADCControl = 7
 };
 
+// Register 72 from TI's PCM3052A data sheet (SLES160): AML selects the microphone, PG[4:0] is the PGA gain in dB plus 8, and codes below 4 or above 28 are a digital mute.
 enum {
    kOnyxDACMuteBits = 0x03,
-   kOnyxADCGainMask = 0x0f,
+   kOnyxADCMicrophone = 0x20,
+   kOnyxADCGainMask = 0x1f,
    kOnyxAttenuationBase = 0x80,
    kOnyxMaximumVolume = 127,
    kOnyxDefaultVolume = 100,
    kOnyxGainOffsetdB = 8,
-   kOnyxMaximumGain = 15,
+   kOnyxMinimumGain = 4,
+   kOnyxMaximumGain = 28,
    kOnyxDefaultGain = 7,
    kOnyxMinimumSampleRate = 32000,
    kOnyxMaximumSampleRate = 96000
@@ -178,7 +181,7 @@ UInt32 OpenOnyxAudio::getMaximumdBGain()
 
 UInt32 OpenOnyxAudio::getMinimumdBGain()
 {
-   return (UInt32)(-kOnyxGainOffsetdB << 16);
+   return (UInt32)((kOnyxMinimumGain - kOnyxGainOffsetdB) << 16);
 }
 
 UInt32 OpenOnyxAudio::getMaximumGain()
@@ -188,7 +191,7 @@ UInt32 OpenOnyxAudio::getMaximumGain()
 
 UInt32 OpenOnyxAudio::getMinimumGain()
 {
-   return 0;
+   return kOnyxMinimumGain;
 }
 
 UInt32 OpenOnyxAudio::getDefaultInputGain()
@@ -198,7 +201,7 @@ UInt32 OpenOnyxAudio::getDefaultInputGain()
 
 IOReturn OpenOnyxAudio::setInputGain(UInt32 leftGain, UInt32 rightGain)
 {
-   if (leftGain > kOnyxMaximumGain) {
+   if (leftGain < kOnyxMinimumGain || leftGain > kOnyxMaximumGain) {
       return kIOReturnBadArgument;
    }
    mGainLeft = leftGain;
@@ -213,8 +216,19 @@ UInt32 OpenOnyxAudio::getActiveInput()
 
 IOReturn OpenOnyxAudio::setActiveInput(UInt32 input)
 {
+   UInt8 value = mRegisters[kOnyxADCControl] & ~kOnyxADCMicrophone;
+
+   switch (input) {
+   case kIOAudioInputPortSubTypeInternalMicrophone:
+      value |= kOnyxADCMicrophone;
+      break;
+   case kIOAudioInputPortSubTypeLine:
+      break;
+   default:
+      return kIOReturnUnsupported;
+   }
    mActiveInput = input;
-   return kIOReturnSuccess;
+   return writeRegister(kOnyxADCControl, value);
 }
 
 IOReturn OpenOnyxAudio::setPlayThrough(bool playthroughState)

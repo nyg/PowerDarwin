@@ -16,7 +16,7 @@ FireWire disks needed `AppleFWOHCI`, the driver of the iMac's FireWire controlle
 
 ### What Step 9 leaves
 
-Audio CDs, which no test has read, and the iMac's own optical drive, which did not see a DVD even under Leopard; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. Leopard's UDF is closed and no Darwin release published one, so a disc with only a UDF volume is ejected, and a bridge disc mounts through its ISO 9660 volume ([Step 9](step-9-disks-and-devices.md)). An open UDF could be a port of FreeBSD's `sys/fs/udf`, under a BSD licence: about 3,500 lines that read UDF's physical and sparable partitions, but neither the virtual allocation table of discs written in increments nor the metadata partition of UDF 2.50 and later, which Blu-ray discs use. Like msdosfs 136.6, it would need a kext, a `udf.fs` bundle with its probe, and `mount_udf`.
+Audio CDs, which no test has read, and the iMac's own optical drive, which did not see a DVD even under Leopard; the line input, which no test has used; and AppleOnboardAudio's DSP, whose sources are empty. Leopard's UDF is closed and no Darwin release published one, so a disc with only a UDF volume is ejected, and a bridge disc mounts through its ISO 9660 volume ([Step 9](step-9-disks-and-devices.md)). An open UDF could be a port of FreeBSD's `sys/fs/udf`, under a BSD licence: about 3,500 lines that read UDF's physical and sparable partitions, but neither the virtual allocation table of discs written in increments nor the metadata partition of UDF 2.50 and later, which Blu-ray discs use. Like msdosfs 136.6, it would need a kext, a `udf.fs` bundle with its probe, and `mount_udf`.
 
 ### Unpublished sources
 
@@ -63,7 +63,7 @@ None of Step 10's rows is `deferred`: what it turned off waits for closed code, 
 
 - ReportCrash, the crash reporter, whose absence launchd and configd still log ([Step 8](step-8-clean-boot.md)).
 - loginwindow, which registers the console user; `autodiskmount.plist` works around its absence for disks ([Step 9](step-9-disks-and-devices.md)).
-- CoreAudio: `openplay` plays a sound, and no more; a sound server for other programs would be new code ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
+- CoreAudio: `openplay` plays or records a sound, and no more; a sound server for other programs would be new code ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
 
 [What stays closed](../synthesis/what-stays-closed.md) lists them all.
 
@@ -94,7 +94,7 @@ mindmap
   root((Open items))
     Drivers
       open AppleFWOHCI
-      CDs, sound input, UDF
+      audio CDs, line input, DSP, UDF
       unpublished sources
     Machines
       other PowerPC Macs
