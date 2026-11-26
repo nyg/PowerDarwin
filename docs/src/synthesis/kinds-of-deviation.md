@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- How the 123 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 124 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
 - How one closed framework, OpenDirectory, reaches four projects.
@@ -10,7 +10,7 @@
 
 ## A row for every change
 
-Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 123 rows, D1 to D123: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, and D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 124 rows, D1 to D124: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out, and D124, the first boot of an image that others download. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -26,10 +26,10 @@ Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/bl
 
 ```mermaid
 xychart-beta horizontal
-    title "Rows of DEVIATIONS.md by kind, D1 to D123"
+    title "Rows of DEVIATIONS.md by kind, D1 to D124"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
     y-axis "Rows" 0 --> 35
-    bar [35, 30, 26, 22, 4, 4, 2]
+    bar [35, 30, 26, 23, 4, 4, 2]
 ```
 
 A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 5 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
@@ -48,7 +48,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | What the source export removed | | | D35, D39, D90, D93 | D120 | D22, D32 | | |
 | Apple's Xcode against the public one | D7, D70, D82, D99 | D23, D25, D78 | D53, D105 | | | | |
 | Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111, D121 | | | |
-| Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112, D117, D118, D119, D122 | | | |
+| Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112, D117, D118, D119, D122, D124 | | | |
 | Other closed frameworks and libraries | D51, D69, D89, D107 | | | | D27, D41, D61, D87, D91, D102, D108, D113 | | |
 | OpenDirectory | | | | | D42, D44 | D66, D80, D84 | |
 | The archive: tarballs, lists, Roots | D1, D3, D6, D20, D123 | D2 | | | | | |
@@ -188,7 +188,7 @@ With Panther's SCSI family in place, Leopard's IOUSBMassStorageClass, the USB di
 
 ### Closed parts the system needs
 
-Where no version was ever published, the project writes its own. Twelve rows are new code: [D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15) and [D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122), stubs of the closed quarantine and sandbox libraries, so that copyfile and gnutar build and libSystem exports Apple's symbols; [D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67), two umbrella headers for building Kerberos; and six replacements under the MIT licence, OpenSMU for AppleSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](opensmu.md)), OpenPMU for ApplePMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118)), OpenRadeonPM for the GPU's idle power settings of the closed ATIRadeon9700 ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)), OpenFWOHCI for AppleFWOHCI, the link driver of the FireWire controller ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), OpenOnyx for the codec plug-in published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and `openplay` for playing sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)); and the image's `dsymutil`, a script that exits 0 in place of Xcode's closed tool, which gcc runs after a one-step `-g` build ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). OpenSMU, OpenPMU, OpenOnyx and OpenFWOHCI learned their hardware from BSD drivers, NetBSD's `smu.c` and `pmu.c` and FreeBSD's `onyx.c` and `fwohci.c`, with Linux's `smu.c`, `windfarm_pm121.c` and `firewire-ohci` read for facts, and `openplay` from IOAudioFamily's published interface; none took code, but for the table of the codec's registers and their first values, which OpenOnyx copies from `onyx.c` with its BSD notice.
+Where no version was ever published, the project writes its own. Thirteen rows are new code: [D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15) and [D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122), stubs of the closed quarantine and sandbox libraries, so that copyfile and gnutar build and libSystem exports Apple's symbols; [D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67), two umbrella headers for building Kerberos; and six replacements under the MIT licence, OpenSMU for AppleSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](opensmu.md)), OpenPMU for ApplePMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118)), OpenRadeonPM for the GPU's idle power settings of the closed ATIRadeon9700 ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)), OpenFWOHCI for AppleFWOHCI, the link driver of the FireWire controller ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), OpenOnyx for the codec plug-in published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and `openplay` for playing sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)); and the image's `dsymutil`, a script that exits 0 in place of Xcode's closed tool, which gcc runs after a one-step `-g` build ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)); and `first-boot`, a script that stands in for Setup Assistant at the first boot, sets root's password and makes the SSH host keys ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). OpenSMU, OpenPMU, OpenOnyx and OpenFWOHCI learned their hardware from BSD drivers, NetBSD's `smu.c` and `pmu.c` and FreeBSD's `onyx.c` and `fwohci.c`, with Linux's `smu.c`, `windfarm_pm121.c` and `firewire-ohci` read for facts, and `openplay` from IOAudioFamily's published interface; none took code, but for the table of the codec's registers and their first values, which OpenOnyx copies from `onyx.c` with its BSD notice.
 
 ### The lesson
 
@@ -276,7 +276,7 @@ The rows of Step 10, D97 to D113, brought one new cause, a choice, and otherwise
 
 ## The rows after Step 10
 
-The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, and D122 and D123 for gnutar and curl, brought no new cause:
+The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, D122 and D123 for gnutar and curl, and D124 for the first boot, brought no new cause:
 
 | Row | Project | Cause |
 |---|---|---|
@@ -288,6 +288,7 @@ The rows after Step 10, D114 to D116 from the replay of the build from an empty 
 | D121 | DarwinTools | Leopard's versions never published |
 | D122 | gnutar | closed parts the system needs |
 | D123 | curl | the archive: tarballs, lists, Roots |
+| D124 | system_cmds, OpenSSH | closed parts the system needs |
 
 ## What carries over
 
