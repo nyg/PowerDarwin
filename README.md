@@ -81,14 +81,29 @@ Changing a project means running the same steps one at a time. From a current Ma
 
 ## Install it
 
-No image is published yet: build one, then install it, from Leopard on the same Mac.
+No release is published yet. A release is a page under [Releases](https://github.com/nyg/PowerDarwin/releases) with three files: `PowerDarwin-<name>.img.gz`, the image, a raw disk with an Apple Partition Map, gzipped; `PowerDarwin-<name>-source.tar`, the source of every binary on it; and `SHA256SUMS`. Until there is one, build the image (above) with `make-test-image --release=<name>`, which makes it as a release has it: root has no password, and the time zone is UTC. `/private/var/tmp/PowerDarwin.cdr.gz` on the build machine is then the same raw image, gzipped.
 
-1. Run `sudo scripts/install-image`. It asks where PowerDarwin goes: onto a new partition taken from the end of a Journaled HFS+ volume, which keeps its files (Leopard's own volume will do); onto an existing partition, which is erased; or onto a whole disk, which is erased. It needs 2 GB, and offers 10 GB. Then it asks for the time zone and the NTP server, offering Leopard's own, for root's password, and whether to make PowerDarwin the startup disk, and it shows what it will do before it changes anything. Options answer without asking: `--shrink=disk0s3 --size=10G`, `--partition=disk0s4` or `--disk=disk1`, `--time-zone=America/New_York`, `--ntp-server=pool.ntp.org`, `--startup-disk`, and `--yes`.
-2. Start it: hold Option at power-on and choose it in the Startup Manager, or restart, if it is the startup disk. From Open Firmware, `setenv boot-args -v` then `boot sata/k2-sata@0/@0:<partition number>,\\:tbxi` starts it verbosely on an iMac G5.
-3. Log in as root on the console, or over SSH, which is on and takes root's password: keep the Mac on a network you trust. A current OpenSSH client needs `-o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1`.
-4. `bless --mount /Volumes/<Leopard volume> --setOF` and `reboot` go back to Leopard.
+### In QEMU
 
-To try it in QEMU instead, copy `/private/var/tmp/PowerDarwin.cdr.gz`, the raw copy of the image, to the current Mac, unpack it, and run `scripts/boot-qemu PowerDarwin.cdr [boot-args]`. Without boot-args it boots to the single-user shell (`-v -s`); with `-v` it boots to the login prompt, and the guest's SSH port is forwarded to port 2222. Root logs in with the password whose DES hash is in the build folder's `root-password.hash` (`openssl passwd -crypt -stdin`) when `make-test-image` runs; without that file, nobody can.
+On a current computer, macOS or Linux, with QEMU's `qemu-system-ppc` (tested with QEMU 11.1.3) and a clone of this repo:
+
+1. Check the files with `shasum -a 256 -c SHA256SUMS`, or `sha256sum -c SHA256SUMS`, and unpack the image with `gunzip PowerDarwin-<name>.img.gz`.
+2. Run `scripts/boot-qemu PowerDarwin-<name>.img -v`. `-v` starts the system verbosely, up to the login prompt; without it, `boot-qemu` starts the single-user shell (`-v -s`). The guest's SSH port is forwarded to port 2222 of `127.0.0.1`.
+3. At the first boot, the console asks for root's password, twice, of which only the first 8 characters count. Then it makes the SSH host keys, in about a minute in QEMU, turns SSH on and shows `login:`. Later boots go straight to `login:`.
+4. Log in as root on the console, or over SSH with `ssh -p 2222 -o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1 root@127.0.0.1`.
+5. `shutdown -h now` switches it off.
+
+A test image, which `make-test-image` makes without `--release`, has root's password already when the build folder holds `root-password.hash`, its DES hash (`openssl passwd -crypt -stdin`), and the build machine's time zone and NTP server.
+
+### On a PowerPC Mac, from Leopard
+
+1. On a current computer, check and unpack the image as above, then copy it, with a clone of this repo, to the PowerPC Mac: Leopard cannot reach GitHub over TLS. On the build machine itself, `install-image` takes `/private/var/tmp/PowerDarwin.dmg` unless `--image` names another.
+2. Run `sudo scripts/install-image --image=PowerDarwin-<name>.img`. It asks where PowerDarwin goes: onto a new partition taken from the end of a Journaled HFS+ volume, which keeps its files (Leopard's own volume will do); onto an existing partition, which is erased; or onto a whole disk, which is erased. It needs 2 GB, and offers 10 GB. Then it asks for the time zone and the NTP server, offering Leopard's own, for root's password, and whether to make PowerDarwin the startup disk, and it shows what it will do before it changes anything. Options answer without asking: `--shrink=disk0s3 --size=10G`, `--partition=disk0s4` or `--disk=disk1`, `--time-zone=America/New_York`, `--ntp-server=pool.ntp.org`, `--startup-disk`, and `--yes`.
+3. Start it: hold Option at power-on and choose it in the Startup Manager, or restart, if it is the startup disk. Its console is a text console, seen in a verbose start: from Open Firmware, `setenv boot-args -v` then `boot sata/k2-sata@0/@0:<partition number>,\\:tbxi` starts it verbosely on an iMac G5.
+4. Log in as root on the console, or over SSH, which the first boot turns on and which takes root's password: keep the Mac on a network you trust. A current OpenSSH client needs `-o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1`.
+5. `bless --mount /Volumes/<Leopard volume> --setOF` and `reboot` go back to Leopard.
+
+An image put onto a Mac another way, with `asr` by hand, has no root password, as in QEMU: its console asks for one at the first boot, in a verbose start, and SSH stays off until then. As on any Mac without a firmware password, whoever is at the console can also start the single-user shell, `-v -s`, which asks for no password.
 
 ## Layout
 
@@ -97,7 +112,8 @@ To try it in QEMU instead, copy `/private/var/tmp/PowerDarwin.cdr.gz`, the raw c
 - `env/`: build-environment workarounds, each with the error it fixes.
 - `replacements/`: new code that stands in for a closed Apple library or driver.
 - `LICENSES/`: the texts of the licences that the patches and the copied files are under.
-- `scripts/`: the three that build and install PowerDarwin (`download-kit`, `build-image`, `install-image`); fetching, staging and building (`fetch-sources`, `fetch-roots`, `wayback-fetch`, `resolve-buildlist`, `stage-sources`, `stage-roots`, `prepare-buildroot`), making and checking the image (`make-test-image`, `check-image`, `cmp-binaries`, `cmp-disassembly`, `check-family-imports`), running it (`boot-qemu`, `qemu-type`, `ssh-root`), and the book's indexes (`make-book-indexes`). The book's Method chapters explain each one.
+- `overlay/`: files that `make-test-image` puts onto the image at the same path, such as `usr/libexec/first-boot`, which sets root's password and makes the SSH host keys at the first boot.
+- `scripts/`: the three that build and install PowerDarwin (`download-kit`, `build-image`, `install-image`); fetching, staging and building (`fetch-sources`, `fetch-roots`, `wayback-fetch`, `resolve-buildlist`, `stage-sources`, `stage-roots`, `prepare-buildroot`), making, checking and publishing the image (`make-test-image`, `collect-notices`, `check-image`, `cmp-binaries`, `cmp-disassembly`, `check-family-imports`, `make-release`, `publish-release`), running it (`boot-qemu`, `qemu-type`, `ssh-root`), and the book's indexes (`make-book-indexes`). The book's Method chapters explain each one.
 - `hardware/`: one page per machine, with the drivers it needs.
 - `reference/`: listings and logs from Leopard, against which the image is compared, and a description of Andrew-R's darwinbuild patch.
 - `docs/`: the book, an mdBook.
@@ -122,13 +138,14 @@ pnpm run deploy
 
 ## Licence
 
-- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `env/` but the two below, the replacements in `replacements/` (each with its own copy of the licence, OpenOnyx's with the BSD notice of the FreeBSD table it copies, and OpenRadeonPM's with the MIT notices of the X.Org files it follows), the book in `docs/`, the Worker in `worker/` and the other documents.
+- What this project writes is under the MIT licence, in [LICENSE](LICENSE): the scripts, the files of `overlay/`, the files of `env/` but the two below, the replacements in `replacements/` (each with its own copy of the licence, OpenOnyx's with the BSD notice of the FreeBSD table it copies, and OpenRadeonPM's with the MIT notices of the X.Org files it follows), the book in `docs/`, the Worker in `worker/` and the other documents.
 - `env/ditto` is darwinbuild's `ditto.sh` with one change, under darwinbuild's BSD licence from Apple, and `env/quarantine.h` holds the stubs of copyfile's `copyfile.c` with three additions, under the APSL 2.0. Each file says so in its first lines.
 - `docs/src/count.js` is GoatCounter's script, under the ISC licence, as its first lines state.
 - Each patch in `patches/` changes another project's source, so its changes are under the licence of the files it changes, as that project's source states: the APSL, version 2.0 or 1.1, for most of Apple's projects, and the licences of bash, gcc, Kerberos, ntp, Python, Ruby, Samba and the others for theirs. Its first line gives its deviation and the date of the change. A file that a patch adds is this project's, under the MIT licence, unless its notice says otherwise: the one that `patches/CF-476.19/0003-string-transform-and-forced-preferences.patch` adds comes from swift-corelibs-foundation, under the Apache License 2.0 with Runtime Library Exception.
 - [LICENSES/](LICENSES/) holds the texts of the APSL 2.0 and 1.1, and of the Apache License 2.0 with Swift's Runtime Library Exception.
 - `manifest/plists/` holds darwinbuild's Darwin 9 build lists, under darwinbuild's BSD licence from Apple, in [manifest/plists/LICENSE](manifest/plists/LICENSE), with this project's changes to `9A581.plist`.
 - `reference/` holds listings and logs captured from Leopard, kept as records of what Apple's system does.
+- The image holds, in `/usr/share/doc/PowerDarwin`, a notice saying where the source of its binaries is, the texts of the APSL 2.0 and 1.1 and of the Apache License 2.0, and one file per project built with the licence files and notices of its source, which `scripts/collect-notices` gathers; Apple's builds of some projects add theirs in `/usr/local/OpenSourceLicenses`. A release holds, beside its image, the source of every binary on it ([Making the image](docs/src/method/making-the-image.md#releases)).
 - The book quotes short excerpts of Apple's and others' sources, each under its own licence, with the project, version and file it comes from.
 
 PowerDarwin is an independent project, not affiliated with, endorsed or sponsored by Apple Inc. Apple, Mac, Mac OS, iMac and Power Mac are trademarks of Apple Inc., and PowerPC is a trademark of IBM; the other names belong to their owners.

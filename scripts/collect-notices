@@ -1,0 +1,129 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use File::Find;
+use Digest::MD5 qw(md5_hex);
+
+my $usage = "usage: collect-notices <source folder> <APSL 2.0 text> <output file>
+
+Writes into <output file> the licence files found in one project's staged
+source, but the APSL 2.0, and the distinct copyright notices with licence
+terms that head its C, C++, Objective-C, assembler, yacc and lex files, but
+those that only refer to the APSL or the GNU licences.\n";
+
+@ARGV == 3 or die $usage;
+my ($source, $apsl, $output) = @ARGV;
+-d $source or die "no source folder at $source\n";
+
+sub read_file {
+   my ($path) = @_;
+   open(my $fh, '<', $path) or return undef;
+   local $/;
+   my $text = <$fh>;
+   close($fh);
+   return $text;
+}
+
+sub squeeze {
+   my ($text) = @_;
+   $text =~ s/\s+/ /g;
+   $text =~ s/^ | $//g;
+   return $text;
+}
+
+my $apsl_text = read_file($apsl);
+defined $apsl_text or die "cannot read $apsl\n";
+my $apsl_key = squeeze($apsl_text);
+my $licence_name = qr/^(?:COPYING|COPYRIGHT|LICEN[CS]E|APPLE_LICENSE|APSL|Artistic|NOTICE|README\.LICEN[CS]E)(?:[._-].*)?$|\.LICEN[CS]E$/i;
+my $code_name = qr/\.(?:c|h|cc|cp|cpp|cxx|c\+\+|hh|hpp|hxx|m|mm|s|y|l)$/i;
+my $copyleft = qr/Apple Public Source License|GNU (?:Library |Lesser )?General Public License/i;
+my $terms = qr/licen[cs]|permission|redistribut/i;
+
+my (@licence_files, @code_files);
+find({ no_chdir => 1, wanted => sub {
+   return if -l $_ || !-f _;
+   my $name = $_;
+   $name =~ s{.*/}{};
+   push @licence_files, $_ if $name =~ $licence_name;
+   push @code_files, $_ if $name =~ $code_name;
+} }, $source);
+
+sub relative { my ($path) = @_; $path =~ s{^\Q$source\E/?}{}; return $path; }
+
+my (%licence_seen, @licences);
+for my $path (sort @licence_files) {
+   my $text = read_file($path);
+   next unless defined $text && $text =~ /\S/;
+   my $key = squeeze($text);
+   next if $key eq $apsl_key || $licence_seen{md5_hex($key)}++;
+   push @licences, [relative($path), $text];
+}
+
+sub comment_blocks {
+   my ($text) = @_;
+   my @lines = split /\n/, $text;
+   splice(@lines, 400) if @lines > 400;
+   my (@blocks, @block, $in_c);
+   for my $line (@lines) {
+      if ($in_c) {
+         push @block, $line;
+         if ($line =~ m{\*/}) { push @blocks, [@block]; @block = (); $in_c = 0; }
+      } elsif ($line =~ m{^\s*/\*}) {
+         push @blocks, [@block] if @block;
+         @block = ($line);
+         if ($line =~ m{/\*.*\*/}) { push @blocks, [@block]; @block = (); }
+         else { $in_c = 1; }
+      } elsif ($line =~ m{^\s*(?://|;|#)}) {
+         push @block, $line;
+      } else {
+         push @blocks, [@block] if @block;
+         @block = ();
+      }
+   }
+   push @blocks, [@block] if @block;
+   return map {
+      my @clean = map {
+         my $l = $_;
+         $l =~ s{^\s*(?:/\*+-?|\*+/|\*+|//+|;+|#+)}{};
+         $l =~ s{\s*\*+/\s*$}{};
+         $l =~ s{^ ?}{};
+         $l =~ s{\s+$}{};
+         $l;
+      } @$_;
+      shift @clean while @clean && $clean[0] eq '';
+      pop @clean while @clean && $clean[-1] eq '';
+      join("\n", @clean);
+   } @blocks;
+}
+
+my (%notice_files, @notice_order, %notice_text);
+for my $path (sort @code_files) {
+   my $text = read_file($path);
+   next unless defined $text;
+   for my $block (comment_blocks($text)) {
+      next unless $block =~ /copyright/i && $block =~ $terms && $block !~ $copyleft;
+      my $key = md5_hex(squeeze($block));
+      push @notice_order, $key unless $notice_files{$key};
+      push @{$notice_files{$key}}, relative($path);
+      $notice_text{$key} = $block;
+   }
+}
+
+open(my $out, '>', $output) or die "cannot write $output\n";
+my $project = $source;
+$project =~ s{/+$}{};
+$project =~ s{.*/}{};
+print $out "$project\n\n";
+print $out "Licence files in its source, but the APSL 2.0, which is in ../licenses/APSL-2.0.txt: ", (@licences ? scalar(@licences) : "none"), "\n";
+for my $licence (@licences) {
+   print $out "\n==== $licence->[0]\n\n$licence->[1]";
+   print $out "\n" unless $licence->[1] =~ /\n$/;
+}
+print $out "\nNotices with licence terms in its source files, but those under the APSL or a GNU licence: ", (@notice_order ? scalar(@notice_order) : "none"), "\n";
+for my $key (@notice_order) {
+   my @files = @{$notice_files{$key}};
+   my $where = join(', ', @files[0 .. ($#files < 2 ? $#files : 2)]);
+   $where .= sprintf(' and %d more', @files - 3) if @files > 3;
+   print $out "\n==== $where\n\n$notice_text{$key}\n";
+}
+close($out);

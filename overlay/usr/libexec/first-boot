@@ -1,0 +1,87 @@
+#!/bin/bash
+
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
+done_file=/var/db/.PowerDarwinSetupDone
+passwd_file=/etc/master.passwd
+root_plist=/var/db/dslocal/nodes/Default/users/root.plist
+ssh_plist=/System/Library/LaunchDaemons/ssh.plist
+
+[[ -e $done_file ]] && exec /usr/libexec/getty "$@"
+
+replace() {
+   local file=$1 mode=$2 script=$3
+   sed "$script" "$file" > "$file.first-boot" || return 1
+   chown root:wheel "$file.first-boot"
+   chmod "$mode" "$file.first-boot"
+   mv -f "$file.first-boot" "$file"
+   sync
+}
+
+root_hash() {
+   local in_passwd in_plist
+   in_passwd=$(sed -n 's/^root:\([^:]*\):.*/\1/p' "$passwd_file")
+   in_plist=$(sed -n '/<key>passwd<\/key>/{n;n;s|.*<string>\(.*\)</string>.*|\1|p;}' "$root_plist")
+   [[ -n $in_passwd && $in_passwd != '*' && $in_passwd == "$in_plist" ]] && echo "$in_passwd"
+}
+
+set_password() {
+   local password again hash
+   echo
+   echo "Root has no password yet, and SSH stays off until it has one."
+   echo "Choose root's password. Only its first 8 characters count."
+   while :; do
+      IFS= read -r -s -p "New password for root: " password || return 1
+      echo
+      if [[ -z $password ]]; then
+         echo "It cannot be empty."
+         continue
+      fi
+      IFS= read -r -s -p "The same again: " again || return 1
+      echo
+      [[ $password == "$again" ]] && break
+      echo "The two differ. Try again."
+   done
+   hash=$(printf '%s\n' "$password" | openssl passwd -crypt -stdin)
+   [[ $hash =~ ^[./0-9A-Za-z]{13}$ ]] || { echo "openssl made no password hash."; return 1; }
+   replace "$passwd_file" 600 "s|^root:[^:]*:|root:$hash:|" || return 1
+   replace "$root_plist" 600 "/<key>passwd<\/key>/{n;n;s|<string>[^<]*</string>|<string>$hash</string>|;}" || return 1
+   [[ -n $(root_hash) ]] || { echo "Root's password could not be written."; return 1; }
+   killall DirectoryService 2> /dev/null
+   echo "Root's password is set."
+}
+
+make_host_key() {
+   local type=$1 file=$2
+   [[ -s $file && -s $file.pub ]] && return 0
+   rm -f "$file.first-boot" "$file.first-boot.pub"
+   ssh-keygen -q -t "$type" -f "$file.first-boot" -N '' -C '' < /dev/null > /dev/null || return 1
+   mv -f "$file.first-boot.pub" "$file.pub"
+   mv -f "$file.first-boot" "$file"
+   sync
+}
+
+setup() {
+   exec < /dev/console > /dev/console 2>&1
+   echo
+   echo "PowerDarwin's first boot."
+   [[ -n $(root_hash) ]] || set_password || return 1
+   if [[ ! -s /etc/ssh_host_key || ! -s /etc/ssh_host_rsa_key || ! -s /etc/ssh_host_dsa_key ]]; then
+      echo "Making the SSH host keys, which can take a few minutes."
+      make_host_key rsa1 /etc/ssh_host_key || return 1
+      make_host_key rsa /etc/ssh_host_rsa_key || return 1
+      make_host_key dsa /etc/ssh_host_dsa_key || return 1
+   fi
+   if grep -A1 '<key>Disabled</key>' "$ssh_plist" | grep -q '<true/>'; then
+      replace "$ssh_plist" 644 '/<key>Disabled<\/key>/{n;s|<true/>|<false/>|;}' || return 1
+   fi
+   launchctl load "$ssh_plist" 2> /dev/null
+   echo "SSH is on. Log in as root."
+   echo
+}
+
+if ( setup ); then
+   touch "$done_file"
+   sync
+fi
+[[ -n $(root_hash) ]] || exit 1
+exec /usr/libexec/getty "$@"

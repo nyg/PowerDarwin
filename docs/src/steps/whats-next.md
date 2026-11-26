@@ -79,9 +79,9 @@ Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Ot
 
 ### An image others can boot
 
-Today the image is made for tests: `make-test-image` writes the hash of a test password into it, and `passwd`, the usual way to change a password, is not built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)). An image for others would need a first-boot way to set the password, and one download, a disk image to restore with `asr` or, after Step 14, to write to a USB key.
+The image is now made the way a release would publish it: `make-test-image --release=<name>` leaves root without a password, uses UTC and `time.apple.com` instead of the build machine's time zone and NTP server, and puts the licence texts and the notices of every project built into `/usr/share/doc/PowerDarwin`. At its first boot, the console asks for root's password, and the image makes its SSH host keys before it turns SSH on, which stands in for `passwd` there ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). `make-release` checks such an image for passwords, keys and anything of the build machine, and writes the release's files: one raw image, for QEMU and for `install-image`, the source of every binary on it, and checksums; `publish-release` uploads them ([Making the image](../method/making-the-image.md#releases)).
 
-Rule 5 already holds for such an image: every file is built from source or written by the scripts, and the check of each file's MD5 proves it ([Making the image](../method/making-the-image.md)). The licences ask for more. Most of Darwin is under the APSL 2.0, and bash, gcc and Samba under the GPL; both ask that binaries come with their sources and changes. The repo holds the patches and scripts, and `manifest/` pins each source by its hash, so publishing them beside the image would be most of it.
+No release is published yet. The first is to be the image of a rebuild on an unmodified Leopard 10.5.8 (below), once the comparisons with Leopard are repeated on it. What would remain after it: Step 14, after which the same raw image could be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
 
 ### A second build machine
 
@@ -111,7 +111,7 @@ mindmap
       second build machine
 ```
 
-Some items help others: OpenDirectory would bring back `passwd`, with which an image for others could set its password.
+Some items help others: OpenDirectory would bring back `passwd`, with which root's password could be changed after the first boot.
 
 ## Where to look
 
@@ -121,5 +121,5 @@ Some items help others: OpenDirectory would bring back `passwd`, with which an i
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
 - In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
-- [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): the test password.
+- [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), [overlay/usr/libexec/first-boot](https://github.com/nyg/PowerDarwin/blob/master/overlay/usr/libexec/first-boot), [scripts/make-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-release) and [scripts/publish-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/publish-release): the test password, the first boot and the release.
 - [What stays closed, and why](../synthesis/what-stays-closed.md).
