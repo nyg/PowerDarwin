@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- How the 124 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 125 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
 - How one closed framework, OpenDirectory, reaches four projects.
@@ -10,7 +10,7 @@
 
 ## A row for every change
 
-Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 124 rows, D1 to D124: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out, and D124, the first boot of an image that others download. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 125 rows, D1 to D125: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out, D124, the first boot of an image that others download, and D125, which keeps the build machine's names out of the binaries. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -26,10 +26,10 @@ Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/bl
 
 ```mermaid
 xychart-beta horizontal
-    title "Rows of DEVIATIONS.md by kind, D1 to D124"
+    title "Rows of DEVIATIONS.md by kind, D1 to D125"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
-    y-axis "Rows" 0 --> 35
-    bar [35, 30, 26, 23, 4, 4, 2]
+    y-axis "Rows" 0 --> 40
+    bar [36, 30, 26, 23, 4, 4, 2]
 ```
 
 A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 5 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
@@ -38,7 +38,7 @@ A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16
 
 A row's kind says what sort of change was made. It does not say why the change was needed, and the same cause can lead to rows of several kinds. When Xcode 3.1.4 wrote its MIG output into a folder per architecture, where IOKitUser's script looked for it in one folder, the fix was filed as `bitrot` ([D23](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d23)); when DirectoryService's script failed the same way, as `bug` ([D53](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d53)). A missing dependency becomes `build-env` when a Root is put into the build environment by hand ([D4](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d4)), and `bug` when the build list itself gets the dependency ([D29](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d29)).
 
-So the rest of this chapter sorts the rows a second way, by cause. Every row has one cause, the one its error points at first, or, for rows added before any build failed, such as D88 and D89, the gap it fills; D100 and D115, choices, have a cause of their own:
+So the rest of this chapter sorts the rows a second way, by cause. Every row has one cause, the one its error points at first, or, for rows added before any build failed, such as D88 and D89, the gap it fills; D100, D115 and D125, choices, have causes of their own:
 
 | Cause | `build-env` | `bitrot` | `bug` | `closed-replacement` | `closed-dependency` | `deferred` | `dropped` |
 |---|---|---|---|---|---|---|---|
@@ -55,6 +55,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | Faults in Apple's code | | | D17, D33, D46, D83, D116 | | | | |
 | Waiting for an open project | | | | | | D72 | D26, D45 |
 | A choice: PowerPC only | D100, D115 | | | | | | |
+| A choice: no name of the build machine | D125 | | | | | | |
 
 [Indexes and timeline](../reference/indexes.md) lists every row with its step and chapter.
 
@@ -241,7 +242,7 @@ A change made only until another project is built is `deferred`, and becomes `dr
 
 ### A choice
 
-Two rows fix nothing: [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100) builds gcc and gcc_42 for PowerPC only, without the Intel cross compilers that the build list's `ppc i386` would add, since the project targets PowerPC, and [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) builds every project so, keeping `ppc64` wherever Leopard has it. Their error column says "none: a choice".
+Three rows fix nothing: [D100](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d100) builds gcc and gcc_42 for PowerPC only, without the Intel cross compilers that the build list's `ppc i386` would add, since the project targets PowerPC, and [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) builds every project so, keeping `ppc64` wherever Leopard has it; [D125](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d125) builds every project in UTC, under a neutral host name and login name, so that no binary names the build machine or its user. Their error column says "none: a choice".
 
 ## Step 9's rows
 
@@ -276,7 +277,7 @@ The rows of Step 10, D97 to D113, brought one new cause, a choice, and otherwise
 
 ## The rows after Step 10
 
-The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, D122 and D123 for gnutar and curl, and D124 for the first boot, brought no new cause:
+The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, D122 and D123 for gnutar and curl, D124 for the first boot, and D125 for the names the builds record, brought one new cause, a choice, and otherwise fell into the old ones:
 
 | Row | Project | Cause |
 |---|---|---|
@@ -289,6 +290,7 @@ The rows after Step 10, D114 to D116 from the replay of the build from an empty 
 | D122 | gnutar | closed parts the system needs |
 | D123 | curl | the archive: tarballs, lists, Roots |
 | D124 | system_cmds, OpenSSH | closed parts the system needs |
+| D125 | all | a choice: no name of the build machine |
 
 ## What carries over
 
