@@ -7,6 +7,7 @@
 - What stood between Apple's Perl, Python and Ruby and a build from source: DTrace probes, Carbon, and settings that Apple's build list lacks.
 - What Apple's Samba needed to build without its closed framework, and why it stopped answering a minute after boot.
 - How the step was proved, first in a chroot of the image, then on an iMac G5 (`PowerMac12,1`).
+- Which everyday tools were built after the step, how they compare with an unmodified Leopard 10.5.8's, and how far `curl` reaches over HTTPS.
 
 ## The goal
 
@@ -166,7 +167,7 @@ Apple's `smbd.plist` is a launchd job that listens on Samba's ports, 139 and 445
 
 ## The image
 
-`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 with the 18 of the first chroot tests, and 80 since DarwinTools, below), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
+`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 with the 18 of the first chroot tests, 80 since DarwinTools and 87 since the everyday tools, below), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
 
 - `/usr/bin/dsymutil`, a script that exits 0 ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). A compile and link in one step with `-g` makes gcc run `dsymutil` after linking (`gcc/config/darwin.h` in gcc-5465), as autoconf's `configure` scripts do with `-g -O2`, and Apple's `dsymutil` is closed; the build environment has a wrapper for it ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). A one-step `-g` build then gets no `.dSYM` bundle, and a two-step build keeps its debugging information in its object files.
 - CarbonHeaders 18.1, of Mac OS X 10.6, which [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) already uses, installed by its own Makefile: nine headers in `/usr/include`, and `MacTypes.h` again in a `CarbonCore.framework` inside an otherwise empty `CoreServices.framework`, where CF's `CFBase.h` looks for it ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)).
@@ -195,6 +196,22 @@ CFBase.h:67:79: error: CoreServices/../Frameworks/CarbonCore.framework/Headers/M
 Apple published an open `sw_vers` once, in DarwinTools 1, a project of darwinbuild's Darwin 8.0 build list, `8A428`: one C file under its author's BSD licence, which reads `/System/Library/CoreServices/SystemVersion.plist` through CF's private `_CFCopySystemVersionDictionary`. Its tarball is gone from Apple's site; the Wayback Machine keeps it, and so does nyg/PowerDarwin-roots, from which `fetch-sources` takes it first. [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121) builds it with the dependencies of its 8A428 entry, renamed for Darwin 9's toolchain. Its Makefile also builds `startupfiletool`, a tool to fill an HFS+ volume's startup file that Leopard does not ship, and installs a `SystemVersion.plist` for Darwin 8.0, so the build runs only its `sw_vers` target, and the image keeps the `SystemVersion.plist` that `make-test-image` writes.
 
 For `-productVersion`, this `sw_vers` prints the file's `MacOSXProductVersion` key if there is one, which Darwin 8's file set to 10.4 for scripts that take their deployment target from it, and `ProductVersion` otherwise. The image's file has no such key, so it prints `9.8`, and `build-image` and `install-image`, run on the image, stop with their message that they need Leopard, as they should. The build environment keeps D98's stand-in: it has no `SystemVersion.plist`, so this `sw_vers` would print nothing there and exit with status 1.
+
+### Everyday tools (D122, D123)
+
+The images of this step lacked seven everyday commands: `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`. Each is a project of the 9L30 build list, awk 11, gnutar 442.0.1, gnuzip 25, file 23, lsof 33, top 39 and curl 42, and none needs a closed part, so they were built after the step was reached, on 26 November 2026, at the end of the build order ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)). Six built at the first try, in 5 seconds for top to 6 minutes for curl, which its entry builds for `ppc` and `ppc64`. gnutar did not link:
+
+```text
+Undefined symbols:
+  "_qtn_file_apply_to_path", referenced from:
+      _apply_qtn_to_path in extract.o
+```
+
+Apple's own `quarantine.diff`, among gnutar's patches, makes `tar` mark the files it extracts from a quarantined archive, through the closed quarantine library ([Step 1, part 1](step-1-kernel-and-userland.md)). The build environment's `quarantine.h`, D8's do-nothing stubs, had every function of the library that gnutar calls but that one. [D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122) adds it, so the build environment changes and gnutar's source does not. `tar` marks no file, as nothing on the image is quarantined: the stubbed `qtn_file_alloc` returns `NULL`.
+
+Two of the seven entries name fewer dependencies than their projects use. top's does not name CF, IOKitUser or ncurses, whose libraries it links, and curl's names none at all, though its `configure` looks for OpenSSL, zlib, Kerberos' GSSAPI and LDAP, and leaves out whichever it does not find. darwinbuild leaves every Root it installs in the BuildRoot, and at the end of the order all of them are there: curl built with the same protocols and features as Leopard's, SSL, `libz`, GSS-Negotiate and LDAP among them.
+
+That first curl printed another manual than Leopard's for `curl --manual`. The manual is compiled in, from `src/hugehelp.c`, which `make` regenerates from the man page when the page is newer. Apple's `docs__curl.1.diff` changes the page, and when Apple's build applied it the page became newer, so the manual was made again with Apple's change; GitHub's tarball gives every file the same time, so our build compiled the `hugehelp.c` that curl 7.16.3 ships, made from curl's own page, as bash's parser was in [Step 1, part 1](step-1-kernel-and-userland.md). [D123](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d123) touches the page when the source is staged, as D20 touches bash's grammar, and the manual is made again with the build environment's `nroff`.
 
 ## How it was proved
 
@@ -225,22 +242,52 @@ BuildVersion:   9L30
 
 and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`. Installed with `install-image` on the iMac and started there, it printed the same, and our `bless` then made Leopard the startup disk again.
 
+The seven everyday tools were compared with three sets of Apple's binaries: Sorbet Leopard's, the book's reference system; Apple's archived Roots of the same versions, but for curl, which has none; and an unmodified Leopard 10.5.8, installed from Apple's DVD and combo update onto another partition of the build machine and read from there. All of ours are PowerPC only, where Apple's also carry `i386` ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)).
+
+- `file`, `top`, `gzip` and `curl` have the same instructions and strings as the unmodified 10.5.8's, and so does `libcurl.4.dylib`; `curl --manual` prints the same bytes, and `top` is identical to Sorbet's too. Sorbet's `gzip` and `curl` are later, from its own updates: a 2011 `gzip`, and curl 7.16.4.
+- `awk` has the same instructions as Apple's 9A581 Root; Leopard's own `awk`, of 10.5.0, calls `strtod` where ours and the Root call `strtod$UNIX2003`.
+- `lsof` has the same instructions at other addresses: it writes the build's date, host name and `uname -a` into the binary, and longer strings move its code.
+- `tar` imports six functions fewer than Leopard's, the `__qtn_*` functions that D122's stubs replace.
+- The data files are the same but for two kinds of difference: the compressed manual pages differ in their gzip headers only, and `file`'s compiled `magic.mgc` in byte order only, as Apple compiled Leopard's on an Intel Mac; `file` reads either.
+
+On an image made with them, `check-image` found 28,451 files, all from the builds but the 25 of the table in [Making the image](../method/making-the-image.md). Booted in QEMU `mac99`, and then installed with `install-image` on the iMac and started there, each did a real task, both times the same, with files served by the current Mac:
+
+- `awk` summed a column, counted the regular files of `/usr/bin` and their bytes, and found the account with user ID 0 in `/etc/passwd`;
+- `tar` made, listed and extracted an archive of a folder holding a symbolic link, plain and with `-z`, and every file kept its MD5;
+- `gzip -9` and `gunzip` gave back the same MD5, and so did `gzip -c` piped into `zcat`;
+- `file` named Mach-O executables, the two architectures of libSystem one by one, the kernel, text, a shell script, the two archives, and its own big-endian `magic.mgc`. `file -i` prints `regular file`, as on Leopard, whose POSIX patch gives `-i` that meaning; `-I` prints MIME types;
+- `lsof` listed launchd's open files and the TCP sockets, launchd's on ports 22, 139 and 445 among them, and `lsof -t -c sshd` found the same process ID as `ps`;
+- `top -l 1` printed the process table, and `top -l 2 -o cpu` sorted it by processor use;
+- `curl` downloaded a 300,000-byte file from the current Mac over HTTP with its MD5 unchanged, and pages from the internet over HTTP.
+
+On the iMac, sshd answered 87 seconds after the restart, the system log held only the two lines that Step 8 accepts, and our `bless` then made Leopard the startup disk again.
+
+### HTTPS
+
+The image's `curl`, like Leopard's, is curl 7.16.3 on OpenSSL 0.9.7l, the version of the OpenSSL 46.11 project. Its newest protocol is TLS 1.0, and it checks certificates signed with SHA-1 or MD5, not SHA-256, which OpenSSL added in 0.9.8. Its bundle of trusted certificates, `/usr/share/curl/curl-ca-bundle.crt`, is curl's own of 2007, 59 certificates, the same file as Leopard's. In QEMU and on the iMac, against a server on the current Mac that accepts TLS 1.0:
+
+- with the server's test certificate authority given by `--cacert`, curl checked the certificate (`SSL certificate verify ok`), used AES256-SHA, and the file kept its MD5;
+- without `--cacert`, it stopped with `SSL certificate problem` (exit 60), as the bundle does not hold the test authority, and with `-k` it went on unchecked;
+- a server certificate signed with SHA-256 stopped it with `ASN1_verify:unknown message digest algorithm`, and `-k` let it through.
+
+Current sites refuse the handshake: example.com with `sslv3 alert handshake failure`, apple.com, github.com and web.archive.org with `tlsv1 alert protocol version`, all exit 35. Leopard's own `curl` on the build machine fails the same way on the same sites. HTTPS works with servers that still accept TLS 1.0 and SHA-1 certificates; current sites would need TLS 1.2, which OpenSSL brought in 1.0.1, and no project of the 9L30 build list has it.
+
 ## What is still missing
 
-- `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
+- Other everyday commands, such as `cmp` and `diff`, which no step has built yet ([What's next](whats-next.md)), and HTTPS to current sites, which need TLS 1.2 (above).
 - DTrace itself, and with it the languages' probes, which compile to nothing.
 - Python's 36 Carbon modules, Build Applet and Python Launcher ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, as no Tk is built.
 - `.dSYM` bundles for one-step `-g` builds ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
 - In Samba: SPNEGO, the byte-range locks of `darwin_streams`, and file sharing set from a preference pane ([D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). Samba 3.0.25b speaks SMB1 only.
 - Intel code: the compilers are PowerPC only, but Perl, Python, Ruby, Samba and most libraries still carried `i386` slices, and some `x86_64`, until [D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115) built every project for PowerPC only.
-- A test in QEMU: Step 10 was proved in a chroot and on the iMac only.
+- A test in QEMU of the compiler, the languages and Samba, which were proved in a chroot and on the iMac only; of this step's work, only the everyday tools were tried in QEMU.
 
 ## Where to look
 
-- [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), new in this step, and [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121), which added `sw_vers` later; [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) and [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), which they build on.
-- [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace), [env/sw_vers](https://github.com/nyg/PowerDarwin/blob/master/env/sw_vers) and [env/ditto](https://github.com/nyg/PowerDarwin/blob/master/env/ditto), which [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot) puts into the build environment.
-- Patches: [python-30.1.3](https://github.com/nyg/PowerDarwin/blob/master/patches/python-30.1.3/), [ruby-67.6](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/), [samba-187.8](https://github.com/nyg/PowerDarwin/blob/master/patches/samba-187.8/).
-- [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist): the entries of gcc, gcc_42, perl, python, ruby, samba and SystemStubs.
+- [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), new in this step, and [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121) to [D123](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d123), which added `sw_vers` and the everyday tools later; [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) and [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), which they build on.
+- [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace), [env/sw_vers](https://github.com/nyg/PowerDarwin/blob/master/env/sw_vers), [env/ditto](https://github.com/nyg/PowerDarwin/blob/master/env/ditto) and [env/quarantine.h](https://github.com/nyg/PowerDarwin/blob/master/env/quarantine.h), which [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot) puts into the build environment.
+- Patches: [python-30.1.3](https://github.com/nyg/PowerDarwin/blob/master/patches/python-30.1.3/), [ruby-67.6](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/), [samba-187.8](https://github.com/nyg/PowerDarwin/blob/master/patches/samba-187.8/), and curl-42's [touch](https://github.com/nyg/PowerDarwin/blob/master/patches/curl-42/touch) list.
+- [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist): the entries of gcc, gcc_42, perl, python, ruby, samba and SystemStubs, and those of top and curl, which name fewer dependencies than they use.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): `header_projects`, CarbonHeaders, `dsymutil`, `smb.conf`, `smbd.plist` and the image's size; [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image).
 - README.md: Step 10, rule 4, and "Status".
 - In gcc-5465: `gcc/config/darwin.h`, the `dsymutil` run. In samba-187.8: `samba/source/param/loadparm.c`, `passdb/pdb_get_set.c` and `libsmb/clispnego.c`.

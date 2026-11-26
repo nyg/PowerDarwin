@@ -225,7 +225,7 @@ flowchart LR
 
 ## The build order
 
-[manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order) lists every build of an image, in order, 276 steps, one per line:
+[manifest/build-order](https://github.com/nyg/PowerDarwin/blob/master/manifest/build-order) lists every build of an image, in order, 283 steps, one per line:
 
 - `build <arguments>`: one darwinbuild run, with darwinbuild's own arguments, such as `build -target=embedded launchd` ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)) or `build IOATABlockStorage 130.3.1` ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)).
 - `build -loadonly <project>`: a darwinbuild run that only installs the project's build dependencies into the BuildRoot, and builds nothing (below).
@@ -240,6 +240,7 @@ The order is the one the builds of 19 to 22 November 2026 found. darwinbuild kee
 - `darwinbuild -headers securityd` is left out. It ran before [D48](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d48) gave securityd its build dependencies, which darwinbuild installs even for `-headers`, and one of them, libsecurity_agent, has no archived Root and is built later. No project includes securityd's headers.
 - darwinbuild installs a project's build dependencies before every run, before it knows whether the build will succeed, and leaves them in the BuildRoot. The first builds relied on Roots that such runs had installed, failed builds and `-headers` runs among them: Libnotify includes `servers/bootstrap.h`, which only the full Root of launchd_libs holds, and found it in Apple's launchd_libs Root, installed by the dependencies of `darwinbuild -headers launchd`; and D6's `arch` survived because Apple's system_cmds Root, which would replace it, came in the same way before D6. Each of darwinbuild's logs lists the Roots installed in the BuildRoot when the run began, so the runs that first installed Roots and are not in the order are known. The order replays each of them, at its place, as `darwinbuild -loadonly <project>`, which installs the same dependencies and stops: 22 such lines.
 - Two things the first builds put into the BuildRoot by hand had no row: AppleDisplays' Root, for a header IOKitUser copies, and a `CFBase.h` that includes `MacTypes.h`, first the SDK's, then our CF's, for IOKitUser's `kNilOptions`. darwinbuild installs neither for IOKitUser, whose entry in the build list names neither project; [D114](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d114) adds both to it.
+- The everyday tools built after Step 10, gnuzip, awk, gnutar, file, lsof, top and curl, come last, after DarwinTools: no earlier build needs them, so the steps before them run as before. gnuzip comes first, as gnutar, file and lsof list it among their build dependencies. top's entry does not name CF, IOKitUser or ncurses, whose libraries it links, and curl's names no dependency at all, though it links OpenSSL, zlib, Kerberos and libresolv: both build against what the earlier builds left in the BuildRoot, which at the end of the order holds all of them.
 
 [scripts/build-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/build-image), run as root on the build machine from an unpacked kit, then does everything:
 

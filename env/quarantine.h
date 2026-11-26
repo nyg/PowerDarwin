@@ -21,7 +21,7 @@
  * @APPLE_LICENSE_HEADER_END@
  */
 
-/* The stubs that copyfile-42's copyfile.c defines for embedded targets, changed on 2026-11-19: moved to a header, made inline, with qtn_xattr_name, qtn_file_init_with_path and qtn_file_init_with_data added. */
+/* The stubs that copyfile-42's copyfile.c defines for embedded targets, changed on 2026-11-19: moved to a header, made inline, with qtn_xattr_name, qtn_file_init_with_path and qtn_file_init_with_data added; on 2026-11-26, qtn_file_apply_to_path added, which gnutar calls. */
 
 #ifndef _QUARANTINE_H_
 #define _QUARANTINE_H_
@@ -39,6 +39,7 @@ static inline int qtn_file_init_with_path(qtn_file_t x, const char *y) { return 
 static inline int qtn_file_init_with_data(qtn_file_t x, const void *y, size_t z) { return -1; }
 static inline void qtn_file_free(qtn_file_t x) { return; }
 static inline int qtn_file_apply_to_fd(qtn_file_t x, int y) { return -1; }
+static inline int qtn_file_apply_to_path(qtn_file_t x, const char *y) { return -1; }
 static inline char *qtn_error(int x) { return NULL; }
 static inline int qtn_file_to_data(qtn_file_t x, char *y, size_t z) { return -1; }
 static inline qtn_file_t qtn_file_clone(qtn_file_t x) { return NULL; }
