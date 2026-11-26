@@ -166,7 +166,7 @@ Apple's `smbd.plist` is a launchd job that listens on Samba's ports, 139 and 445
 
 ## The image
 
-`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 now, with the 18 of the first chroot tests), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
+`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 with the 18 of the first chroot tests, and 80 since DarwinTools, below), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
 
 - `/usr/bin/dsymutil`, a script that exits 0 ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). A compile and link in one step with `-g` makes gcc run `dsymutil` after linking (`gcc/config/darwin.h` in gcc-5465), as autoconf's `configure` scripts do with `-g -O2`, and Apple's `dsymutil` is closed; the build environment has a wrapper for it ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). A one-step `-g` build then gets no `.dSYM` bundle, and a two-step build keeps its debugging information in its object files.
 - CarbonHeaders 18.1, of Mac OS X 10.6, which [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) already uses, installed by its own Makefile: nine headers in `/usr/include`, and `MacTypes.h` again in a `CarbonCore.framework` inside an otherwise empty `CoreServices.framework`, where CF's `CFBase.h` looks for it ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)).
@@ -188,6 +188,14 @@ gcc links every program with `-lSystemStubs`, and SystemStubs' Root was not on t
 CFBase.h:67:79: error: CoreServices/../Frameworks/CarbonCore.framework/Headers/MacTypes.h: No such file or directory
 ```
 
+### `sw_vers` from Darwin 8 (D121)
+
+`sw_vers` prints the system's name, version and build, and scripts ask it which release they run on: Perl's build does, for its deployment target (above), and so do `build-image` and `install-image`, which stop unless the version starts with 10.5. The images of this step had none, and a script that called it got `sw_vers: command not found`. Leopard's `/usr/bin/sw_vers` comes from a closed project, which no Darwin 9 build list names, and none of the Roots the build uses holds it.
+
+Apple published an open `sw_vers` once, in DarwinTools 1, a project of darwinbuild's Darwin 8.0 build list, `8A428`: one C file under its author's BSD licence, which reads `/System/Library/CoreServices/SystemVersion.plist` through CF's private `_CFCopySystemVersionDictionary`. Its tarball is gone from Apple's site; the Wayback Machine keeps it, and so does nyg/PowerDarwin-roots, from which `fetch-sources` takes it first. [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121) builds it with the dependencies of its 8A428 entry, renamed for Darwin 9's toolchain. Its Makefile also builds `startupfiletool`, a tool to fill an HFS+ volume's startup file that Leopard does not ship, and installs a `SystemVersion.plist` for Darwin 8.0, so the build runs only its `sw_vers` target, and the image keeps the `SystemVersion.plist` that `make-test-image` writes.
+
+For `-productVersion`, this `sw_vers` prints the file's `MacOSXProductVersion` key if there is one, which Darwin 8's file set to 10.4 for scripts that take their deployment target from it, and `ProductVersion` otherwise. The image's file has no such key, so it prints `9.8`, and `build-image` and `install-image`, run on the image, stop with their message that they need Leopard, as they should. The build environment keeps D98's stand-in: it has no `SystemVersion.plist`, so this `sw_vers` would print nothing there and exit with status 1.
+
 ## How it was proved
 
 The same 25 checks ran in the chroot and then on the iMac:
@@ -207,6 +215,16 @@ A chroot cannot show launchd starting smbd, since it reaches the build machine's
 
 The final image, made after these tests, holds 28,525 files, of which the 25 not from the builds are all written by `make-test-image`; the 25 checks pass on it in a chroot. Step 10 was reached on the iMac.
 
+For D121, DarwinTools was built on the build machine, in the build folder of a PowerPC-only build, in a few seconds and without a warning: one `gcc -pipe -no-cpp-precomp -arch ppc -framework CoreFoundation`, then `strip`. Its `sw_vers` is `ppc7400` and links the libraries Leopard's does, CoreFoundation, `libgcc_s.1` and `libSystem.B`, and reads the version files through the same CF functions and keys; it imports `CFRetain`, `CFRelease`, `CFStringCreateWithFormat` and `fprintf` more, and `fwrite` and `printf` less, since Leopard's comes from another source. Run side by side on Leopard, the two printed the same bytes for `-productName`, `-productVersion` and `-buildVersion`; with no option, Leopard's separates names from values with a tab, and this one with spaces. On an image made with it, `check-image` found 28,316 files, all from the builds but the 25 of the table in [Making the image](../method/making-the-image.md), and `/usr/bin/sw_vers` identical to its Root's. Booted in QEMU, it printed:
+
+```text
+ProductName:    Darwin
+ProductVersion: 9.8
+BuildVersion:   9L30
+```
+
+and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`. Installed with `install-image` on the iMac and started there, it printed the same, and our `bless` then made Leopard the startup disk again.
+
 ## What is still missing
 
 - `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, which no step has built yet.
@@ -219,7 +237,7 @@ The final image, made after these tests, holds 28,525 files, of which the 25 not
 
 ## Where to look
 
-- [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), new in this step; [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) and [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), which they build on.
+- [D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97) to [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), new in this step, and [D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121), which added `sw_vers` later; [D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7), [D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10), [D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D24](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d24), [D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71), [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) and [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), which they build on.
 - [env/dtrace](https://github.com/nyg/PowerDarwin/blob/master/env/dtrace), [env/sw_vers](https://github.com/nyg/PowerDarwin/blob/master/env/sw_vers) and [env/ditto](https://github.com/nyg/PowerDarwin/blob/master/env/ditto), which [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot) puts into the build environment.
 - Patches: [python-30.1.3](https://github.com/nyg/PowerDarwin/blob/master/patches/python-30.1.3/), [ruby-67.6](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/), [samba-187.8](https://github.com/nyg/PowerDarwin/blob/master/patches/samba-187.8/).
 - [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist): the entries of gcc, gcc_42, perl, python, ruby, samba and SystemStubs.
