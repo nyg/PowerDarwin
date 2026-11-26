@@ -6,7 +6,7 @@
 - What each open item would take, from what the repo already records.
 - Which closed parts stand behind most of them.
 
-Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested in QEMU only, Step 11 is reached in QEMU's `mac99`, and Steps 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-pmu.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. One of its driver items is now a step in README.md, FireWire Step 12, and it leaves this chapter when its step is reached, as the PMU's item did with Step 11 and the GPU's with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
+Steps 1 to 10 and 13 are reached on the iMac G5 (`PowerMac12,1`), with Step 9's CDs tested through a USB drive, Step 11 is reached in QEMU's `mac99`, and Steps 12 and 14 are defined ([Step 9](step-9-disks-and-devices.md), [Step 10](step-10-working-unix.md), [Step 11](step-11-pmu.md), [Step 13](step-13-gpu-idle-heat.md), [Step 14](step-14-usb-boot.md)). This chapter lists what would remain after them. One of its driver items is now a step in README.md, FireWire Step 12, and it leaves this chapter when its step is reached, as the PMU's item did with Step 11 and the GPU's with Step 13. Every other item is an idea, not a commitment. The chapter changes whenever README.md gains a step.
 
 ## Drivers
 
@@ -16,7 +16,7 @@ FireWire disks needed `AppleFWOHCI`, the driver of the iMac's FireWire controlle
 
 ### What Step 9 leaves
 
-A CD test on the iMac; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. 9L30's build list has no UDF project, so a DVD with only a UDF volume has no file system to mount it.
+Audio CDs, which no test has read, and the iMac's own optical drive, which did not see a DVD even under Leopard; sound input, whose levels did not move; and AppleOnboardAudio's DSP, whose sources are empty. Leopard's UDF is closed and no Darwin release published one, so a disc with only a UDF volume is ejected, and a bridge disc mounts through its ISO 9660 volume ([Step 9](step-9-disks-and-devices.md)). An open UDF could be a port of FreeBSD's `sys/fs/udf`, under a BSD licence: about 3,500 lines that read UDF's physical and sparable partitions, but neither the virtual allocation table of discs written in increments nor the metadata partition of UDF 2.50 and later, which Blu-ray discs use. Like msdosfs 136.6, it would need a kext, a `udf.fs` bundle with its probe, and `mount_udf`.
 
 ### Unpublished sources
 

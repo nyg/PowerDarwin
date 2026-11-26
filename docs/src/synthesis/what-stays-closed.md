@@ -36,7 +36,7 @@ block-beta
     d["Drivers"] d1["AppleSMU, plug-ins:<br/>OpenSMU, ours"] d2["disk and SCSI drivers:<br/>Panther's"]
     space d3["AppleOnyxAudio:<br/>OpenOnyx, ours"] d4["ApplePMU:<br/>OpenPMU, ours"]
     space d5["ATI idle power:<br/>OpenRadeonPM, ours"] d6["AppleFWOHCI:<br/>OpenFWOHCI, ours"]
-    space d7["ATI acceleration,<br/>AirPort, Bluetooth: none"] space
+    space d7["UDF, ATI acceleration,<br/>AirPort, Bluetooth: none"] space
 ```
 
 ## Drivers
@@ -50,6 +50,7 @@ block-beta
 | ApplePMU | the PMU of QEMU's `mac99` and of many G4 Macs: clock, restart, power-off, sleep, ADB, battery and lid | without a stand-in, in QEMU: the clock starts at 1970, `reboot` stops at `MACH Reboot`, and configd waits 60 seconds | OpenPMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118), [Step 11](../steps/step-11-pmu.md)); no sleep, no PMU interrupts |
 | IOATABlockStorage 200.1.8, never published | the driver of ATA and SATA disks | little: Panther's driver class is `IOATABlockStorageDriver`, where Apple's is `AppleATADiskDriver`, and the kernel notes `Extension "com.apple.iokit.IOATABlockStorage" has no explicit kernel dependency; using version 6.0.` | Panther's 130.3.1 ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40)) |
 | IOSCSIArchitectureModelFamily 200.3.6, with its three plug-ins, never published | turns SCSI devices into disks and optical drives: CDs, DVDs, USB disks | without a stand-in, no CD or USB disk; with Panther's, no Blu-ray | Panther's 139.0.2 ([D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D86](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d86)) |
+| `udf.kext` 2.0.2, with `udf.fs`, `mount_udf` and `newfs_udf` | mounts UDF, the file system of DVDs and Blu-ray discs; `newfs_udf` makes UDF volumes | a disc with only a UDF volume is not mounted, and DiskArbitration ejects it; a bridge disc mounts through its ISO 9660 volume | none ([Step 9](../steps/step-9-disks-and-devices.md)) |
 | `AppleFWOHCI` | the FireWire controller's driver, a plug-in of IOFireWireFamily that no published source holds | no FireWire device appears | OpenFWOHCI ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), with no isochronous DMA; no FireWire device tested yet |
 | `IOFWSimplePhysicalAddressSpace`, in IOFireWireFamily 344.4.0 and later | the physical address space that SBP-2 keeps its commands in; the published source file holds only a copyright line | IOFireWireFamily does not load | ours, in a patch ([D120](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d120)) |
 | `ATIRadeon9700`, and the ATI display drivers in `IONDRVSupport` | the GPU's acceleration and power management | the screen comes from the firmware's display driver; our OpenRadeonPM sets the GPU's clock gating and its link's L0s state, which keeps the GPU and the north bridge cooler at idle than under Leopard ([Step 13](../steps/step-13-gpu-idle-heat.md)) | OpenRadeonPM ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)) |
@@ -120,12 +121,13 @@ On the iMac G5, the image is a Unix system with no graphical system: it boots, m
 - the graphical system and everything built on Foundation and Cocoa;
 - Wi-Fi and Bluetooth, and FireWire's audio and video streams;
 - sleep, and graphics acceleration;
+- discs with only a UDF volume;
 - `passwd`, password policies and a DHCP server, through OpenDirectory;
 - crash reports, the sandbox and the firewall;
 - DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
 - on a PMU Mac, sleep, the ADB keyboard, the battery and the lid, through ApplePMU.
 
-Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI: OpenDirectory from a later open CoreFoundation. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
+Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI: OpenDirectory from a later open CoreFoundation, and a UDF file system from FreeBSD's. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
 
 ## Where to look
 

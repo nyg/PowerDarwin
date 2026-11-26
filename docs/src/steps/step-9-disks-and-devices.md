@@ -6,11 +6,11 @@
 - Why Panther's SCSI family can stand in for Leopard's unpublished one, and how that was checked.
 - Why DiskArbitration mounts nothing removable on a system without loginwindow, and the setting that changes it.
 - How the sound of an iMac G5 (`PowerMac12,1`) came up without Apple's codec driver or CoreAudio, and why it stayed silent for five boot tests.
-- Why FireWire disks were left out of the step, and why CDs were mounted in QEMU's `mac99` only.
+- Why FireWire disks and UDF were left out of the step, and how CDs and DVDs were tested on the iMac through a USB drive.
 
 ## The goal
 
-README.md sets it as: "DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound."
+README.md sets it as: "DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested on the iMac through a USB drive), `bless` makes a partition the startup disk, and the built-in audio plays sound."
 
 By Step 8 the image booted cleanly from its own partition, and saw nothing else. The iMac's other volumes stayed unmounted, a USB key did nothing, and there was no CD drive and no sound.
 
@@ -63,6 +63,8 @@ Panther's kexts are version 1.3.9. IOUSBMassStorageClass 208.0.1 asks for 2.0.7 
 
 DiskArbitration also waits for a console user before it mounts a removable or external disk, and only loginwindow, Leopard's closed graphical login, registers one. A getty or SSH login registers none, so a USB key would never be mounted. Apple's servers lift that wait with `AutomountDisksWithoutUserLogin` in `/Library/Preferences/SystemConfiguration/autodiskmount.plist`, and `make-test-image` now writes the same ([Making the image](../method/making-the-image.md)).
 
+UDF, the file system of DVDs and Blu-ray discs, has no source in any Darwin release: none of darwinbuild's build lists, from Darwin 7 to Darwin 12, names a UDF project, and Apple's GitHub holds none. Leopard's `udf.kext` 2.0.2, its `udf.fs` bundle, `mount_udf` and `newfs_udf` are closed, so the image has no UDF, and the step leaves it out. Many discs are bridge discs, with an ISO 9660 volume beside the UDF one over the same files, and `cd9660.fs` mounts that. A disc with only a UDF volume is one that no bundle recognises, and DiskArbitration-183 ejects such an optical disc when no console user is logged in (`diskarbitrationd/DAStage.c`). An open UDF could be ported from FreeBSD ([What's next](whats-next.md)).
+
 ### bless
 
 `bless` makes a volume the startup disk by setting Open Firmware's `boot-device` ([the boot chain](../background/boot-chain.md)). Its link named two closed frameworks it never calls, `ld: framework not found ApplicationServices`, which [D91](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d91) removes; its source also carries 68k boot blocks as a prebuilt binary, which rule 5 keeps off the image.
@@ -104,15 +106,20 @@ Then `openplay` played a tone on Leopard and nothing on Darwin 9. OpenOnyx now r
 
 In QEMU, the seventh multi-user boot test mounted an ISO 9660 CD at `/Volumes/D9ISO`, read-only, and HFS+ and FAT32 USB disks, the second plugged in through QEMU's monitor while the guest ran; both read back the files written on them, and `disktool -e disk3` unmounted and ejected the FAT32 one. QEMU's OHCI model stopped 90 seconds after boot (`Watchdog detected dead controller`), so the disks went on its EHCI controller, as on the iMac.
 
+A later boot test in QEMU inserted two discs made with `hdiutil makehybrid` through QEMU's monitor. The one with only a UDF volume (`-udf`) was ejected within 10 seconds of going in. The bridge disc (`-udf -iso`) was mounted through `cd9660.fs`, and its two files read back with the MD5 they were written with.
+
 On the iMac, the seventeenth boot test, with an `/etc/fstab` added for that test only to keep them read-only, mounted `Tiger` and `Leopard` at boot, and a USB key as soon as it was plugged in, with `nodev, nosuid, noowners` as Leopard does, reading 128 MB from it in 13.7 seconds. `bless --mount / --setOF` set `boot-device` to `sata/k2-sata@0/@0:4,\\:tbxi`, and `reboot` started Darwin 9 without the Startup Manager; `bless --mount /Volumes/Leopard --setOF` and `reboot` went back. The optical drive was found. The eighteenth to twenty-third tests brought the sound, as above. The last image held 12,340 files, all from the project's builds except the 12 that `make-test-image` writes.
 
-Step 9 was reached on the iMac for the internal volumes, USB disks, `bless` and sound. CDs were mounted in QEMU only, as the iMac's optical drive is unreliable.
+The iMac's own optical drive did not see a DVD even under Leopard, and ejected it after half a minute, so a later boot test on the iMac read CDs and DVDs through a USB DVD writer, each first under Leopard for reference. Darwin 9 mounted each one read-only, the DVD-RW at boot and the others as they went in: a CD-R through `cd9660.fs`, the HFS+ partition of a Mac OS X 10.4 install DVD, and a DVD-RW with UDF and ISO 9660 volumes through `cd9660.fs`, where Leopard had used its UDF. The CD-R's 40 files, five files of 583 MB from the install DVD, and 39 of the DVD-RW's 40 files read back with Leopard's MD5, and so did the raw sectors: the CD-R's whole track, the first 256 MB of the install DVD and the first 181 MB of the DVD-RW. The 40th file is `syslinux/boot.cat`, the disc's El Torito boot catalog, to which its UDF side gives no data and its ISO 9660 side the 2,048 bytes of the catalog's sector. `disktool -e` ejected each disc. The image held 28,316 files, all from the project's builds except the 23 that `make-test-image` writes.
+
+Step 9 was reached on the iMac for the internal volumes, USB disks, CDs and DVDs through a USB drive, `bless` and sound.
 
 ## What is still missing
 
-- A CD on the iMac: the drive is found, but it is unreliable, and CDs were mounted in QEMU only.
+- The iMac's own optical drive, which did not see a DVD even under Leopard, and audio CDs: none was at hand, so `cddafs` is untested.
 - Sound input: the microphone's levels did not move on Darwin 9, and it was not tested further.
 - AppleOnboardAudio's DSP, whose sources are empty.
+- UDF: Leopard's is closed and no release published one, so a disc with only a UDF volume is ejected; a bridge disc mounts through its ISO 9660 volume.
 
 ## Where to look
 

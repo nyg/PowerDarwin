@@ -50,7 +50,7 @@ The comparisons with Leopard are provisional: the reference system is Sorbet Leo
 - ✅ **Step 6.** securityd runs: SSH and console logins get their own security session, and launchctl and login use Security as Apple built them.
 - ✅ **Step 7.** OpenSMU drives the fans from the SMU's temperature sensors, and the machine is as quiet at idle as under Leopard.
 - ✅ **Step 8.** The image boots cleanly: the network comes up without a 60-second wait, `ntpdate` sets the clock at boot, the local time zone applies, BootCache runs, and `/var/log/system.log` shows no errors.
-- ✅ **Step 9.** DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested in QEMU only), `bless` makes a partition the startup disk, and the built-in audio plays sound.
+- ✅ **Step 9.** DiskArbitration mounts the internal partitions, USB disks and CDs as they appear (CDs tested on the iMac through a USB drive), `bless` makes a partition the startup disk, and the built-in audio plays sound.
 - ✅ **Step 10.** The image is a working Unix system: its own compiler builds and links a program, Perl, Python and Ruby run, and Samba shares a folder with another machine.
 - ✅ **Step 11.** In QEMU `mac99`, an open driver for the PMU reads the clock from the hardware at boot, `reboot` restarts the machine, `shutdown -h now` switches it off, and the network comes up without a 60-second wait.
 - ⬜ **Step 12.** On the iMac G5, a FireWire disk mounts as it is plugged in, through an open driver for the FireWire controller.
