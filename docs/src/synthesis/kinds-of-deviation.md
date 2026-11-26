@@ -2,7 +2,7 @@
 
 ## What you will learn
 
-- How the 115 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 121 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
 - How one closed framework, OpenDirectory, reaches four projects.
@@ -10,7 +10,7 @@
 
 ## A row for every change
 
-Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 114 rows, D1 to D114: 113 by the end of Step 10, and one more found when the build was first replayed from an empty folder ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)). Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 121 rows, D1 to D121: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, and D121, which put `sw_vers` on the image. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -26,13 +26,13 @@ Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/bl
 
 ```mermaid
 xychart-beta horizontal
-    title "Rows of DEVIATIONS.md by kind, D1 to D113"
+    title "Rows of DEVIATIONS.md by kind, D1 to D121"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
     y-axis "Rows" 0 --> 35
-    bar [33, 29, 26, 16, 4, 4, 2]
+    bar [34, 30, 26, 21, 4, 4, 2]
 ```
 
-A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 29, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 4 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
+A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 5 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
 
 ### Kind and cause
 
@@ -45,14 +45,14 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | The build list's gaps | D4, D5, D9, D14, D18, D19, D59, D60, D64, D98, D104, D110 | | D29, D31, D38, D47, D48, D63, D65, D71, D74, D88, D92, D96, D101, D106, D114 | | | | |
 | CF-Lite against Apple's CoreFoundation | D11 | | D54, D57, D62 | D16, D56, D79 | D21, D28, D50, D52, D109 | | |
 | Closed Foundation and dtrace | D24, D49, D97 | | | | D12, D34, D43, D55, D68, D75, D76, D77, D103 | | |
-| What the source export removed | | | D35, D39, D90, D93 | | D22, D32 | | |
+| What the source export removed | | | D35, D39, D90, D93 | D120 | D22, D32 | | |
 | Apple's Xcode against the public one | D7, D70, D82, D99 | D23, D25, D78 | D53, D105 | | | | |
 | Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111, D121 | | | |
-| Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112 | | | |
+| Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112, D117, D118, D119 | | | |
 | Other closed frameworks and libraries | D51, D69, D89, D107 | | | | D27, D41, D61, D87, D91, D102, D108, D113 | | |
 | OpenDirectory | | | | | D42, D44 | D66, D80, D84 | |
 | The archive: tarballs, lists, Roots | D1, D3, D6, D20 | D2 | | | | | |
-| Faults in Apple's code | | | D17, D33, D46, D83 | | | | |
+| Faults in Apple's code | | | D17, D33, D46, D83, D116 | | | | |
 | Waiting for an open project | | | | | | D72 | D26, D45 |
 | A choice: PowerPC only | D100, D115 | | | | | | |
 
@@ -134,13 +134,13 @@ Closed code reaches a build through the tools it runs, not only the libraries it
 
 ### What happens
 
-Apple's published sources are an export of its internal ones. The export removes blocks marked `#ifndef __OPEN_SOURCE__`, and sometimes leaves behind code that uses what it removed. Some sources come out as stubs or empty files. Six rows: [D22](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d22), [D32](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d32), [D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), [D90](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d90) and [D93](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d93).
+Apple's published sources are an export of its internal ones. The export removes blocks marked `#ifndef __OPEN_SOURCE__`, and sometimes leaves behind code that uses what it removed. Some sources come out as stubs or empty files. Seven rows: [D22](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d22), [D32](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d32), [D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), [D90](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d90), [D93](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d93) and [D120](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d120).
 
 - A declaration: `fLockGroup` in IOUSBFamily's `IOUSBWorkLoop.h` sits inside `#ifndef __OPEN_SOURCE__`, as Leopard's `Kernel.framework`, the headers that kexts compile against, shows (D35, told in [Step 1, part 2](../steps/step-1-drivers-and-bootx.md)).
 - Values: 66 register offsets, masks and version tests of the U3 and U4 north bridges, which AppleMacRISC4PE's code uses and no header defines (D39, the same chapter).
 - Names: AppleOnboardAudio uses `kCodec_PCM3052` and `kCodec_NumberOfTypes` and defines neither, in every release on Apple's GitHub (D90).
 - A function: `convertNanosToPercent`, declared and called, defined nowhere (D93).
-- Empty files: IOKitUser was published with 24 empty files, its HID event system among them, and MIG rejects the empty interface file (D22), so IOHIDFamily's `hidd`, which runs that system, is left out (D32). AppleOnyxAudio comes as a 15-line stub, for which OpenOnyx stands in ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and AppleDBDMAAudio's DSP as empty sources, so the DSP does not run ([Step 9](../steps/step-9-disks-and-devices.md)).
+- Empty files: IOKitUser was published with 24 empty files, its HID event system among them, and MIG rejects the empty interface file (D22), so IOHIDFamily's `hidd`, which runs that system, is left out (D32). AppleOnyxAudio comes as a 15-line stub, for which OpenOnyx stands in ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and AppleDBDMAAudio's DSP as empty sources, so the DSP does not run ([Step 9](../steps/step-9-disks-and-devices.md)). IOFireWireFamily publishes `IOFWSimplePhysicalAddressSpace`'s source file with only a copyright line from 344.4.0 on, and 338.4.0 has it inside `#ifndef _OPEN_SOURCE_`, so the family built without the class; D120 writes it from its published header and its subclass's source ([Step 12](../steps/step-12-firewire.md)).
 
 ### Worked example: a function no published source defines (D93)
 
@@ -188,7 +188,7 @@ With Panther's SCSI family in place, Leopard's IOUSBMassStorageClass, the USB di
 
 ### Closed parts the system needs
 
-Where no version was ever published, the project writes its own. Ten rows are new code: [D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13) and [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15), stubs of the closed quarantine and sandbox libraries, so that copyfile builds and libSystem exports Apple's symbols; [D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67), two umbrella headers for building Kerberos; and five replacements under the MIT licence, OpenSMU for AppleSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](opensmu.md)), OpenPMU for ApplePMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118)), OpenRadeonPM for the GPU's idle power settings of the closed ATIRadeon9700 ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)), OpenOnyx for the codec plug-in published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and `openplay` for playing sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)); and the image's `dsymutil`, a script that exits 0 in place of Xcode's closed tool, which gcc runs after a one-step `-g` build ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). OpenSMU, OpenPMU and OpenOnyx learned their hardware from BSD drivers, NetBSD's `smu.c` and `pmu.c` and FreeBSD's `onyx.c`, with Linux's `smu.c` and `windfarm_pm121.c` read for facts, and `openplay` from IOAudioFamily's published interface; none took code, but for the table of the codec's registers and their first values, which OpenOnyx copies from `onyx.c` with its BSD notice.
+Where no version was ever published, the project writes its own. Eleven rows are new code: [D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13) and [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15), stubs of the closed quarantine and sandbox libraries, so that copyfile builds and libSystem exports Apple's symbols; [D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67), two umbrella headers for building Kerberos; and six replacements under the MIT licence, OpenSMU for AppleSMU ([D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [OpenSMU](opensmu.md)), OpenPMU for ApplePMU ([D118](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d118)), OpenRadeonPM for the GPU's idle power settings of the closed ATIRadeon9700 ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)), OpenFWOHCI for AppleFWOHCI, the link driver of the FireWire controller ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), OpenOnyx for the codec plug-in published only as a stub ([D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94)), and `openplay` for playing sound without CoreAudio ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)); and the image's `dsymutil`, a script that exits 0 in place of Xcode's closed tool, which gcc runs after a one-step `-g` build ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). OpenSMU, OpenPMU, OpenOnyx and OpenFWOHCI learned their hardware from BSD drivers, NetBSD's `smu.c` and `pmu.c` and FreeBSD's `onyx.c` and `fwohci.c`, with Linux's `smu.c`, `windfarm_pm121.c` and `firewire-ohci` read for facts, and `openplay` from IOAudioFamily's published interface; none took code, but for the table of the codec's registers and their first values, which OpenOnyx copies from `onyx.c` with its BSD notice.
 
 ### The lesson
 
@@ -233,7 +233,7 @@ Five rows come from the passage of time between Leopard and now. The build lists
 
 ### Faults in Apple's code
 
-Four rows fix a fault in the code itself, rather than in what surrounds it: libgcc compiles `crt2.o` without a deployment target, the oldest Mac OS X version a binary is built for, which Leopard's headers need ([D17](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d17)), three IOUSBFamily headers never close their include guards ([D33](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d33)), Libinfo's `getgrouplist_2` passes the address of a pointer where it means the buffer ([D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46)), and `ntpd-wrapper` runs `ntpdate` before the network can look up names ([D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83)). Two have a later Apple fix, which rule 2 prefers: IOUSBFamily 378.4.3 closes the guards, and ntp-45.1, of Mac OS X 10.6, waits for DNS. For the other two the patch is new and as small as possible: D46 changes one argument.
+Five rows fix a fault in the code itself, rather than in what surrounds it: libgcc compiles `crt2.o` without a deployment target, the oldest Mac OS X version a binary is built for, which Leopard's headers need ([D17](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d17)), three IOUSBFamily headers never close their include guards ([D33](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d33)), Libinfo's `getgrouplist_2` passes the address of a pointer where it means the buffer ([D46](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d46)), `ntpd-wrapper` runs `ntpdate` before the network can look up names ([D83](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d83)), and IOGraphics 305.14's display wrangler, with no window server, idles to a state in which the console drops every key ([D116](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d116)). Three have a later Apple fix, which rule 2 prefers: IOUSBFamily 378.4.3 closes the guards, ntp-45.1, of Mac OS X 10.6, waits for DNS, and IOGraphics 330, of the same release, starts the wrangler's idle timer only once a window server opens the screen. For the other two the patch is new and as small as possible: D46 changes one argument.
 
 ### Waiting for an open project
 
@@ -274,6 +274,19 @@ The rows of Step 10, D97 to D113, brought one new cause, a choice, and otherwise
 | D111 | CarbonHeaders | Leopard's versions never published |
 | D112 | gcc | closed parts the system needs |
 
+## The rows after Step 10
+
+The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, and D121 for `sw_vers`, brought no new cause:
+
+| Row | Project | Cause |
+|---|---|---|
+| D114 | IOKitUser | the build list's gaps |
+| D115 | all | a choice: PowerPC only |
+| D116 | IOGraphics | a fault in Apple's code |
+| D117, D118, D119 | OpenRadeonPM, OpenPMU, OpenFWOHCI | closed parts the system needs |
+| D120 | IOFireWireFamily | what the source export removed |
+| D121 | DarwinTools | Leopard's versions never published |
+
 ## What carries over
 
 Anyone who builds another Darwin, or Darwin 9 for another Mac, will meet most of these causes again, since they come from how Apple published its sources and not from one machine. In order of how many rows they cost here:
@@ -295,4 +308,4 @@ Another Mac adds rows of its own only where its hardware differs: its platform d
 - [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist), where the build list's gaps are filled.
 - [scripts/prepare-buildroot](https://github.com/nyg/PowerDarwin/blob/master/scripts/prepare-buildroot), one step per `build-env` row that puts files into the build environment.
 - [The rules](../method/rules.md), for the kinds and the order of fixes, and [Indexes and timeline](../reference/indexes.md), for every row with its step.
-- The step chapters, for the full stories: D7, D12, D13 and D20 in [Step 1, part 1](../steps/step-1-kernel-and-userland.md); D35, D39 and D40 in [Step 1, part 2](../steps/step-1-drivers-and-bootx.md); D49, D56 and D62 in [Step 3, part 1](../steps/step-3-security-and-daemons.md); D26, D45 and D48 in [Step 6](../steps/step-6-securityd.md); D83 in [Step 8](../steps/step-8-clean-boot.md); D85, D94 and D95 in [Step 9](../steps/step-9-disks-and-devices.md); D97, D102, D103 and D113 in [Step 10](../steps/step-10-working-unix.md).
+- The step chapters, for the full stories: D7, D12, D13 and D20 in [Step 1, part 1](../steps/step-1-kernel-and-userland.md); D35, D39 and D40 in [Step 1, part 2](../steps/step-1-drivers-and-bootx.md); D49, D56 and D62 in [Step 3, part 1](../steps/step-3-security-and-daemons.md); D26, D45 and D48 in [Step 6](../steps/step-6-securityd.md); D83 in [Step 8](../steps/step-8-clean-boot.md); D85, D94 and D95 in [Step 9](../steps/step-9-disks-and-devices.md); D97, D102, D103 and D113 in [Step 10](../steps/step-10-working-unix.md); D116 in [Step 2](../steps/step-2-console-login.md); D118 in [Step 11](../steps/step-11-pmu.md); D119 and D120 in [Step 12](../steps/step-12-firewire.md); D117 in [Step 13](../steps/step-13-gpu-idle-heat.md).
