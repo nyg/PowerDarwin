@@ -1,4 +1,4 @@
-PowerDarwin D44, 2026-11-20: changes to system_cmds 433.8, under the licence of the files changed.
+PowerDarwin D44, 2026-11-28: changes to system_cmds 433.8, under the licence of the files changed.
 --- a/Makefile
 +++ b/Makefile
 @@ -7,7 +7,7 @@
@@ -10,7 +10,7 @@ PowerDarwin D44, 2026-11-20: changes to system_cmds 433.8, under the licence of 
          reboot.tproj sync.tproj sysctl.tproj\
          update.tproj vipw.tproj vifs.tproj zic.tproj zdump.tproj vm_stat.tproj\
          zprint.tproj latency.tproj sc_usage.tproj fs_usage.tproj\
-@@ -17,7 +17,7 @@
+@@ -17,9 +17,14 @@
  ifeq "$(Embedded)" "NO"
  SubProjects += at.tproj atrun.tproj\
  	auditd.tproj audit.tproj\
@@ -19,3 +19,10 @@ PowerDarwin D44, 2026-11-20: changes to system_cmds 433.8, under the licence of 
  	dirhelper.tproj\
  	shutdown.tproj
  endif
+ 
++HaveOpenDirectory = $(shell if test -f /System/Library/PrivateFrameworks/OpenDirectory.framework/Frameworks/CFOpenDirectory.framework/Headers/CFOpenDirectory.h; then echo YES; fi)
++ifeq ($(HaveOpenDirectory),YES)
++SubProjects += passwd.tproj chpass.tproj
++endif
++
+ include $(MAKEFILEPATH)/CoreOS/ReleaseControl/BSDCommon.make

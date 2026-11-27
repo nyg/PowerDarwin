@@ -112,7 +112,7 @@ flowchart LR
     stand --> f1["CFPreferencesAppValueIsForced, always false: D56"]
     closed --> c1["CFNotificationCenter: D21, D28, D50, D52"]
     closed --> c2["CFFileDescriptor: D79"]
-    closed --> c3["CFBridgingPriv.h: D42, D66"]
+    stand --> f2["CFBridgingPriv.h, every object a CF object: D126"]
 ```
 
 Rule 2 prefers Apple's own later code to a new patch ([The rules](../method/rules.md)). [D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54) backports from CF-550 the three symbols libsecurity_codesigning needs, `_kCFBundleResourceSpecificationKey`, `_CFBundleCreateIfMightBeBundle` and `_CFBundleCreateWithExecutableURLIfMightBeBundle`, which Apple's 10.5.8 CoreFoundation exports and CF-476.19's source lacks; they are adapted to 476, without CF-550's check for bundles built for the iPhone.

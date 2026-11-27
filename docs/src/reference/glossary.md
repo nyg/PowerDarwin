@@ -124,7 +124,9 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **CFNotificationCenter**: CoreFoundation's notifications between processes. Only Apple's closed CoreFoundation has it, so every caller is cut out or left unbuilt. See [Step 3, part 1](../steps/step-3-security-and-daemons.md).
 
-**CFOpenDirectory, OpenDirectory**: Leopard's interface to directory services (accounts, groups, passwords). Its C part, CFOpenDirectory, includes a private header of the closed CoreFoundation, so nothing built on it can be built here, such as `passwd`, `chpass` and `pam_securityserver`. See [Step 2](../steps/step-2-console-login.md).
+**CFBridgingPriv.h**: a private header of Apple's closed CoreFoundation, whose macros hand a call to Foundation's object when a CF object is one. CFOpenDirectory includes it, and the build environment holds a stand-in in which every object is a CF object ([D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126)). See [Step 2](../steps/step-2-console-login.md).
+
+**CFOpenDirectory, OpenDirectory**: Leopard's interface to directory services (accounts, groups, passwords), through which `passwd`, `chpass` and `pam_securityserver` work. Its C part, CFOpenDirectory, is built with a stand-in for a private header of the closed CoreFoundation, and the outer `OpenDirectory.framework` without its Objective-C classes, which need Foundation ([D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126), [D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127)). See [Step 2](../steps/step-2-console-login.md).
 
 **chroot**: a folder entered with `chroot`, so that programs inside see it as `/` and can load nothing outside it. The first userland was tried this way before it was booted. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
@@ -450,9 +452,13 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **page**: the unit of virtual memory, 4 KB on PowerPC. See [Hardware and boot basics](../background/hardware-basics.md).
 
-**PAM**: pluggable authentication modules, the library through which `login` and `sshd` check passwords (`pam_unix`), accounts and sessions (`pam_launchd`), with one policy file per service in `/etc/pam.d`. See [Step 2](../steps/step-2-console-login.md).
+**PAM**: pluggable authentication modules, the library through which `login` and `sshd` check passwords (`pam_securityserver`, `pam_unix`), accounts and sessions (`pam_launchd`), with one policy file per service in `/etc/pam.d`. See [Step 2](../steps/step-2-console-login.md).
 
 **`pam_launchd`**: the PAM session module that makes a login's namespace a launchd session of the user, a `StandardIO` session for root's logins. See [Step 6](../steps/step-6-securityd.md).
+
+**`pam_securityserver`**: the PAM module that checks a password through Security's authorization API, which securityd answers by asking DirectoryService; the only module that checks a shadow hash. See [Step 2](../steps/step-2-console-login.md).
+
+**`pam_unix`**: the PAM module that compares a password with the account's `crypt()` hash, which Libinfo reads from DirectoryService or `/etc/master.passwd`. See [Step 2](../steps/step-2-console-login.md).
 
 **Panther**: Mac OS X 10.3 (Darwin 7), whose IOATABlockStorage and SCSI family, the last that Apple published, the image builds in place of Leopard's unpublished ones. See [Darwin's history](../background/history.md).
 
@@ -555,6 +561,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **service access list**: DirectoryService's list of users allowed to use a service such as SSH, which Apple's sshd checks through `mbr_user_name_to_uuid`. See [Step 3, part 2](../steps/step-3-network-and-ssh.md).
 
 **`SessionCreate`**: Security's call that makes a bootstrap subset, moves the process into it and asks securityd for a security session. See [Step 6](../steps/step-6-securityd.md).
+
+**shadow hash**: the form in which DirectoryService keeps a password that `passwd` sets: salted hashes in `/var/db/shadow/hash/<GUID>`, with `********` in the account's `passwd` attribute. See [Step 2](../steps/step-2-console-login.md).
 
 **shared cache (dyld)**: one file holding the common libraries, already bound together, mapped into every process. `update_dyld_shared_cache` builds it from the lists in `/var/db/dyld/shared_region_roots/`. See [Step 4](../steps/step-4-everyday-commands.md).
 

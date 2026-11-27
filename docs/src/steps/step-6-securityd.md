@@ -177,12 +177,12 @@ On the iMac, in the eighth boot test on the iMac G5, the same image was restored
 
 Step 6 was reached on the iMac. Two lines remained at each login, both from parts the image lacks:
 
-- `PAM unable to _pam_dlopen(/usr/lib/pam/pam_securityserver.so)`: `pam.d/login` and `pam.d/sshd` still list `pam_securityserver`, which needs OpenDirectory and so Apple's closed CoreFoundation, and is not built ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42)). [Step 8](step-8-clean-boot.md) removes it from the PAM files.
+- `PAM unable to _pam_dlopen(/usr/lib/pam/pam_securityserver.so)`: `pam.d/login` and `pam.d/sshd` list `pam_securityserver`, which needs OpenDirectory, and so is built only at the end of the build order ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42)).
 - On the console, `bootstrap_look_up(com.apple.ReportCrash) failure: Unknown service name (1102)`: no job holds the name of ReportCrash, Apple's crash reporter, which is closed.
 
 ## What is still missing
 
-- `pam_securityserver`, and with it the account checks it makes for sshd: password-server policies, disabled accounts and the login shell ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
+- The account checks that `pam_securityserver` makes for sshd: password-server policies, disabled accounts and the login shell ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
 - No smart-card reader works: the only drivers SmartCardServices brings are the vendors' prebuilt ones, which stay off the image.
 - ReportCrash, which is closed.
 

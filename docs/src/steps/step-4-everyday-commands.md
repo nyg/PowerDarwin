@@ -101,7 +101,7 @@ The image held 12,163 files, all from the project's builds except eight that `ma
 - The clock started in 1970 at every boot, and the iMac could neither restart nor switch itself off: [Step 5](step-5-clock-and-power.md).
 - Logins had no security session of their own: [Step 6](step-6-securityd.md).
 - `ntpdate` failed at boot, and the network came up a minute late: [Step 8](step-8-clean-boot.md).
-- `passwd` is still not built, as it needs OpenDirectory, which needs Apple's closed CoreFoundation ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)); `make-test-image` sets root's password instead.
+- `passwd` is built only after OpenDirectory, at the end of the build order ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)); a test image gets root's password from `make-test-image`.
 
 ## Where to look
 

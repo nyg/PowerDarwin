@@ -108,6 +108,7 @@ network_cmds	307.1.1	3
 tcp_wrappers	18	3
 libresolv	25.0.2	3
 CFOpenDirectory	39	3
+OpenDirectory	39	3
 bootp	170.1	3
 Kerberos	75.10.11	3
 OpenSSH	95.1.5	3

@@ -282,3 +282,8 @@ build file
 build lsof
 build top
 build curl
+prepare D126
+build CFOpenDirectory
+build OpenDirectory
+build system_cmds
+build pam_modules

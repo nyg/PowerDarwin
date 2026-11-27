@@ -2,15 +2,15 @@
 
 ## What you will learn
 
-- How the 125 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
+- How the 128 rows of DEVIATIONS.md divide among its seven kinds, and why a kind describes the fix rather than the fault.
 - The causes behind the rows: a build list that misses projects, the gap between CF-Lite and Apple's CoreFoundation, closed Foundation and dtrace, code that Apple's source export removed, Apple's own Xcode against the public one, sources never published, and a few more.
 - One worked example for each cause, and where the step chapters tell the others.
-- How one closed framework, OpenDirectory, reaches four projects.
+- How one closed header and the closed Foundation reached OpenDirectory and the four projects that use it.
 - What carries over to anyone who builds another Darwin, or Darwin for another Mac.
 
 ## A row for every change
 
-Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 125 rows, D1 to D125: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out, D124, the first boot of an image that others download, and D125, which keeps the build machine's names out of the binaries. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
+Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md) for every patch, every workaround in the build environment and every replacement ([The rules](../method/rules.md)). Each row gives the project, the kind of change, what was changed, the error it fixes, quoted exactly, and the later Apple release with the same fix, if any. There are 128 rows, D1 to D128: 113 by the end of Step 10, three more while the build was replayed from an empty folder and its image installed, D114 to D116 ([darwinbuild and the build machine](../method/darwinbuild.md#the-build-order)), four in Steps 11 to 13, D117 to D120, D121, which put `sw_vers` on the image, D122 and D123, for gnutar and curl, two of the everyday tools that Step 10 left out, D124, the first boot of an image that others download, D125, which keeps the build machine's names out of the binaries, and D126 to D128, which build OpenDirectory and with it `passwd`. Every step chapter tells the rows of its step; this chapter looks at all of them at once, to find what made them necessary.
 
 ### The seven kinds
 
@@ -26,10 +26,10 @@ Rule 3 asks for one row in [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/bl
 
 ```mermaid
 xychart-beta horizontal
-    title "Rows of DEVIATIONS.md by kind, D1 to D125"
+    title "Rows of DEVIATIONS.md by kind, D1 to D128"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
     y-axis "Rows" 0 --> 40
-    bar [36, 30, 26, 23, 4, 4, 2]
+    bar [37, 30, 25, 24, 4, 5, 3]
 ```
 
 A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 5 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
@@ -50,7 +50,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111, D121 | | | |
 | Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112, D117, D118, D119, D122, D124 | | | |
 | Other closed frameworks and libraries | D51, D69, D89, D107 | | | | D27, D41, D61, D87, D91, D102, D108, D113 | | |
-| OpenDirectory | | | | | D42, D44 | D66, D80, D84 | |
+| OpenDirectory | D128 | | | D126 | D127 | D42, D44, D66, D80 | D84 |
 | The archive: tarballs, lists, Roots | D1, D3, D6, D20, D123 | D2 | | | | | |
 | Faults in Apple's code | | | D17, D33, D46, D83, D116 | | | | |
 | Waiting for an open project | | | | | | D72 | D26, D45 |
@@ -206,25 +206,29 @@ The lesson: before patching a closed dependency away, check whether the code use
 
 ## OpenDirectory, one framework in four projects
 
-OpenDirectory is Leopard's interface to directory services: accounts, groups and passwords. Its C part, CFOpenDirectory, includes `CoreFoundation/CFBridgingPriv.h`, a private header of Apple's closed CoreFoundation, so it cannot be built on CF-Lite, and its Objective-C part needs Foundation. darwinbuild's 9A581 Roots of both hold only the outer framework. Four projects use it, in five rows:
+OpenDirectory is Leopard's interface to directory services: accounts, groups and passwords. Its C part, CFOpenDirectory, includes `CoreFoundation/CFBridgingPriv.h`, a private header of Apple's closed CoreFoundation, and its Objective-C part needs Foundation. Four projects use it, and eight rows follow from it:
 
 ```mermaid
 flowchart LR
-    CF["closed CoreFoundation:<br/>CFBridgingPriv.h"] --> CFOD[CFOpenDirectory]
-    FND[closed Foundation] --> OD[OpenDirectory.framework]
-    CFOD --> OD
+    CF["closed CoreFoundation:<br/>CFBridgingPriv.h"] -.-> SI["a stand-in: D126"]
+    SI --> CFOD["CFOpenDirectory: D128"]
+    FND[closed Foundation] -.-> OC["Objective-C classes<br/>left out: D127"]
+    CFOD --> OD[OpenDirectory.framework]
+    OC --> OD
     OD --> PSS["pam_securityserver<br/>pam_modules: D42"]
     OD --> PW["passwd, chpass<br/>system_cmds: D44"]
     OD --> BP["bootpd<br/>bootp: D66"]
     PSS --> PAM["pam.d files<br/>pam: D80, D84"]
 ```
 
-- [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42) builds pam_modules without `pam_securityserver`.
-- [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44) builds system_cmds without `passwd` and `chpass`, so `make-test-image` writes root's password hash itself.
-- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66) builds bootp without `bootpd`, the DHCP and NetBoot server; the DHCP client is built.
-- [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84) follow from D42 in pam's files: sshd's account phase uses `pam_unix`, and logins no longer try the missing module, which logged `PAM adding faulty module: /usr/lib/pam/pam_securityserver.so` at each login.
+- [D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126) puts a stand-in for `CFBridgingPriv.h` into the build environment. The header gives macros that hand a call to Foundation's object when a CF object is one, and the stand-in gives them the forms that CF-Lite's own `CFInternal.h` gives them without Objective-C.
+- [D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127) builds `OpenDirectory.framework` without its Objective-C classes, and so without Foundation; it re-exports CFOpenDirectory, and the four programs that use it import nothing else.
+- [D128](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d128) builds both for `ppc` alone, as the build list builds DirectoryService, which CFOpenDirectory links.
+- [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42) and [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44) build `pam_securityserver`, `passwd` and `chpass` only once CFOpenDirectory is in the build environment: pam_modules and system_cmds are built long before it, and again after it.
+- [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84) is `dropped`: logins try `pam_securityserver` first again, as Apple's `pam.d` files have it, and it is the module that checks a password `passwd` has set.
+- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66) still builds bootp without `bootpd`, the DHCP and NetBoot server, and [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) still gives sshd's account phase to `pam_unix`.
 
-Two of the five are `closed-dependency` and three `deferred`, though all five come from the same closed header and framework: a row's kind records how it was filed, not its cause. One private header of CoreFoundation and the closed Foundation thus cost two account tools, a PAM module and a DHCP server. [What's next](../steps/whats-next.md) says what an open path would take. The lesson: follow a closed framework to every project that includes it before turning features off one by one; a single gap may explain several rows.
+D42 and D44 were `closed-dependency` while the gap seemed closed for good; once a stand-in filled it, they became `deferred`, waiting only for their place in the build order. A row's kind records how it was filed, not its cause. The lesson: follow a closed framework to every project that includes it before turning features off one by one; a single gap may explain several rows, and filling it brings them back together.
 
 ## Smaller causes
 
@@ -238,7 +242,7 @@ Five rows fix a fault in the code itself, rather than in what surrounds it: libg
 
 ### Waiting for an open project
 
-A change made only until another project is built is `deferred`, and becomes `dropped` once that project is. launchctl was built without Security ([D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26)), and the console login's `pam_launchd` was optional ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)), until securityd was built in Step 6; both rows are now `dropped` ([Step 6](../steps/step-6-securityd.md)). Cyrus SASL's MySQL plug-in still waits for MySQL ([D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72)).
+A change made only until another project is built is `deferred`, and becomes `dropped` once that project is. launchctl was built without Security ([D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26)), and the console login's `pam_launchd` was optional ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)), until securityd was built in Step 6; both rows are now `dropped` ([Step 6](../steps/step-6-securityd.md)), and so is [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), which kept logins from trying `pam_securityserver` until OpenDirectory was built. Cyrus SASL's MySQL plug-in still waits for MySQL ([D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72)).
 
 ### A choice
 
@@ -277,7 +281,7 @@ The rows of Step 10, D97 to D113, brought one new cause, a choice, and otherwise
 
 ## The rows after Step 10
 
-The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, D122 and D123 for gnutar and curl, D124 for the first boot, and D125 for the names the builds record, brought one new cause, a choice, and otherwise fell into the old ones:
+The rows after Step 10, D114 to D116 from the replay of the build from an empty folder and the install of its image, D117 to D120 from Steps 11 to 13, D121 for `sw_vers`, D122 and D123 for gnutar and curl, D124 for the first boot, D125 for the names the builds record, and D126 to D128 for OpenDirectory, brought one new cause, a choice, and otherwise fell into the old ones:
 
 | Row | Project | Cause |
 |---|---|---|
@@ -291,6 +295,7 @@ The rows after Step 10, D114 to D116 from the replay of the build from an empty 
 | D123 | curl | the archive: tarballs, lists, Roots |
 | D124 | system_cmds, OpenSSH | closed parts the system needs |
 | D125 | all | a choice: no name of the build machine |
+| D126, D127, D128 | CFOpenDirectory, OpenDirectory | OpenDirectory |
 
 ## What carries over
 

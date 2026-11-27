@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82 D89 D94 D97 D98 D99"
+all_steps="plist D4 D5 D6 D7 D8 D9 D10 D13 D14 D15 D18 D19 D24 D30 D36 D37 D40 D49 D59 D60 D64 D67 D70 D73 D82 D89 D94 D97 D98 D99 D126"
 usage="usage: prepare-buildroot <ssh host> [--check] [--folder=<build folder on host>] [step...]
        prepare-buildroot --here=<build folder> [--check] [step...]
        (steps: all, $all_steps)"
@@ -350,6 +350,8 @@ step_D97() { put_file D97 "$here/env/dtrace" "$build/usr/sbin/dtrace" 555; }
 step_D98() { put_file D98 "$here/env/sw_vers" "$build/usr/bin/sw_vers" 555; }
 
 step_D99() { put_file D99 "$here/env/ditto" "$build/usr/bin/ditto" 555; }
+
+step_D126() { put_file D126 "$here/env/CFBridgingPriv.h" "$build/System/Library/Frameworks/CoreFoundation.framework/Versions/A/PrivateHeaders/CFBridgingPriv.h" 644; }
 
 on_build_machine() {
    folder=$1
