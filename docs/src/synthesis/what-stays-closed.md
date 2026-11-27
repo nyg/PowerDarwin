@@ -107,7 +107,7 @@ Rule 5 lets closed tools run the build, as long as nothing of theirs reaches the
 
 | Tool | What it does in the build |
 |---|---|
-| Leopard on the build machine (an unmodified 10.5.8 since November 2026; before, Sorbet Leopard, a community update of 10.5.8) | runs darwinbuild, `hdiutil` and `kextload -n`, and is the reference against which our binaries are compared |
+| Leopard 10.5.8 on the build machine | runs darwinbuild, `hdiutil` and `kextload -n`, and is the reference against which our binaries are compared |
 | Xcode 3.1.4 | `xcodebuild` and its helpers, such as `copyplist`; `dsymutil`, wrapped ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)) |
 | darwinbuild's Roots | Apple's binaries of each project, which fill the BuildRoots until our builds replace them ([D3](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d3)); the release's compilers among them (rule 4), until Step 10 built ours |
 | Xcode's `MacOSX10.5.sdk` | headers and link stubs of what was never published: the SCSI family's headers ([D36](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d36)), CoreAudio's ([D89](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d89)) |

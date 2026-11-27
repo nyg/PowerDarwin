@@ -142,8 +142,6 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **combined mode**: an I²C transfer that writes a register number, then reads from that register, in one go. See [OpenSMU](../synthesis/opensmu.md).
 
-**combo update**: Apple's one installer that takes any Leopard 10.5 release to 10.5.8. The one Apple publishes today installs build `9L31a`, not `9L30`. See [darwinbuild and the build machine](../method/darwinbuild.md).
-
 **command page**: the page of memory into which OpenSMU writes a command for the SMU, and the SMU writes its reply. See [OpenSMU](../synthesis/opensmu.md) and [Step 5](../steps/step-5-clock-and-power.md).
 
 **compiler driver, `cc1`**: `cc` (or `gcc`) is a driver that runs `cc1`, the compiler proper, then `as` and `ld`. See [Step 10](../steps/step-10-working-unix.md).
@@ -569,8 +567,6 @@ Each term in a sentence or two, with the chapter that explains it.
 **SMU**: system management unit, a small processor on the logic board of G5 Macs such as the iMac G5, that keeps the clock, switches the power, reads sensors and drives fans. See [Step 5](../steps/step-5-clock-and-power.md).
 
 **Snow Leopard**: Mac OS X 10.6 (Darwin 10), August 2009, the first Mac OS X for Intel Macs only. See [Darwin's history](../background/history.md).
-
-**Sorbet Leopard**: a community update of Leopard 10.5.8 for PowerPC Macs, which the project's build machine ran until November 2026; its kernel and drivers carry the versions of 10.5.8's build list. The comparisons with Leopard's binaries are provisional until they are repeated against an unmodified Leopard 10.5.8. See [How testing is done](../method/testing.md).
 
 **source export**: the step that turns Apple's internal source into the published one. It removed blocks marked `#ifndef __OPEN_SOURCE__` but not code using them ([D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)). See [Step 1, part 2](../steps/step-1-drivers-and-bootx.md).
 

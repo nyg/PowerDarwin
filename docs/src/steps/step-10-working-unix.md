@@ -7,7 +7,7 @@
 - What stood between Apple's Perl, Python and Ruby and a build from source: DTrace probes, Carbon, and settings that Apple's build list lacks.
 - What Apple's Samba needed to build without its closed framework, and why it stopped answering a minute after boot.
 - How the step was proved, first in a chroot of the image, then on an iMac G5 (`PowerMac12,1`).
-- Which everyday tools were built after the step, how they compare with an unmodified Leopard 10.5.8's, and how far `curl` reaches over HTTPS.
+- Which everyday tools were built after the step, how they compare with Leopard's, and how far `curl` reaches over HTTPS.
 
 ## The goal
 
@@ -242,9 +242,9 @@ BuildVersion:   9L30
 
 and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`. Installed with `install-image` on the iMac and started there, it printed the same, and our `bless` then made Leopard the startup disk again.
 
-The seven everyday tools were compared with three sets of Apple's binaries: Sorbet Leopard's, the book's reference system; Apple's archived Roots of the same versions, but for curl, which has none; and an unmodified Leopard 10.5.8, installed from Apple's DVD and combo update onto another partition of the build machine and read from there. All of ours are PowerPC only, where Apple's also carry `i386` ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)).
+The seven everyday tools were compared with two sets of Apple's binaries: Leopard 10.5.8's, on the build machine, and Apple's archived Roots of the same versions, but for curl, which has none. All of ours are PowerPC only, where Apple's also carry `i386` ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)).
 
-- `file`, `top`, `gzip` and `curl` have the same instructions and strings as the unmodified 10.5.8's, and so does `libcurl.4.dylib`; `curl --manual` prints the same bytes, and `top` is identical to Sorbet's too. Sorbet's `gzip` and `curl` are later, from its own updates: a 2011 `gzip`, and curl 7.16.4.
+- `file`, `top`, `gzip` and `curl` have the same instructions and strings as Leopard's, and so does `libcurl.4.dylib`; `curl --manual` prints the same bytes.
 - `awk` has the same instructions as Apple's 9A581 Root; Leopard's own `awk`, of 10.5.0, calls `strtod` where ours and the Root call `strtod$UNIX2003`.
 - `lsof` has the same instructions at other addresses: it writes the build's date, host name and `uname -a` into the binary, and longer strings move its code.
 - `tar` imports six functions fewer than Leopard's, the `__qtn_*` functions that D122's stubs replace.

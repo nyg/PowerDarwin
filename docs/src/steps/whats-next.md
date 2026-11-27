@@ -82,11 +82,7 @@ Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Ot
 
 The image is now made the way a release would publish it: `make-test-image --release=<name>` leaves root without a password, uses UTC and `time.apple.com` instead of the build machine's time zone and NTP server, and puts the licence texts and the notices of every project built into `/usr/share/doc/PowerDarwin`. At its first boot, the console asks for root's password, and the image makes its SSH host keys before it turns SSH on, which stands in for `passwd` there ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). Every project is built in UTC, under the host name `powerdarwin.invalid` and the login name `root`, so that the programs that record who built them and where name no machine or user ([D125](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d125)). `make-release` checks such an image for passwords, keys and anything of the build machine, and writes the release's files: one raw image, for QEMU and for `install-image`, the source of every binary on it, and checksums; `publish-release` uploads them ([Making the image](../method/making-the-image.md#releases)).
 
-No release is published yet. The first is to be the image of a rebuild on an unmodified Leopard 10.5.8 (below), once the comparisons with Leopard are repeated on it. What would remain after it: Step 14, after which the same raw image could be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
-
-### A second build machine
-
-Every image so far was built on one build machine, which ran Sorbet Leopard, a community update of Leopard 10.5.8. A rebuild from scratch with an unmodified Leopard 10.5.8, would show that the scripts repeat the build, and would settle the comparisons with Leopard's binaries, which are provisional until then ([How testing is done](../method/testing.md)). That build machine now exists: the same Mac, with an unmodified Leopard 10.5.8, build `9L31a`, and Xcode 3.1.4 in place of Sorbet ([darwinbuild and the build machine](../method/darwinbuild.md)). The rebuild on it has not finished yet.
+No release is published yet. What would remain after the first: Step 14, after which the same raw image could be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
 
 ## A map of the open items
 
@@ -110,7 +106,6 @@ mindmap
       Darwin 10 for PowerPC
     Distribution
       image for others
-      second build machine
 ```
 
 Some items help others: OpenDirectory would bring back `passwd`, with which root's password could be changed after the first boot.
