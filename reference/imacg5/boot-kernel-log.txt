@@ -1,45 +1,46 @@
-Nov 18 22:00:34 localhost kernel[0]: Darwin Kernel Version 9.8.0: Wed Jul 15 16:57:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_PPC
-Nov 18 22:00:34 localhost kernel[0]: standard timeslicing quantum is 10000 us
-Nov 18 22:00:34 localhost kernel[0]: vm_page_bootstrap: 1140541 free pages and 39107 wired pages
-Nov 18 22:00:34 localhost kernel[0]: mig_table_max_displ = 79
-Nov 18 22:00:34 localhost kernel[0]: 97 prelinked modules
-Nov 18 22:00:34 localhost kernel[0]: Loading security extension com.apple.security.TMSafetyNet
-Nov 18 22:00:34 localhost kernel[0]: calling mpo_policy_init for TMSafetyNet
-Nov 18 22:00:34 localhost kernel[0]: Security policy loaded: Safety net for Time Machine (TMSafetyNet)
-Nov 18 22:00:34 localhost kernel[0]: Loading security extension com.apple.nke.applicationfirewall
-Nov 18 22:00:34 localhost kernel[0]: Loading security extension com.apple.security.seatbelt
-Nov 18 22:00:34 localhost kernel[0]: calling mpo_policy_init for mb
-Nov 18 22:00:34 localhost kernel[0]: Seatbelt MACF policy initialized
-Nov 18 22:00:34 localhost kernel[0]: Security policy loaded: Seatbelt Policy (mb)
-Nov 18 22:00:34 localhost kernel[0]: Copyright (c) 1982, 1986, 1989, 1991, 1993
-Nov 18 22:00:34 localhost kernel[0]: The Regents of the University of California. All rights reserved.
-Nov 18 22:00:34 localhost kernel[0]: MAC Framework successfully initialized
-Nov 18 22:00:34 localhost kernel[0]: using 16384 buffer headers and 4096 cluster IO buffer headers
-Nov 18 22:00:34 localhost kernel[0]: AirPort_Brcm43xx::probe: 059c2780, 0
-Nov 18 22:00:34 localhost kernel[0]: AppleKauaiATA shasta-ata features enabled
-Nov 18 22:00:34 localhost kernel[0]: DART enabled
-Nov 18 22:00:34 localhost kernel[0]: FireWire (OHCI) Apple ID 52 PCI now active, GUID 001451fffexxxxxx; max speed s400.
-Nov 18 22:00:34 localhost kernel[0]: mbinit: done
-Nov 18 22:00:34 localhost kernel[0]: Security auditing service present
-Nov 18 22:00:34 localhost kernel[0]: BSM auditing present
-Nov 18 22:00:34 localhost kernel[0]: rooting via boot-uuid from /chosen: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-Nov 18 22:00:34 localhost kernel[0]: Waiting on <dict ID="0"><key>IOProviderClass</key><string ID="1">IOResources</string><key>IOResourceMatch</key><string ID="2">boot-uuid-media</string></dict>
-Nov 18 22:00:34 localhost kernel[0]: [Bluetooth::CSRHIDTransition] switchToHCIMode (legacy)
-Nov 18 22:00:34 localhost kernel[0]: Got boot device = IOService:/MacRISC4PE/ht@0,f2000000/AppleMacRiscHT/pci@3/IOPCI2PCIBridge/k2-sata-root@C/AppleK2SATARoot/k2-sata@0/AppleK2SATA/ATADeviceNub@0/AppleATADiskDriver/IOATABlockStorageDevice/IOBlockStorageDriver/Samsung SSD 870 EVO 500GB Samsung SSD 870 EVO 500GB/IOApplePartitionScheme/Apple_HFS_Untitled_2@5
-Nov 18 22:00:34 localhost kernel[0]: BSD root: disk0s5, major 14, minor 2
-Nov 18 22:00:34 localhost kernel[0]: wl0: Broadcom BCM4318 802.11 Wireless Controller
-Nov 18 22:00:34 localhost kernel[0]: 4.170.25.8.2AppleSMU -- shutdown cause = 2
-Nov 18 22:00:34 localhost kernel[0]: AppleSMU::PMU vers = 0x000d0092, SPU vers = 0x56, SDB vers = 0x01,
-Nov 18 22:00:34 localhost kernel[0]: [Bluetooth::CSRHIDTransition] transition complete.
-Nov 18 22:00:34 localhost kernel[0]: [HCIController][configurePM] power parent ready after 1 tries
-Nov 18 22:00:34 localhost kernel[0]: Jettisoning kernel linker.
-Nov 18 22:00:34 localhost kernel[0]: Resetting IOCatalogue.
-Nov 18 22:00:34 localhost kernel[0]: Matching service count = 0
-Nov 18 22:00:34 localhost kernel[0]: Matching service count = 1
-Nov 18 22:00:38 localhost kernel[0]: UniNEnet: Ethernet address 00:14:51:xx:xx:xx
-Nov 18 22:00:38 localhost kernel[0]: AirPort_Brcm43xx: Ethernet address 00:14:51:xx:xx:xx
-Nov 18 22:00:46 localhost kernel[0]: AirPort: Link Down on en1
-Nov 18 22:31:11 imacg5 kernel[0]: UniNEnet::monitorLinkStatus - Link is up at 1000 Mbps - Full Duplex (PHY regs 5,6:0xdd81,0x000d)
-Nov 18 22:37:28 imacg5 kernel[0]: AirPort: Link Up on en1
-Nov 18 22:37:28 imacg5 kernel[0]: SetCryptoKey T: len 16, idx 0
-Nov 18 22:37:28 imacg5 kernel[0]: SetCryptoKey R: len 16, idx 2
+Nov 27 16:00:58 localhost kernel[0]: Darwin Kernel Version 9.8.0: Wed Jul 15 16:57:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_PPC
+Nov 27 16:00:58 localhost kernel[0]: standard timeslicing quantum is 10000 us
+Nov 27 16:00:58 localhost kernel[0]: vm_page_bootstrap: 1140513 free pages and 39135 wired pages
+Nov 27 16:00:58 localhost kernel[0]: mig_table_max_displ = 79
+Nov 27 16:00:58 localhost kernel[0]: 100 prelinked modules
+Nov 27 16:00:58 localhost kernel[0]: Loading security extension com.apple.security.TMSafetyNet
+Nov 27 16:00:58 localhost kernel[0]: calling mpo_policy_init for TMSafetyNet
+Nov 27 16:00:58 localhost kernel[0]: Security policy loaded: Safety net for Time Machine (TMSafetyNet)
+Nov 27 16:00:58 localhost kernel[0]: Loading security extension com.apple.nke.applicationfirewall
+Nov 27 16:00:58 localhost kernel[0]: Loading security extension com.apple.security.seatbelt
+Nov 27 16:00:58 localhost kernel[0]: calling mpo_policy_init for mb
+Nov 27 16:00:58 localhost kernel[0]: Seatbelt MACF policy initialized
+Nov 27 16:00:58 localhost kernel[0]: Security policy loaded: Seatbelt Policy (mb)
+Nov 27 16:00:58 localhost kernel[0]: Copyright (c) 1982, 1986, 1989, 1991, 1993
+Nov 27 16:00:58 localhost kernel[0]: The Regents of the University of California. All rights reserved.
+Nov 27 16:00:58 localhost kernel[0]: MAC Framework successfully initialized
+Nov 27 16:00:58 localhost kernel[0]: using 16384 buffer headers and 4096 cluster IO buffer headers
+Nov 27 16:00:58 localhost kernel[0]: AirPort_Brcm43xx::probe: 059d9f00, 0
+Nov 27 16:00:58 localhost kernel[0]: AppleKauaiATA shasta-ata features enabled
+Nov 27 16:00:58 localhost kernel[0]: DART enabled
+Nov 27 16:00:58 localhost kernel[0]: USBF:	23.454	EHCI driver - PortPower end bits not sticking. Retrying
+Nov 27 16:00:58 localhost kernel[0]: FireWire (OHCI) Apple ID 52 PCI now active, GUID 001451fffexxxxxx; max speed s400.
+Nov 27 16:00:58 localhost kernel[0]: mbinit: done
+Nov 27 16:00:58 localhost kernel[0]: Security auditing service present
+Nov 27 16:00:58 localhost kernel[0]: BSM auditing present
+Nov 27 16:00:58 localhost kernel[0]: rooting via boot-uuid from /chosen: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+Nov 27 16:00:58 localhost kernel[0]: Waiting on <dict ID="0"><key>IOProviderClass</key><string ID="1">IOResources</string><key>IOResourceMatch</key><string ID="2">boot-uuid-media</string></dict>
+Nov 27 16:00:58 localhost kernel[0]: [Bluetooth::CSRHIDTransition] switchToHCIMode (legacy)
+Nov 27 16:00:58 localhost kernel[0]: wl0: Broadcom BCM4318 802.11 Wireless Controller
+Nov 27 16:00:58 localhost kernel[0]: 4.170.25.8.2AppleSMU -- shutdown cause = 2
+Nov 27 16:00:58 localhost kernel[0]: Got boot device = IOService:/MacRISC4PE/ht@0,f2000000/AppleMacRiscHT/pci@3/IOPCI2PCIBridge/k2-sata-root@C/AppleK2SATARoot/k2-sata@0/AppleK2SATA/ATADeviceNub@0/AppleATADiskDriver/IOATABlockStorageDevice/IOBlockStorageDriver/Samsung SSD 870 EVO 500GB Samsung SSD 870 EVO 500GB/IOApplePartitionScheme/Apple_HFS_Untitled_2@5
+Nov 27 16:00:58 localhost kernel[0]: BSD root: disk0s5, major 14, minor 3
+Nov 27 16:00:58 localhost kernel[0]: AppleSMU::PMU vers = 0x000d0092, SPU vers = 0x56, SDB vers = 0x01,
+Nov 27 16:00:58 localhost kernel[0]: [Bluetooth::CSRHIDTransition] transition complete.
+Nov 27 16:00:58 localhost kernel[0]: [HCIController][configurePM] power parent ready after 1 tries
+Nov 27 16:00:58 localhost kernel[0]: Jettisoning kernel linker.
+Nov 27 16:01:00 localhost kernel[0]: UniNEnet: Ethernet address 00:14:51:xx:xx:xx
+Nov 27 16:01:00 localhost kernel[0]: AirPort_Brcm43xx: Ethernet address 00:14:51:xx:xx:xx
+Nov 27 16:01:00 localhost kernel[0]: Resetting IOCatalogue.
+Nov 27 16:01:03 localhost kernel[0]: Matching service count = 0
+Nov 27 16:01:03 localhost kernel[0]: Matching service count = 1
+Nov 27 16:01:03 localhost kernel[0]: Matching service count = 2
+Nov 27 16:01:05 localhost kernel[0]: PowerMac12,1: stalling for module
+Nov 27 16:01:05 localhost kernel[0]: UniNEnet::monitorLinkStatus - Link is up at 1000 Mbps - Full Duplex (PHY regs 5,6:0xdd81,0x000d)
+Nov 27 16:01:05 localhost kernel[0]: Matching service count = 1
+Nov 27 16:01:05 localhost kernel[0]: AirPort: Link Down on en1

@@ -72,8 +72,8 @@ On 21 November 2026, after part 1:
 - IONetworkingFamily 47.3 and AppleGMACEthernet 159.3.1: each exports and imports the same symbols as Apple's 10.5.8 kext.
 - network_cmds (`ifconfig`, `ping`, `netstat`, `route` and 20 more, each importing exactly what Apple's does), OpenSSL 0.9.7, ipsec's `libipsec`, libresolv and tcp_wrappers.
 - bootp 170.1: `IPConfiguration.bundle`, `ipconfig` and the BSDP client, which looks for NetBoot servers, without the DHCP server.
-- The directory stack: Kerberos, tcl, SQLite, Cyrus SASL from passwordserver_sasl and passwordserver_saslkerberos, PasswordServer.framework from DSPasswordServerFramework, LDAP.framework from LDAPFramework, then DirectoryService and its daemon. `/usr/sbin/DirectoryService` imports 857 of the 864 symbols of the reference system's DirectoryService, a later 514.29, and none other.
-- OpenSSH 95.1.5, which is OpenSSH 5.1p1: its tools import exactly Apple's symbols, but `sshd` lacks Apple's import of `puts`, and `ssh` of `puts` and `putchar`; its `sshd_config` is identical to Apple's.
+- The directory stack: Kerberos, tcl, SQLite, Cyrus SASL from passwordserver_sasl and passwordserver_saslkerberos, PasswordServer.framework from DSPasswordServerFramework, LDAP.framework from LDAPFramework, then DirectoryService and its daemon. `/usr/sbin/DirectoryService` imports 857 of the 864 symbols of Leopard's, also 514.25, and none other.
+- OpenSSH 95.1.5, which is OpenSSH 5.1p1: its tools import and export exactly Apple's symbols; its `sshd_config` sets the same options as Leopard's, which is 10.5.0's file, left in place by later updates, and differs from ours only in comments.
 
 make-test-image copies their Roots into the image, writes the test password's hash into root's record in the local directory as well as into `master.passwd`, and sets `Disabled` to false in `ssh.plist`, as turning on Remote Login does on Leopard.
 
@@ -110,7 +110,7 @@ The kqueue itself is plain BSD, so [D79](https://github.com/nyg/PowerDarwin/blob
 pthread_create( &watchThread, &attributes, FileChangeThread, (void *) (intptr_t) fKqueue );
 ```
 
-and the callback becomes `FileChangeThread`, which loops forever on `kevent()` and, for each changed file, does what the callback did: it empties the cache of that file's record type, and for users and groups the membership cache too. The daemon then imports four fewer `CFFileDescriptor` calls than Apple's, and `kCFAllocatorSystemDefault`, which only those used. The other two of the seven missing imports are distributed-notification calls that 514.29 added.
+and the callback becomes `FileChangeThread`, which loops forever on `kevent()` and, for each changed file, does what the callback did: it empties the cache of that file's record type, and for users and groups the membership cache too. The daemon then imports four fewer `CFFileDescriptor` calls than Apple's, and `kCFAllocatorSystemDefault`, which only those used. The other two of the seven missing imports, `CFNotificationCenterGetDistributedCenter` and `CFNotificationCenterPostNotificationWithOptions`, are the calls of `XSEventPortCreate` and `XSEventPortPostEvent`, from the closed `libXSEventPort.a` that [D77](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d77) takes out of the link.
 
 ### An account that looked expired (D80)
 
