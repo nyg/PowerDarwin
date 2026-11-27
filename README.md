@@ -22,7 +22,7 @@ The book in [docs/](docs/src/README.md), published at [nyg.github.io/PowerDarwin
 
 Steps 1 to 10 and 13 are reached: on an iMac G5, the image boots to a multi-user system with Ethernet, SSH, fan control, disks, USB, sound, its own compiler, Perl, Python, Ruby and Samba, keeps its GPU and north bridge cooler at idle than Leopard does, and restarts and powers off. Step 11 is reached in QEMU `mac99`, where an open driver for its PMU keeps the clock, restarts and powers off, and the network comes up without a 60-second wait. Not working yet: Wi-Fi, graphics acceleration and sleep. FireWire has an open driver in the image, which brings the bus up, but no FireWire device has been tested on it yet. `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, built after Step 10, run on the iMac and in QEMU, and `curl`, like Leopard's, reaches over HTTPS only the servers that still accept TLS 1.0. Other everyday commands, such as `cmp`, `diff` and `man`, are not built yet.
 
-The comparisons with Leopard are provisional: the reference system is Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](reference/imacg5/README.md)), until they are repeated against an unmodified Leopard 10.5.8.
+The comparisons with Leopard are provisional: the reference system was Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](reference/imacg5/README.md)), until they are repeated against an unmodified Leopard 10.5.8, which the build machine now runs.
 
 ## Hardware
 

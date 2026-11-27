@@ -99,7 +99,7 @@ sequenceDiagram
 
 ## Comparing with Leopard's binaries
 
-A system that boots can still differ from Apple's in ways no test shows at once: a function missing from a library, a driver compiled from source that is not the one Apple shipped. So each project's build is also compared with Leopard's binary of the same version, at the same path, on the build machine's own Leopard. That Leopard is Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/README.md)), so the comparisons in this book are provisional until they are repeated against an unmodified Leopard 10.5.8.
+A system that boots can still differ from Apple's in ways no test shows at once: a function missing from a library, a driver compiled from source that is not the one Apple shipped. So each project's build is also compared with Leopard's binary of the same version, at the same path, on the build machine's own Leopard. That Leopard was Sorbet Leopard, a community update of Leopard 10.5.8 ([reference/imacg5/](https://github.com/nyg/PowerDarwin/blob/master/reference/imacg5/README.md)), so the comparisons in this book are provisional until they are repeated against the unmodified Leopard 10.5.8 that has since replaced it.
 
 ### Symbols and sections
 
