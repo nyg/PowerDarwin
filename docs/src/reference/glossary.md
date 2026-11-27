@@ -568,8 +568,6 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Snow Leopard**: Mac OS X 10.6 (Darwin 10), August 2009, the first Mac OS X for Intel Macs only. See [Darwin's history](../background/history.md).
 
-**Sorbet Leopard**: a community update of Leopard 10.5.8 for PowerPC Macs, which the project's build machine runs; its kernel and drivers carry the versions of 10.5.8's build list. The comparisons with Leopard's binaries are provisional until they are repeated against an unmodified Leopard 10.5.8. See [How testing is done](../method/testing.md).
-
 **source export**: the step that turns Apple's internal source into the published one. It removed blocks marked `#ifndef __OPEN_SOURCE__` but not code using them ([D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)). See [Step 1, part 2](../steps/step-1-drivers-and-bootx.md).
 
 **S/PDIF**: a digital audio output. AppleOnboardAudio mutes the digital stream while no S/PDIF cable is in. See [Step 9](../steps/step-9-disks-and-devices.md).
