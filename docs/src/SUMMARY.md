@@ -37,6 +37,7 @@
 - [Step 13: the GPU at idle](steps/step-13-gpu-idle-heat.md)
 - [Step 14: booting from a USB key](steps/step-14-usb-boot.md)
 - [What's next](steps/whats-next.md)
+- [A graphical interface: the options](steps/graphical-interface.md)
 
 # Synthesis
 

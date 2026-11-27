@@ -252,6 +252,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **four-character code**: a 32-bit number written as four characters, such as the file type `tbxi`. Its bytes read differently in each byte order. See [Hardware and boot basics](../background/hardware-basics.md).
 
+**framebuffer**: the memory whose bytes are the screen's pixels, which a display driver sets up and the kernel or a window server draws into. See [A graphical interface: the options](../steps/graphical-interface.md).
+
 **framework**: a bundle in `/System/Library/Frameworks` holding a library with its headers and resources. See [What Darwin is](../background/what-darwin-is.md).
 
 **gcc_select, gnumake**: the project that makes `cc`, `gcc`, `c++` and the other links to the default compiler, gcc 4.0, and the project of GNU Make 3.81, `make`. See [Step 10](../steps/step-10-working-unix.md).
@@ -405,6 +407,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **MPIC**: the multiprocessor interrupt controller of PowerPC Macs, an OpenPIC, driven by AppleMPIC. See [Hardware and boot basics](../background/hardware-basics.md).
 
 **msdosfs, `cd9660`, cddafs**: the FAT file system with its tools, the bundle for ISO 9660 data CDs, and the file system for audio CDs. See [Step 9](../steps/step-9-disks-and-devices.md).
+
+**NDRV**: the display driver that a graphics card's firmware carries, written for Mac OS 9, which IOKit's IONDRVSupport runs on Darwin to set up the screen. See [A graphical interface: the options](../steps/graphical-interface.md).
 
 **`nmedit`**: a cctools tool that edits a binary's symbol table, run after linking to apply an exports file. See [Step 6](../steps/step-6-securityd.md).
 
@@ -638,11 +642,17 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **virtual control**: Apple's `PowerMac12_1VirtualControl`, which gives a fan the highest of several loops' requests and applies the rubber band and the power floor. See [OpenSMU](../synthesis/opensmu.md).
 
+**VNC**: a protocol that sends a screen's pixels to a viewer on another computer, and the viewer's keys and mouse back. See [A graphical interface: the options](../steps/graphical-interface.md).
+
 **vtable**: the table of function pointers through which C++ calls a class's virtual functions. A subclass built against one version of a family calls its functions at fixed slots, so the slots must match in the version it runs with. See [Step 9](../steps/step-9-disks-and-devices.md).
 
 **Wayback Machine**: the Internet Archive's copy of old web pages, the only remaining source of darwinbuild's Roots and of some of Apple's old tarballs. See [Leopard 9L30](../method/sources-and-roots.md).
 
+**window manager**: an X client that places, frames and moves the other clients' windows, such as twm. See [A graphical interface: the options](../steps/graphical-interface.md).
+
 **work loop**: the thread on which an IOKit driver handles its interrupts and requests. See [Hardware and boot basics](../background/hardware-basics.md).
+
+**X Window System, X server, X client**: the graphical system of most Unix systems. The X server owns a screen, a keyboard and a mouse; X clients are the programs that draw on it, through a protocol that also works over a network. Apple's 9L30 release publishes X.Org's, in the X11 projects. See [A graphical interface: the options](../steps/graphical-interface.md).
 
 **XCOFF**: the program format that Open Firmware loads and runs, which BootX is built in. See [the boot chain](../background/boot-chain.md).
 
@@ -650,4 +660,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Xcode 3.1.4**: Apple's developer tools for Leopard, closed, needed on the build machine for `xcodebuild`. See [darwinbuild and the build machine](../method/darwinbuild.md).
 
+**XDarwin, IOKit mode**: the X server of Apple's X11 for Panther and Tiger and of X.Org's xorg-server up to 1.4, which in its IOKit mode runs from Darwin's text console on IOKit's framebuffer and input, with no WindowServer. Leopard's X11 does not have it. See [A graphical interface: the options](../steps/graphical-interface.md).
+
 **xnu**: Darwin's kernel: Mach, a BSD layer and IOKit. See [What Darwin is](../background/what-darwin-is.md).
+
+**Xvfb**: an X server whose screen is only memory, built by Apple's X11server 48.7 and installed by Leopard. See [A graphical interface: the options](../steps/graphical-interface.md).
