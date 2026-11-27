@@ -136,7 +136,7 @@ if (!do_pam_account()) {
 
 and `pam_strerror` spells that "User account has expired". The console was not affected, because Apple's `pam.d/login` uses `pam_permit` for its account phase.
 
-[D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)'s [patch](https://github.com/nyg/PowerDarwin/blob/master/patches/pam-32.1/0002-sshd-account-without-pam-securityserver.patch) makes the account phase `pam_unix`, which checks the account's and the password's expiry dates. What `pam_securityserver` checks besides, password-server policies, disabled accounts and the login shell, is not checked. The row's kind is `deferred`, as is D66's: both wait for builds that come after OpenDirectory's ([What's next](whats-next.md#opendirectory)).
+[D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) made the account phase `pam_unix`, which checks the account's and the password's expiry dates, until `pam_securityserver` was built after OpenDirectory ([Step 2](step-2-console-login.md)). The row is now `dropped`: the phase is Apple's again, and `pam_securityserver` checks password-server policies, disabled accounts and the login shell. In QEMU, on 28 November 2026, with root's shell set to `/usr/bin/false` by `chsh`, sshd refused root after its password, with `PAM: User account has expired for root`, while the console, whose account phase is `pam_permit`, took the password and the shell ended at once; with `/bin/sh` back, both logged in, before and after a restart.
 
 ### Every other deviation of this part
 
@@ -175,7 +175,7 @@ From another Mac on the network, a current OpenSSH client logged in as root, wit
 - The clock read 31 December 1969, since nothing sets it without AppleSMU; ntpd comes in [Step 4](step-4-everyday-commands.md), the hardware clock in [Step 5](step-5-clock-and-power.md).
 - SSH logins get no security session of their own until [Step 6](step-6-securityd.md), where launchproxy's `SessionCreate()` starts to succeed.
 - The 60-second wait before `en0` is named remains until [Step 8](step-8-clean-boot.md) on the iMac, and in QEMU until an open driver for its PMU exists ([What's next](whats-next.md)).
-- sshd's account phase skips what `pam_securityserver` checks ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)); there is no DHCP server, `bootpd` ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and no Wi-Fi support in the DHCP client ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)).
+- There is no DHCP server, `bootpd` ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and no Wi-Fi support in the DHCP client ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)).
 - `grep`, `ps`, `less` and `vi` are not built yet: [Step 4](step-4-everyday-commands.md) adds them.
 
 ## Where to look

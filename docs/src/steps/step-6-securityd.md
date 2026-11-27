@@ -182,7 +182,6 @@ Step 6 was reached on the iMac. Two lines remained at each login, both from part
 
 ## What is still missing
 
-- The account checks that `pam_securityserver` makes for sshd: password-server policies, disabled accounts and the login shell ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
 - No smart-card reader works: the only drivers SmartCardServices brings are the vendors' prebuilt ones, which stay off the image.
 - ReportCrash, which is closed.
 
