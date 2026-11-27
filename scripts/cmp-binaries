@@ -21,8 +21,9 @@ work=$(mktemp -d /tmp/cmp-binaries.XXXXXX)
 trap 'rm -rf "$work"' EXIT
 
 archs() { lipo -info "$1" 2>/dev/null | sed 's/.*: //' || true; }
-imports() { nm -arch ppc -u "$1" 2>/dev/null | sort > "$2" || true; }
-exports() { nm -arch ppc -g "$1" 2>/dev/null | grep -v ' U ' | awk '{ print $3 }' | sort > "$2" || true; }
+symbols() { nm -arch ppc "$1" "$2" 2>/dev/null | awk -v header="$2(" 'NF && index($0, header) != 1' || true; }
+imports() { symbols -u "$1" | sort > "$2"; }
+exports() { symbols -g "$1" | awk '$1 != "U" { print $3 }' | sort > "$2"; }
 sections() { size -arch ppc "$1" 2>/dev/null | tail -1 | awk '{ print $1, $2, $3 }' || true; }
 same() { cmp -s "$1" "$2" && echo yes || echo no; }
 
