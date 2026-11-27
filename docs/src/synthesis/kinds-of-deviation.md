@@ -29,7 +29,7 @@ xychart-beta horizontal
     title "Rows of DEVIATIONS.md by kind, D1 to D128"
     x-axis ["build-env", "bug", "closed-dependency", "closed-replacement", "bitrot", "deferred", "dropped"]
     y-axis "Rows" 0 --> 40
-    bar [37, 30, 25, 24, 4, 4, 4]
+    bar [37, 30, 25, 24, 4, 3, 5]
 ```
 
 A quarter of the rows are `bug`, but few of them fix Apple's code. Of the 30, 16 change only the build list, 4 put back what the source export removed, 3 fill gaps in CF-Lite, and 2 follow the public tools, Xcode's layout and darwinxref's order of flags; only 5 fix a fault in the code itself. The largest kind, `build-env`, changes no source at all. Most of the work of building Darwin 9 is not fixing Apple's code but supplying what the build around that code needs.
@@ -50,7 +50,7 @@ So the rest of this chapter sorts the rows a second way, by cause. Every row has
 | Leopard's versions never published | D10, D30, D36, D73 | | D58 | D37, D40, D85, D86, D111, D121 | | | |
 | Closed parts the system needs | | | | D8, D13, D15, D67, D81, D94, D95, D112, D117, D118, D119, D122, D124 | | | |
 | Other closed frameworks and libraries | D51, D69, D89, D107 | | | | D27, D41, D61, D87, D91, D102, D108, D113 | | |
-| OpenDirectory | D128 | | | D126 | D127 | D42, D44, D66 | D80, D84 |
+| OpenDirectory | D128 | | | D126 | D127 | D42, D44 | D66, D80, D84 |
 | The archive: tarballs, lists, Roots | D1, D3, D6, D20, D123 | D2 | | | | | |
 | Faults in Apple's code | | | D17, D33, D46, D83, D116 | | | | |
 | Waiting for an open project | | | | | | D72 | D26, D45 |
@@ -226,7 +226,7 @@ flowchart LR
 - [D128](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d128) builds both for `ppc` alone, as the build list builds DirectoryService, which CFOpenDirectory links.
 - [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42) and [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44) build `pam_securityserver`, `passwd` and `chpass` only once CFOpenDirectory is in the build environment: pam_modules and system_cmds are built long before it, and again after it.
 - [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84) and [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) are `dropped`: logins try `pam_securityserver` first again, as Apple's `pam.d` files have it, and it is the module that checks a password `passwd` has set; sshd's account phase is that module again too.
-- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66) still builds bootp without `bootpd`, the DHCP and NetBoot server.
+- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66) is `dropped` as well: bootp is built after OpenDirectory, with `bootpd`, the DHCP and NetBoot server.
 
 D42 and D44 were `closed-dependency` while the gap seemed closed for good; once a stand-in filled it, they became `deferred`, waiting only for their place in the build order. A row's kind records how it was filed, not its cause. The lesson: follow a closed framework to every project that includes it before turning features off one by one; a single gap may explain several rows, and filling it brings them back together.
 
@@ -242,7 +242,7 @@ Five rows fix a fault in the code itself, rather than in what surrounds it: libg
 
 ### Waiting for an open project
 
-A change made only until another project is built is `deferred`, and becomes `dropped` once that project is. launchctl was built without Security ([D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26)), and the console login's `pam_launchd` was optional ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)), until securityd was built in Step 6; both rows are now `dropped` ([Step 6](../steps/step-6-securityd.md)), and so are [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84) and [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), which kept logins from trying `pam_securityserver` until OpenDirectory was built. Cyrus SASL's MySQL plug-in still waits for MySQL ([D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72)).
+A change made only until another project is built is `deferred`, and becomes `dropped` once that project is. launchctl was built without Security ([D26](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d26)), and the console login's `pam_launchd` was optional ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)), until securityd was built in Step 6; both rows are now `dropped` ([Step 6](../steps/step-6-securityd.md)), and so are [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84) and [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), which kept logins from trying `pam_securityserver` until OpenDirectory was built, and [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), which left out `bootpd` until then. Cyrus SASL's MySQL plug-in still waits for MySQL ([D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72)).
 
 ### A choice
 
