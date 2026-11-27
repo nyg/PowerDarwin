@@ -81,7 +81,7 @@ Changing a project means running the same steps one at a time. From a current Ma
 
 ## Install it
 
-No release is published yet. A release is a page under [Releases](https://github.com/nyg/PowerDarwin/releases) with three files: `PowerDarwin-<name>.img.gz`, the image, a raw disk with an Apple Partition Map, gzipped; `PowerDarwin-<name>-source.tar`, the source of every binary on it; and `SHA256SUMS`. Until there is one, build the image (above) with `make-test-image --release=<name>`, which makes it as a release has it: root has no password, and the time zone is UTC. `/private/var/tmp/PowerDarwin.cdr.gz` on the build machine is then the same raw image, gzipped.
+Each release is a page under [Releases](https://github.com/nyg/PowerDarwin/releases) with three files: `PowerDarwin-<name>.img.gz`, the image, a raw disk with an Apple Partition Map, gzipped; `PowerDarwin-<name>-source.tar`, the source of every binary on it; and `SHA256SUMS`. To have the same from your own build, make the image (above) again with `make-test-image --release=<name>`, which makes it as a release has it: root has no password, and the time zone is UTC. `/private/var/tmp/PowerDarwin.cdr.gz` on the build machine is then the same raw image, gzipped.
 
 ### In QEMU
 
