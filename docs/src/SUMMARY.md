@@ -43,6 +43,7 @@
 - [Kinds of deviation, with worked examples](synthesis/kinds-of-deviation.md)
 - [OpenSMU](synthesis/opensmu.md)
 - [What stays closed, and why](synthesis/what-stays-closed.md)
+- [Wi-Fi: what it would take](synthesis/wifi.md)
 
 # Reference
 

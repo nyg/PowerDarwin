@@ -41,7 +41,7 @@ Apple's last bootable Darwin was 8.0.1, in 2005; after that, Apple published sou
 - **Background**: what Darwin is, its history, the hardware and boot ideas the rest of the book uses, PowerPC Macs and QEMU, and the boot chain from power-on to `login:`.
 - **Method**: where the sources come from, how darwinbuild builds them, the project's rules, how the disk image is made, and how it is tested.
 - **The steps**: one chapter per step, two for Steps 1 and 3, each with its goal, what was built, what broke, how it was fixed, and how the step was proved.
-- **Synthesis**: the kinds of change the project had to make, OpenSMU in full, and what stays closed.
+- **Synthesis**: the kinds of change the project had to make, OpenSMU in full, what stays closed, and what Wi-Fi would take.
 - **Reference**: the glossary and indexes of deviations, projects and commits.
 
 ## Three ways to read it

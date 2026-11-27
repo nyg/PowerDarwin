@@ -54,7 +54,7 @@ block-beta
 | `AppleFWOHCI` | the FireWire controller's driver, a plug-in of IOFireWireFamily that no published source holds | no FireWire device appears | OpenFWOHCI ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)), with no isochronous DMA; no FireWire device tested yet |
 | `IOFWSimplePhysicalAddressSpace`, in IOFireWireFamily 344.4.0 and later | the physical address space that SBP-2 keeps its commands in; the published source file holds only a copyright line | IOFireWireFamily does not load | ours, in a patch ([D120](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d120)) |
 | `ATIRadeon9700`, and the ATI display drivers in `IONDRVSupport` | the GPU's acceleration and power management | the screen comes from the firmware's display driver; our OpenRadeonPM sets the GPU's clock gating and its link's L0s state, which keeps the GPU and the north bridge cooler at idle than under Leopard ([Step 13](../steps/step-13-gpu-idle-heat.md)) | OpenRadeonPM ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)) |
-| `IO80211Family` with `AppleAirPortBrcm4311`; `IOBluetoothFamily` | AirPort and Bluetooth | no Wi-Fi, no Bluetooth: the network is Ethernet | none |
+| `IO80211Family` with `AppleAirPortBrcm4311`; `IOBluetoothFamily` | AirPort and Bluetooth | no Wi-Fi, no Bluetooth: the network is Ethernet | none; [Wi-Fi: what it would take](wifi.md) looks at an open driver for the iMac's chip |
 | `IOHDIXController` | the driver of disk images | no disk-image driver | none |
 | `ALF`, `AppleXsanFilter`, `TMSafetyNet`, `seatbelt` | the application firewall, Xsan, Time Machine's protection, the sandbox's policy | no firewall, no sandbox | none |
 | `OSvKernDSPLib` | vector arithmetic in the kernel, which IOAudioFamily calls once | none | a loop ([D87](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d87)) |
@@ -84,7 +84,7 @@ block-beta
 | DiskImages | disk images | Security's FileVault part, in SecurityFoundation, is not built | none |
 | AppleSystemInfo | reads the serial number | `pam_serialnumber`, used only by Mac OS X Server's PAM files, is not built | none ([D41](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d41)) |
 | XSEventPort | carries DirectoryService's events to the adaptive firewall | `dsPostEvent` returns 0 | DirectoryService's own switch ([D77](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d77)) |
-| Apple80211 | Wi-Fi | IPConfiguration does not read the Wi-Fi network's name | bootp's own `NO_WIRELESS` build ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)) |
+| Apple80211, with `airportd` and configd's `Apple80211Monitor` | Wi-Fi: scanning, joining, keys | IPConfiguration does not read the Wi-Fi network's name | bootp's own `NO_WIRELESS` build ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)) |
 
 ## Programs
 
@@ -120,7 +120,7 @@ Rule 5 lets closed tools run the build, as long as nothing of theirs reaches the
 On the iMac G5, the image is a Unix system with no graphical system: it boots, mounts its disks and USB keys, keeps time, restarts, switches off, runs its fans as quietly as Leopard, plays and records sound through `openplay`, serves SSH logins over Ethernet, compiles programs with the release's own toolchain, runs Perl, Python and Ruby, and shares a folder over SMB1. What the closed parts take away:
 
 - the graphical system and everything built on Foundation and Cocoa;
-- Wi-Fi and Bluetooth, and FireWire's audio and video streams;
+- Wi-Fi ([Wi-Fi: what it would take](wifi.md)) and Bluetooth, and FireWire's audio and video streams;
 - sleep, and graphics acceleration;
 - discs with only a UDF volume;
 - `passwd`, password policies and a DHCP server, through OpenDirectory;
