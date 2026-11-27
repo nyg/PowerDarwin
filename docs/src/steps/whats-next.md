@@ -22,6 +22,10 @@ Audio CDs, which no test has read, and the iMac's own optical drive, which did n
 
 Panther's IOATABlockStorage 130.3.1 and IOSCSIArchitectureModelFamily 139.0.2 stand in for Leopard's 200.1.8 and 200.3.6, which Apple never published ([D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85)). If either source ever appears, the project would build it, drop the stand-in and the deviations around it, and compare the result with Leopard's binary. AppleMacRISC4PE builds with 66 register values that no published header defines ([D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)), and the published source leaves parts of five of its functions out; only a model-name line in panic logs applies to the iMac, so what the others lack can matter only on other Macs.
 
+### Wi-Fi
+
+The image has no Wi-Fi: Leopard's 802.11 family, its AirPort drivers, its framework and its daemons are closed, and Apple published only eap8021x, the 802.1X client, and the family's headers. The iMac's AirPort Extreme is a Broadcom BCM4318, which open drivers in Linux (b43) and the BSDs (bwn, bwi) support. A driver of the project's own, with a station's 802.11 stack and WPA2, would fit the image's network path as a second Ethernet interface, but the chip needs firmware loaded at every power-up, and the only open one, OpenFWWF, is from outside Apple's release and untried on the iMac's core revision. [Wi-Fi: what it would take](../synthesis/wifi.md) compares four routes against the rules, says what was checked and how, and lists the decisions and the stages.
+
 ## Machines
 
 ### Other PowerPC Macs
@@ -93,6 +97,7 @@ mindmap
       open AppleFWOHCI
       audio CDs, line input, DSP, UDF
       unpublished sources
+      Wi-Fi
     Machines
       other PowerPC Macs
       QEMU's OHCI
@@ -118,5 +123,6 @@ Some items help others: OpenDirectory would bring back `passwd`, with which root
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
 - In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
+- [Wi-Fi: what it would take](../synthesis/wifi.md): the iMac's AirPort Extreme, the open drivers and firmware for it, and the decisions they need.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), [overlay/usr/libexec/first-boot](https://github.com/nyg/PowerDarwin/blob/master/overlay/usr/libexec/first-boot), [scripts/make-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-release) and [scripts/publish-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/publish-release): the test password, the first boot and the release.
 - [What stays closed, and why](../synthesis/what-stays-closed.md).

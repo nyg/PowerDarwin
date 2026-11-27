@@ -4,9 +4,17 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **16.16 fixed point**: an integer whose upper 16 bits are whole units and lower 16 bits fractions, so 65,536 stands for 1 °C. OpenSMU and Apple's drivers keep temperatures in it. See [OpenSMU](../synthesis/opensmu.md).
 
+**802.11 stack**: the part of an operating system that builds and reads 802.11 frames, scans, joins networks and handles their keys, such as net80211 in the BSDs. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
+**802.11, Wi-Fi**: IEEE's standard for wireless local networks, and its trade name. The iMac G5's chip speaks 802.11b and 802.11g, in the 2.4 GHz band. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
 **`9A581`, `9L30`**: Apple's build numbers for Mac OS X 10.5.0 and 10.5.8. The project builds the versions of `9L30`. See [Leopard 9L30](../method/sources-and-roots.md).
 
 **ADC**: analog-to-digital converter, which turns a voltage into a number. The SMU's ADC reads the CPU diode. See [Step 7](../steps/step-7-fans.md).
+
+**AirPort, AirPort Extreme**: Apple's names for the Wi-Fi of its Macs: AirPort for the first cards, 802.11b, and AirPort Extreme for 802.11g, which on the iMac G5 is a Broadcom BCM4318 on the logic board. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
+**Apple80211, IO80211Family**: Leopard's closed Wi-Fi framework for programs, and its closed kernel family for Wi-Fi drivers, whose headers Apple published in `Kernel.framework` under the APSL 1.1. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **AppleFWOHCI**: Apple's driver of the FireWire controller, a plug-in of IOFireWireFamily that no published source holds. Without it, or our OpenFWOHCI in its place, no FireWire device appears. See [Step 9](../steps/step-9-disks-and-devices.md) and [Step 12](../steps/step-12-firewire.md).
 
@@ -28,6 +36,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **APSL**: the Apple Public Source License 2.0, the licence of most of Darwin's projects. See [What Darwin is](../background/what-darwin-is.md).
 
+**AR9271**: an Atheros Wi-Fi chip of USB adapters, whose firmware Qualcomm Atheros published as source, `open-ath9k-htc-firmware`. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
 **`asr`**: Apple Software Restore, Leopard's tool that copies a disk image onto a partition. See [How testing is done](../method/testing.md).
 
 **ASPM, L0s, L1**: Active State Power Management, by which each end of a PCI Express link puts its transmitter into a low-power state while it has nothing to send: L0s, left within a fraction of a microsecond, or the deeper L1. Software turns it on in each end's Link Control register. See [Step 13](../steps/step-13-gpu-idle-heat.md).
@@ -38,9 +48,15 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`AutomountDisksWithoutUserLogin`**: the setting in `/Library/Preferences/SystemConfiguration/autodiskmount.plist` with which DiskArbitration mounts removable and external disks without a console user, as on Apple's servers. `make-test-image` writes it. See [Step 9](../steps/step-9-disks-and-devices.md).
 
+**b43, bwn, bwi**: open drivers of Broadcom's SoftMAC Wi-Fi chips: b43 in Linux, under the GPL; bwn in FreeBSD and bwi in FreeBSD, OpenBSD and NetBSD, under BSD licences. All three support the iMac G5's BCM4318. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
+**backplane**: the bus inside a Broadcom Wi-Fi chip that joins its cores, the PCI core, the common core and the 802.11 core, which a driver reaches one at a time through a window of the PCI register space. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
 **backport**: a fix taken from a later Apple release of the same project and applied to the `9L30` version, the second choice of rule 2. See [The rules](../method/rules.md).
 
 **BCD**: binary-coded decimal, a way of storing a number with each decimal digit in four bits, so that 59 is stored as the byte `0x59`. The SMU keeps its clock this way. See [Step 5](../steps/step-5-clock-and-power.md).
+
+**BCM4318**: Broadcom's 802.11b/g chip, PCI ID `14e4:4318`, the iMac G5's AirPort Extreme. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **bison, `y.tab.c`**: bison turns a grammar (`parse.y`) into a C parser (`y.tab.c`). `make` makes the parser again only when the grammar is newer, which D20 relies on. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
 
@@ -111,6 +127,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **CarbonHeaders**: the project of `AvailabilityMacros.h`, `TargetConditionals.h`, `MacTypes.h` and other headers that many others include. Its `9L30` version has no source ([D10](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d10)); version 18.1, of Mac OS X 10.6, is on GitHub, and the image gets its nine headers ([D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)). See [Step 10](../steps/step-10-working-unix.md).
 
 **cause**: why a deviation was needed, as against its kind, what sort of change it is. Chapter 25 sorts every row by both. See [Kinds of deviation](../synthesis/kinds-of-deviation.md).
+
+**CCMP, TKIP**: the ciphers that encrypt each frame on a WPA2 and a WPA network: CCMP is built on AES, TKIP on RC4. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **cctools, ld64**: Apple's project of the assembler and binary tools (`as`, `ar`, `nm`, `otool`, `lipo`), and Apple's linker for Leopard, `ld`. See [Step 10](../steps/step-10-working-unix.md).
 
@@ -187,6 +205,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **deviation**: any difference from Apple's sources or from Apple's build: a patch, a change to the build environment, or a replacement. Each has an ID such as D81 and a row in DEVIATIONS.md. See [The rules](../method/rules.md) and [Kinds of deviation](../synthesis/kinds-of-deviation.md).
 
 **device alias**: Open Firmware's short name for a device path, such as `hd` or `sata`. `devalias` lists them. See [the boot chain](../background/boot-chain.md).
+
+**device firmware**: a program that runs on a device's own processor, such as a Wi-Fi chip's, and that the device's driver loads into it; not the Mac's own firmware, Open Firmware. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **device path**: Open Firmware's name for a device, a partition and a file, such as `sata/k2-sata@0/@0:4,\\:tbxi`. See [the boot chain](../background/boot-chain.md).
 
@@ -432,6 +452,8 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **OpenFWOHCI**: this project's link driver for the iMac G5's FireWire controller, in place of Apple's closed `AppleFWOHCI` ([D119](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d119)). See [Step 12](../steps/step-12-firewire.md).
 
+**OpenFWWF**: an open firmware for Broadcom's 802.11b/g chips, written at the University of Brescia under the GPL-2.0 and built with b43-tools' assembler; its last release is 5.2, of 2009. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
 **OpenPMU**: this project's open driver for the PMU, in place of Apple's closed ApplePMU: clock, restart and power-off. Its class derives from one named `ApplePMU`, for which AppleMacRISC2PE's processor driver waits. See [Step 11](../steps/step-11-pmu.md).
 
 **OpenRadeonPM**: this project's kext that sets the idle power state of the iMac G5's ATI RV370, its clock gating and its link's L0s state, in place of that part of Apple's closed `ATIRadeon9700` ([D117](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d117)). See [Step 13](../steps/step-13-gpu-idle-heat.md).
@@ -499,6 +521,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **project**: one source tree that Apple publishes with its own version, such as `xnu` 1228.15.4. A release of Mac OS X is a list of project versions. See [Leopard 9L30](../method/sources-and-roots.md).
 
 **property list**: Apple's format for structured data: nested dictionaries, lists, strings and numbers, written as XML, in NeXT's older text form, or in binary. `Info.plist` files, launchd jobs and darwinbuild's build lists are property lists. See [Leopard 9L30](../method/sources-and-roots.md).
+
+**PSK, WPA, WPA2**: Wi-Fi Protected Access, the protection of most home networks. A passphrase gives the pre-shared key (PSK), from which a four-way handshake between the station and the access point derives each session's keys; WPA2 then encrypts with CCMP, WPA with TKIP. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **PureDarwin**: a community project making usable systems from Darwin's sources: Nano (2008, Darwin 9.2 from Apple's prebuilt parts, Intel) and rafirafi's 1.3 beta (2012, Darwin 9.8, i386 only). See [Darwin's history](../background/history.md).
 
@@ -568,11 +592,17 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **Snow Leopard**: Mac OS X 10.6 (Darwin 10), August 2009, the first Mac OS X for Intel Macs only. See [Darwin's history](../background/history.md).
 
+**SoftMAC, FullMAC**: a Wi-Fi chip whose own processor runs only the timing-critical part of 802.11's MAC layer, leaving scanning, joining and keys to the host's 802.11 stack, and one that runs all of it in its firmware. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
 **source export**: the step that turns Apple's internal source into the published one. It removed blocks marked `#ifndef __OPEN_SOURCE__` but not code using them ([D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)). See [Step 1, part 2](../steps/step-1-drivers-and-bootx.md).
 
 **S/PDIF**: a digital audio output. AppleOnboardAudio mutes the digital stream while no S/PDIF cable is in. See [Step 9](../steps/step-9-disks-and-devices.md).
 
 **SPNEGO**: the exchange in which an SMB client and server agree how to authenticate. Samba 3.0.25b rejects the `mechListMIC` field that today's Mac client sends in it, so the image's `smb.conf` turns it off ([D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113)). See [Step 10](../steps/step-10-working-unix.md).
+
+**SPROM**: the small memory of a Broadcom Wi-Fi board that holds its MAC address, its calibration and its limits, read by the driver at start. See [Wi-Fi: what it would take](../synthesis/wifi.md).
+
+**SSID**: the name of a Wi-Fi network, which its access points announce. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **Startup Manager**: the boot menu that appears when Option is held at power-on, listing the volumes a Mac can start from. See [the boot chain](../background/boot-chain.md).
 
@@ -581,6 +611,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **`Still waiting for root device`**: the kernel's message when no driver has published the root partition after 60 seconds. See [the boot chain](../background/boot-chain.md).
 
 **`sungem`**: QEMU's model of Apple's GMAC Ethernet chip, the iMac G5's own, driven by AppleGMACEthernet. See [PowerPC Macs](../background/powerpc-macs.md).
+
+**supplicant**: the code on a station that proves its key or identity to the network and runs WPA's four-way handshake, such as wpa_supplicant, or a part of a driver's 802.11 stack. See [Wi-Fi: what it would take](../synthesis/wifi.md).
 
 **`sw_vers`**: the command that prints the system's name, version and build, read from `SystemVersion.plist`; Perl's build calls it, and a stand-in prints 10.5.8 and `9L30` in the build environment ([D98](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d98)). Leopard's comes from a closed project; the image's is built from DarwinTools 1, Apple's open `sw_vers` of Darwin 8, and prints Darwin, 9.8 and `9L30` ([D121](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d121)). See [Step 10](../steps/step-10-working-unix.md).
 
