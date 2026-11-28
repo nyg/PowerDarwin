@@ -296,7 +296,7 @@ On an image made with them, `check-image` found 29,568 files, all from the build
 - `man ls` showed the page in `less` on a terminal, which searched it and quit, and `man` formatted the pages of `diff`, `screen`, `nano`, `cron`, `zip` and `dig`;
 - `screen` started a session that was detached, listed as `Detached`, attached again and ended, and `nano` wrote a file of two lines.
 
-Nothing new appeared in the system log. This image has not been started on the iMac yet.
+Nothing new appeared in the system log. Installed with `install-image` on the iMac and started there, the commands did the same tasks with the same results, the current Mac's `openrsync` included, `cron` ran the job each minute, and nothing from them appeared in the system log either.
 
 ### HTTPS
 
@@ -311,7 +311,6 @@ Current sites refuse the handshake: example.com with `sslv3 alert handshake fail
 ## What is still missing
 
 - Other commands of Leopard's, such as `od`, `bc`, `sudo` and `zsh`, which no step has built yet ([What's next](whats-next.md)), and HTTPS to current sites, which need TLS 1.2 (above).
-- A boot on the iMac of an image with the commands built after the everyday tools, which were tried in QEMU only.
 - DTrace itself, and with it the languages' probes, which compile to nothing.
 - Python's 36 Carbon modules, Build Applet and Python Launcher ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, as no Tk is built.
 - `.dSYM` bundles for one-step `-g` builds ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
