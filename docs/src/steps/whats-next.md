@@ -49,7 +49,7 @@ Several pieces wait for OpenDirectory, Leopard's interface to directory services
 
 [Step 10](step-10-working-unix.md) made the image a working Unix system, and left these open:
 
-- More everyday commands that no step has built, each a project of the 9L30 build list: `cmp` and `diff` (gnudiff 14), `patch` (patch_cmds 11), `man` (man 12, with groff 31), `crontab` (cron 30), `nc` (netcat 7), `dig` and `host` (bind9 26.1.5), `telnet` and `logger` (remote_cmds 13.0.2), `rsync` (rsync 35.2), `zip` (zip 9), `screen` (screen 12) and `nano` (nano 4); and `bzip2`, whose 16.5 is built for the build environment only ([D19](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d19)). `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl` were built after the step ([D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)).
+- More of Leopard's commands, each from a project of the 9L30 build list that no step has built: `od`, `hexdump` and `ctags` (developer_cmds 49), `bc` and `dc` (bc 21), `cal` and `units` (misc_cmds 23), `uuencode`, `uudecode` and `write` (basic_cmds 48), `mail` (mail_cmds 22), `ftp` (lukemftp 11), `sudo` (sudo 28), `tcpdump` (tcpdump 23), `periodic` and `newsyslog` (crontabs 34), and the shells `tcsh`, `zsh` and `ksh` (tcsh 60, zsh 48, ksh 13). `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl` were built after the step ([D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)), and then `cmp`, `diff`, `patch`, `man`, `nc`, `rsync`, `zip`, `unzip`, `screen`, `nano`, `crontab`, `dig`, `host`, `telnet`, `logger` and `bzip2` ([Step 10](step-10-working-unix.md#more-everyday-commands)).
 - HTTPS to current sites. The image's `curl`, on OpenSSL 0.9.7l as Leopard's is, speaks TLS 1.0 at most and checks no certificate signed with SHA-256, so current sites refuse it, as they refuse Leopard's; they need TLS 1.2, which no project of the 9L30 build list has.
 - DTrace. The probes of Perl and Python compile to nothing through a stand-in `dtrace` in the build environment ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)), and Ruby's through a patched header ([D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103)), as Libc's and DirectoryService's do ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75)). dtrace-48.1 is published, but its library needs the closed Foundation and Symbolication even when built from it, in `libdtrace/dt_ld.m` and `dt_pid_apple.m`; tracing on the image would take a library without them.
 - Python's 36 Carbon modules, its Build Applet and its Python Launcher, which need the closed Carbon and ApplicationServices ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, since Tk needs the closed Aqua frameworks ([D71](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d71)).
@@ -86,11 +86,7 @@ Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Ot
 
 The image is now made the way a release would publish it: `make-test-image --release=<name>` leaves root without a password, uses UTC and `time.apple.com` instead of the build machine's time zone and NTP server, and puts the licence texts and the notices of every project built into `/usr/share/doc/PowerDarwin`. At its first boot, the console asks for root's password, and the image makes its SSH host keys before it turns SSH on, which stands in for `passwd` there ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). Every project is built in UTC, under the host name `powerdarwin.invalid` and the login name `root`, so that the programs that record who built them and where name no machine or user ([D125](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d125)). `make-release` checks such an image for passwords, keys and anything of the build machine, and writes the release's files: one raw image, for QEMU and for `install-image`, the source of every binary on it, and checksums; `publish-release` uploads them ([Making the image](../method/making-the-image.md#releases)).
 
-No release is published yet. The first is to be the image of a rebuild on an unmodified Leopard 10.5.8 (below), once the comparisons with Leopard are repeated on it. What would remain after it: Step 14, after which the same raw image could be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
-
-### A second build machine
-
-Every image so far was built on one build machine, which runs Sorbet Leopard, a community update of Leopard 10.5.8. A rebuild from scratch on another, with an unmodified Leopard 10.5.8, would show that the scripts repeat the build, and would settle the comparisons with Leopard's binaries, which are provisional until then ([How testing is done](../method/testing.md)).
+What remains after the first release: Step 14, after which the same raw image can be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
 
 ## A map of the open items
 
@@ -108,21 +104,20 @@ mindmap
       OpenDirectory
       ReportCrash, loginwindow, CoreAudio
       MySQL for SASL
-      cmp, diff, man and more
+      od, bc, sudo and more
       graphical interface
       HTTPS with TLS 1.2
       DTrace, Samba's SPNEGO
       Darwin 10 for PowerPC
     Distribution
       image for others
-      second build machine
 ```
 
 Some items help others: OpenDirectory would bring back `passwd`, with which root's password could be changed after the first boot.
 
 ## Where to look
 
-- README.md: "Status", which ends with what does not work yet, what `curl` reaches over HTTPS, and the commands still missing.
+- README.md: "Features", which ends with what does not work yet, among it the commands still missing.
 - DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), the `closed-*` rows, among them [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), Step 10's [D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112) and [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): the closed drivers of the iMac G5.
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.

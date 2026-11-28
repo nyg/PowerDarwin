@@ -260,9 +260,13 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **getty**: the program that opens a terminal, prints `login:` and runs `login`. launchd starts it from system_cmds' `com.apple.getty.plist`. See [Step 2](../steps/step-2-console-login.md).
 
+**gnudiff, patch_cmds**: the projects of GNU diffutils 2.8.1 and GNU patch 2.5.8, which make `cmp`, `diff`, `diff3`, `sdiff` and `patch`; they were built after Step 10, with the other commands of [More everyday commands](../steps/step-10-working-unix.md#more-everyday-commands). See [Step 10](../steps/step-10-working-unix.md).
+
 **gnutar, gnuzip**: the projects of GNU tar 1.15.1 and gzip 1.3.10, which make `/usr/bin/tar` and `/usr/bin/gzip`; with awk, file, lsof, top and curl, they were built after Step 10 ([D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)). See [Step 10](../steps/step-10-working-unix.md).
 
 **GPIO**: general-purpose input and output, a single wire that a driver can set or read. See [Hardware and boot basics](../background/hardware-basics.md).
+
+**groff, man**: groff 1.19.2, the GNU formatter whose `nroff`, `tbl` and `eqn` lay out manual pages for a terminal, and man 1.6c, the `man` command, which finds a page, formats it with groff and shows it with `less`, as `/etc/man.conf` says. See [Step 10](../steps/step-10-working-unix.md#more-everyday-commands).
 
 **GUID partition map**: the partition table of current Macs. Open Firmware reads the Apple Partition Map instead. See [Step 14](../steps/step-14-usb-boot.md).
 
@@ -365,6 +369,8 @@ Each term in a sentence or two, with the chapter that explains it.
 **`libmd`**: a static library of message digests (MD5, SHA and others) that ntp links. See [Step 4](../steps/step-4-everyday-commands.md).
 
 **`libSystem`**: Darwin's C library and system interface, made of Libc, Libm, Libinfo and others linked into one library. See [Step 1, part 1](../steps/step-1-kernel-and-userland.md).
+
+**libtelnet**: a static library of the telnet protocol's authentication and encryption, in a project of its own, which remote_cmds' `telnet` links; it is built from source so that no code of Apple's archived Root ends up in `telnet`. See [Step 10](../steps/step-10-working-unix.md#more-everyday-commands).
 
 **`lipo`**: the tool that lists and splits the slices of a fat binary. See [How testing is done](../method/testing.md).
 
@@ -571,8 +577,6 @@ Each term in a sentence or two, with the chapter that explains it.
 **SMU**: system management unit, a small processor on the logic board of G5 Macs such as the iMac G5, that keeps the clock, switches the power, reads sensors and drives fans. See [Step 5](../steps/step-5-clock-and-power.md).
 
 **Snow Leopard**: Mac OS X 10.6 (Darwin 10), August 2009, the first Mac OS X for Intel Macs only. See [Darwin's history](../background/history.md).
-
-**Sorbet Leopard**: a community update of Leopard 10.5.8 for PowerPC Macs, which the project's build machine runs; its kernel and drivers carry the versions of 10.5.8's build list. The comparisons with Leopard's binaries are provisional until they are repeated against an unmodified Leopard 10.5.8. See [How testing is done](../method/testing.md).
 
 **source export**: the step that turns Apple's internal source into the published one. It removed blocks marked `#ifndef __OPEN_SOURCE__` but not code using them ([D35](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d35), [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39)). See [Step 1, part 2](../steps/step-1-drivers-and-bootx.md).
 

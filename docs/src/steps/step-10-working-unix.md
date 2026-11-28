@@ -7,7 +7,7 @@
 - What stood between Apple's Perl, Python and Ruby and a build from source: DTrace probes, Carbon, and settings that Apple's build list lacks.
 - What Apple's Samba needed to build without its closed framework, and why it stopped answering a minute after boot.
 - How the step was proved, first in a chroot of the image, then on an iMac G5 (`PowerMac12,1`).
-- Which everyday tools were built after the step, how they compare with an unmodified Leopard 10.5.8's, and how far `curl` reaches over HTTPS.
+- Which everyday tools and commands were built after the step, how they compare with Leopard's, why Leopard's BIND computes SHA-1 wrong on PowerPC and ours does not, and how far `curl` reaches over HTTPS.
 
 ## The goal
 
@@ -167,7 +167,7 @@ Apple's `smbd.plist` is a launchd job that listens on Samba's ports, 139 and 445
 
 ## The image
 
-`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 with the 18 of the first chroot tests, 80 since DarwinTools and 87 since the everyday tools, below), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
+`make-test-image` grew more in this step than in any other ([Making the image](../method/making-the-image.md)). It adds the Roots of Csu, SystemStubs, the toolchain, the languages and Samba, which brought its list to 61 userland projects (79 with the 18 of the first chroot tests, 80 since DarwinTools, 87 since the everyday tools and 100 since the commands after them, below), and the `/usr/include` alone of 16 header projects, from Libc_headers to objc4, whose libraries, where they have any, are already on the image. It leaves out `/Developer`, and Python's `wininst-*.exe`, Windows programs prebuilt in its source, by rule 5. Three more things come from no build:
 
 - `/usr/bin/dsymutil`, a script that exits 0 ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)). A compile and link in one step with `-g` makes gcc run `dsymutil` after linking (`gcc/config/darwin.h` in gcc-5465), as autoconf's `configure` scripts do with `-g -O2`, and Apple's `dsymutil` is closed; the build environment has a wrapper for it ([D7](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d7)). A one-step `-g` build then gets no `.dSYM` bundle, and a two-step build keeps its debugging information in its object files.
 - CarbonHeaders 18.1, of Mac OS X 10.6, which [D73](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d73) already uses, installed by its own Makefile: nine headers in `/usr/include`, and `MacTypes.h` again in a `CarbonCore.framework` inside an otherwise empty `CoreServices.framework`, where CF's `CFBase.h` looks for it ([D16](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d16), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111)).
@@ -213,6 +213,17 @@ Two of the seven entries name fewer dependencies than their projects use. top's 
 
 That first curl printed another manual than Leopard's for `curl --manual`. The manual is compiled in, from `src/hugehelp.c`, which `make` regenerates from the man page when the page is newer. Apple's `docs__curl.1.diff` changes the page, and when Apple's build applied it the page became newer, so the manual was made again with Apple's change; GitHub's tarball gives every file the same time, so our build compiled the `hugehelp.c` that curl 7.16.3 ships, made from curl's own page, as bash's parser was in [Step 1, part 1](step-1-kernel-and-userland.md). [D123](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d123) touches the page when the source is staged, as D20 touches bash's grammar, and the manual is made again with the build environment's `nroff`.
 
+### More everyday commands
+
+The image still lacked many of Leopard's everyday commands after those seven: `cmp` and `diff`, `patch`, `man`, `nc`, `rsync`, `zip` and `unzip`, `screen`, `nano`, `crontab`, `dig` and `host`, `telnet` and `logger`, and `bzip2`. Each comes from a project of the 9L30 build list: gnudiff 14 (GNU diffutils 2.8.1), patch_cmds 11 (GNU patch 2.5.8), man 12 (man 1.6c) with groff 31 (groff 1.19.2), netcat 7, rsync 35.2 (rsync 2.6.9), zip 9 (Zip 2.32 and UnZip 5.52), screen 12 (screen 4.0.3), nano 4 (nano 2.0.1), cron 30, bind9 26.1.5 (BIND 9.4.3-P1) and remote_cmds 13.0.2; and bzip2 16.5 (bzip2 1.0.5), which the build order already builds for ncurses' install ([D19](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d19)), and whose Root now goes on the image too. None needs a closed part. They were built on 27 November 2026, at the end of the build order, each at the first try and with no new deviation, in less than a minute for most and 5 minutes for bind9, the longest.
+
+Two of them need more than their own source:
+
+- `telnet` links libtelnet, a static library of the telnet protocol's authentication and encryption, which is a project of its own in the build list, libtelnet 7. remote_cmds names it among the dependencies whose headers and static libraries darwinbuild installs before the build. Until our build of it exists, darwinbuild installs Apple's archived Root, and its code would go into our `telnet`: a prebuilt Apple binary, which rule 5 keeps off the image. So libtelnet is built from source just before remote_cmds, and darwinbuild takes our Root. The library itself stays off the image, as Leopard ships none.
+- `man` lays out a page with groff's `nroff`, `tbl` and `eqn`, shows it with `less`, and opens compressed pages with `gunzip` and `bzip2`. Its `configure` looks for each of them in the BuildRoot and writes the paths it finds into `/etc/man.conf`, though man's entry in the build list names none of them. At the end of the order the BuildRoot holds them all, left there by the builds before, so the file is byte for byte the same as Leopard's.
+
+remote_cmds also builds the daemons and the NIS tools that Leopard's does, among them `telnetd`, `tftpd`, `rlogind`, `ntalkd` and `ypbind`, with the launchd jobs of its source, the same files as Leopard's but tftpd's, which starts it with `-s` where Leopard's says `-i`. Each is off, as on Leopard, until its `Disabled` key is set to false or the file it waits for appears. bind9's `named` is off in the same way. cron's job starts `cron` once a table is in `/usr/lib/cron/tabs`, where `crontab` puts it.
+
 ## How it was proved
 
 The same 25 checks ran in the chroot and then on the iMac:
@@ -242,9 +253,9 @@ BuildVersion:   9L30
 
 and `Darwin`, `9.8` and `9L30` for the three options, the values of the image's `SystemVersion.plist`, which launchctl also gave the kernel as `kern.osversion` `9L30`. Installed with `install-image` on the iMac and started there, it printed the same, and our `bless` then made Leopard the startup disk again.
 
-The seven everyday tools were compared with three sets of Apple's binaries: Sorbet Leopard's, the book's reference system; Apple's archived Roots of the same versions, but for curl, which has none; and an unmodified Leopard 10.5.8, installed from Apple's DVD and combo update onto another partition of the build machine and read from there. All of ours are PowerPC only, where Apple's also carry `i386` ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)).
+The seven everyday tools were compared with two sets of Apple's binaries: Leopard 10.5.8's, on the build machine, and Apple's archived Roots of the same versions, but for curl, which has none. All of ours are PowerPC only, where Apple's also carry `i386` ([D115](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d115)).
 
-- `file`, `top`, `gzip` and `curl` have the same instructions and strings as the unmodified 10.5.8's, and so does `libcurl.4.dylib`; `curl --manual` prints the same bytes, and `top` is identical to Sorbet's too. Sorbet's `gzip` and `curl` are later, from its own updates: a 2011 `gzip`, and curl 7.16.4.
+- `file`, `top`, `gzip` and `curl` have the same instructions and strings as Leopard's, and so does `libcurl.4.dylib`; `curl --manual` prints the same bytes.
 - `awk` has the same instructions as Apple's 9A581 Root; Leopard's own `awk`, of 10.5.0, calls `strtod` where ours and the Root call `strtod$UNIX2003`.
 - `lsof` has the same instructions at other addresses: it writes the build's date, host name and `uname -a` into the binary, and longer strings move its code.
 - `tar` imports six functions fewer than Leopard's, the `__qtn_*` functions that D122's stubs replace.
@@ -262,6 +273,31 @@ On an image made with them, `check-image` found 28,451 files, all from the build
 
 On the iMac, sshd answered 87 seconds after the restart, the system log held only the two lines that Step 8 accepts, and our `bless` then made Leopard the startup disk again.
 
+The commands built after them were compared with Leopard 10.5.8's in the same way, program by program, by the disassembly and the strings of each `ppc` slice:
+
+- `cmp`, `diff`, `diff3`, `sdiff`, `patch`, `nc`, `rsync`, `screen`, `crontab`, `bzip2` with its library, 33 of remote_cmds' 35 programs, `logger` among them, and 20 of groff's 22 have the same instructions and strings as Leopard's.
+- The eight programs of zip, `zip` and `unzip` among them, and `nano` have the same instructions; the strings of six of the eight and of `nano` differ only in the date of the build, and for `nano` its time, which they print with their version.
+- `man` has the same instructions at other addresses, and the same strings, one of them in another place; its `/etc/man.conf` is the same file as Leopard's.
+- `cron` calls `daemon$1050` where Leopard's, of 10.5.0, calls `daemon`, as our `awk` calls `strtod$UNIX2003` where Leopard's calls `strtod`.
+- `telnet` and `timed` have as many instructions as Leopard's, with the same constants, but in one place each, around a division by a constant, other registers in another order.
+- groff's `eqn` and `refer` hold other parsers. Leopard's were made again from their grammars, which Apple did not change, by a bison 2, whose parsers say `memory exhausted`; ours are those that groff 1.19.2 ships, made by another yacc, whose parsers say `yacc stack overflow`. The grammars are older than the parsers in groff's tarball, so `make` keeps the parsers.
+- BIND's twelve programs, `dig`, `host`, `nslookup` and `named` among them, are 79 instructions shorter each, with the same strings but for the date of the build in `named` and `lwresd`. Its SHA-1 code, in `lib/isc/sha1.c`, swaps the bytes of each word it reads unless `configure` defines `WORDS_BIGENDIAN`. Ours defines it, as `configure` found a big-endian machine; the `ppc` slice of Leopard's swaps the bytes, so it computes SHA-1 as a little-endian machine would. BIND uses its SHA-1 for TSIG signatures, DNSSEC's DS digests and RSA-SHA1 signatures: for the same key, `dnssec-signzone` wrote a DS record whose SHA-1 digest was `F1A4EA14…` with Leopard's binary and `B0B858C6…` with ours, the digest that Python's `hashlib` computes from the record, and the same SHA-256 digest with both.
+
+On an image made with them, `check-image` found 29,568 files, all from the builds but the 23 of the table in [Making the image](../method/making-the-image.md) and the 191 of `/usr/share/doc/PowerDarwin`, with a notice for each of the 13 new projects, and the checks of `make-release` found it fit to publish. Booted in QEMU `mac99`, where its first boot asked for root's password, each command did a real task, with files served by the current Mac:
+
+- `diff -u` made a patch that `patch` applied, after which `cmp` found the two files the same; `diff -r`, `diff3` and `sdiff` compared folders and files;
+- `bzip2 -9`, `bunzip2` and `bzcat` gave back the same bytes;
+- `zip -r` packed a folder holding a symbolic link, `zip -T` tested the archive, and `unzip` gave back the same tree; `unzip` also unpacked an archive made by the current Mac's `zip`, with the same MD5s and the link kept;
+- `rsync -a` copied 686 manual pages, then copied again only the one changed; it copied a folder over SSH to the same machine, with ours at both ends, and the current Mac's `openrsync` sent a folder to it over SSH;
+- `nc` listened on a port and received a line from another `nc`, fetched a file from the current Mac's web server, and found port 22 open with `-z`;
+- `telnet` fetched the same file and showed sshd's banner on port 22, and a line that `logger` wrote appeared in `/var/log/system.log`;
+- `host`, `dig` and `nslookup` resolved names through QEMU's DNS server, and `dnssec-signzone` wrote a DS record whose SHA-1 and SHA-256 digests were those that Python computes;
+- `crontab` installed a table, launchd started `cron` when it appeared, and the job ran every minute;
+- `man ls` showed the page in `less` on a terminal, which searched it and quit, and `man` formatted the pages of `diff`, `screen`, `nano`, `cron`, `zip` and `dig`;
+- `screen` started a session that was detached, listed as `Detached`, attached again and ended, and `nano` wrote a file of two lines.
+
+Nothing new appeared in the system log. Installed with `install-image` on the iMac and started there, the commands did the same tasks with the same results, the current Mac's `openrsync` included, `cron` ran the job each minute, and nothing from them appeared in the system log either.
+
 ### HTTPS
 
 The image's `curl`, like Leopard's, is curl 7.16.3 on OpenSSL 0.9.7l, the version of the OpenSSL 46.11 project. Its newest protocol is TLS 1.0, and it checks certificates signed with SHA-1 or MD5, not SHA-256, which OpenSSL added in 0.9.8. Its bundle of trusted certificates, `/usr/share/curl/curl-ca-bundle.crt`, is curl's own of 2007, 59 certificates, the same file as Leopard's. In QEMU and on the iMac, against a server on the current Mac that accepts TLS 1.0:
@@ -274,7 +310,7 @@ Current sites refuse the handshake: example.com with `sslv3 alert handshake fail
 
 ## What is still missing
 
-- Other everyday commands, such as `cmp` and `diff`, which no step has built yet ([What's next](whats-next.md)), and HTTPS to current sites, which need TLS 1.2 (above).
+- Other commands of Leopard's, such as `od`, `bc`, `sudo` and `zsh`, which no step has built yet ([What's next](whats-next.md)), and HTTPS to current sites, which need TLS 1.2 (above).
 - DTrace itself, and with it the languages' probes, which compile to nothing.
 - Python's 36 Carbon modules, Build Applet and Python Launcher ([D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102)), and `_tkinter`, as no Tk is built.
 - `.dSYM` bundles for one-step `-g` builds ([D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112)).
@@ -289,6 +325,6 @@ Current sites refuse the handshake: example.com with `sslv3 alert handshake fail
 - Patches: [python-30.1.3](https://github.com/nyg/PowerDarwin/blob/master/patches/python-30.1.3/), [ruby-67.6](https://github.com/nyg/PowerDarwin/blob/master/patches/ruby-67.6/), [samba-187.8](https://github.com/nyg/PowerDarwin/blob/master/patches/samba-187.8/), and curl-42's [touch](https://github.com/nyg/PowerDarwin/blob/master/patches/curl-42/touch) list.
 - [manifest/plists/9A581.plist](https://github.com/nyg/PowerDarwin/blob/master/manifest/plists/9A581.plist): the entries of gcc, gcc_42, perl, python, ruby, samba and SystemStubs, and those of top and curl, which name fewer dependencies than they use.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image): `header_projects`, CarbonHeaders, `dsymutil`, `smb.conf`, `smbd.plist` and the image's size; [scripts/check-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/check-image).
-- README.md: Step 10, rule 4, and "Status".
+- README.md: Step 10, rule 4, and "Features".
 - In gcc-5465: `gcc/config/darwin.h`, the `dsymutil` run. In samba-187.8: `samba/source/param/loadparm.c`, `passdb/pdb_get_set.c` and `libsmb/clispnego.c`.
 - Commits `f491d41`, which reached the step, and `5264e12`, which added `check-image`.

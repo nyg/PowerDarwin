@@ -84,7 +84,7 @@ The kernel booted the iMac the day it was built. Copied onto Leopard's volume as
 
 ### kext_tools and the driver cache
 
-kext_tools makes `kextcache`, `kextd`, `kextload`, `kextstat` and the other driver tools. The driver cache, `Extensions.mkext`, is one file holding every kext needed to reach the root disk, which BootX loads with the kernel ([the boot chain](../background/boot-chain.md)). Tried under Leopard, our `kextstat` printed the same 98 lines as Apple's, and our `kextcache -a ppc -l -m` made a cache of 169 kexts byte-identical to Apple's, 6,220,103 bytes. From then on, [make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) made the image's driver cache with our kextcache.
+kext_tools makes `kextcache`, `kextd`, `kextload`, `kextstat` and the other driver tools. The driver cache, `Extensions.mkext`, is one file holding every kext needed to reach the root disk, which BootX loads with the kernel ([the boot chain](../background/boot-chain.md)). Tried under Leopard, our `kextstat` printed the same 99 lines as Apple's, and our `kextcache -a ppc -l -m` made a cache of 168 kexts byte-identical to Apple's, 6,140,776 bytes. From then on, [make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image) made the image's driver cache with our kextcache.
 
 ## What broke and how it was fixed
 

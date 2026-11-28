@@ -7,7 +7,9 @@ Run on the build machine. Runs darwinbuild in the build folder, as build-image
 does for every build, so that the programs which record who built them and where
 name no machine or user of it: the machine's host name is powerdarwin.invalid
 until darwinbuild ends, then the one it had, and darwinbuild runs in a session of
-its own whose login name is root."
+its own whose login name is root. configd keeps that host name too, even when it
+renews a DHCP lease: the script puts it in the dynamic store's Setup:/System,
+where configd looks before it takes the name DHCP or DNS gives."
 
 name=powerdarwin.invalid
 darwinbuild=/usr/local/bin/darwinbuild
@@ -52,9 +54,18 @@ if os.WIFSIGNALED(status):
 sys.exit(os.WEXITSTATUS(status))
 '
 
+store_host_name() {
+   { echo d.init; echo get Setup:/System; echo d.remove HostName
+     [[ -z $1 ]] || echo "d.add HostName $1"
+     echo set Setup:/System; } | scutil
+}
+
 previous=$(hostname)
 [[ $previous != "$name" ]] || previous=$(scutil --get LocalHostName).local
-trap 'hostname "$previous"' EXIT
+saved=$(scutil --get HostName 2>/dev/null) || saved=
+trap 'store_host_name "$saved"; hostname "$previous"' EXIT
+store_host_name "$name"
+[[ $(echo show Setup:/System | scutil) == *"HostName : $name"* ]] || die "configd's Setup:/System did not take the host name $name"
 hostname "$name"
 status=0
 (cd "$folder" && python -c "$session" "$darwinbuild" "$@") || status=$?
