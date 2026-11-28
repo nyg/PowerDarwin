@@ -128,7 +128,7 @@ On the iMac G5, the image is a Unix system with no graphical system: it boots, m
 - DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
 - on a PMU Mac, sleep, the ADB keyboard, the battery and the lid, through ApplePMU.
 
-Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI: OpenDirectory from a later open CoreFoundation, and a UDF file system from FreeBSD's. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
+Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI: OpenDirectory from a later open CoreFoundation, and a UDF file system from FreeBSD's. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)). Apple's release does publish X11, and [A graphical interface: the options](../steps/graphical-interface.md) looks at what it, and the open code around it, could give.
 
 ## Where to look
 

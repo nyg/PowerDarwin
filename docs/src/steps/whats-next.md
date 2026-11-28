@@ -68,6 +68,10 @@ None of Step 10's rows is `deferred`: what it turned off waits for closed code, 
 
 [What stays closed](../synthesis/what-stays-closed.md) lists them all.
 
+### A graphical interface
+
+The image has no graphical interface, and Leopard's is closed. Apple's 9L30 release does publish X11, in six projects from X11proto to X11server, whose libraries, most of its programs and Xvfb, a server whose screen is only memory, link no closed code once FreeType and fontconfig are built without their Mac font support. X11's own screen server for Leopard, Xquartz, draws through WindowServer. X on the Mac's own screen would take XDarwin's IOKit mode, which runs on IOKit's framebuffer and IOHIDSystem's input: Apple's X11 for Panther and Tiger and X.Org's xorg-server 1.4.2 publish it, Leopard's X11 does not. [A graphical interface: the options](graphical-interface.md) compares six routes against the rules, says which were checked and how, and lists the decisions they need.
+
 ### Deferred features
 
 A `deferred` deviation turns a feature off until the open project it needs is built. [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72) leaves out Cyrus SASL's MySQL plug-in, which needs MySQL's client library; the 9L30 build list has MySQL 45, so building it would bring the plug-in back.
@@ -101,6 +105,7 @@ mindmap
       ReportCrash, loginwindow, CoreAudio
       MySQL for SASL
       od, bc, sudo and more
+      graphical interface
       HTTPS with TLS 1.2
       DTrace, Samba's SPNEGO
       Darwin 10 for PowerPC
@@ -119,4 +124,5 @@ Some items help others: OpenDirectory would bring back `passwd`, with which root
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.
 - In AppleMacRISC4PE-186.3.1: `IOPlatformPlugins/` and `ThermalProfiles/`, for Tiger's plug-ins and profiles.
 - [scripts/make-test-image](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-test-image), [overlay/usr/libexec/first-boot](https://github.com/nyg/PowerDarwin/blob/master/overlay/usr/libexec/first-boot), [scripts/make-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/make-release) and [scripts/publish-release](https://github.com/nyg/PowerDarwin/blob/master/scripts/publish-release): the test password, the first boot and the release.
+- [A graphical interface: the options](graphical-interface.md): Apple's X11 projects, the IOKit mode, and the decisions they need.
 - [What stays closed, and why](../synthesis/what-stays-closed.md).
