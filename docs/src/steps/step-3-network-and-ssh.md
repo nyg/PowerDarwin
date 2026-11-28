@@ -142,7 +142,7 @@ and `pam_strerror` spells that "User account has expired". The console was not a
 
 - [D63](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d63): network_cmds' `ping6` links `libipsec`, so ipsec, built for that library alone, becomes a dependency.
 - [D64](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d64): a script step of Kerberos is written in Python, so the build machine's Python goes into the build environment, as a build tool only.
-- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66): bootp is built without `bootpd`, the DHCP and NetBoot server, which needs CFOpenDirectory; the client is built.
+- [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66): bootp was built without `bootpd`, the DHCP and NetBoot server, which needs CFOpenDirectory, until OpenDirectory was built ([Step 2](step-2-console-login.md)); bootp is now built after it, with `bootpd`. In QEMU, `bootpd -d -D` with a `/etc/bootpd.plist` naming one subnet listened on UDP port 67 and logged `server starting`; launchd's job for it, `bootps.plist`, stays `Disabled`, as Apple installs it.
 - [D67](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d67): Kerberos includes the umbrella headers of the closed CoreServices and ApplicationServices for a few types; small stand-in headers that include CoreFoundation and CarbonCore's headers take their place, as headers only.
 - [D68](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d68): Kerberos is built without its login dialog agent and ticket viewer, both Cocoa applications.
 - [D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69): bootp is built with `RC_RELEASE = Darwin`, which its own script reads to leave out the closed Apple80211 framework; the DHCP client does not read the Wi-Fi network's name.
@@ -175,7 +175,7 @@ From another Mac on the network, a current OpenSSH client logged in as root, wit
 - The clock read 31 December 1969, since nothing sets it without AppleSMU; ntpd comes in [Step 4](step-4-everyday-commands.md), the hardware clock in [Step 5](step-5-clock-and-power.md).
 - SSH logins get no security session of their own until [Step 6](step-6-securityd.md), where launchproxy's `SessionCreate()` starts to succeed.
 - The 60-second wait before `en0` is named remains until [Step 8](step-8-clean-boot.md) on the iMac, and in QEMU until an open driver for its PMU exists ([What's next](whats-next.md)).
-- There is no DHCP server, `bootpd` ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and no Wi-Fi support in the DHCP client ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)).
+- The DHCP client has no Wi-Fi support ([D69](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d69)).
 - `grep`, `ps`, `less` and `vi` are not built yet: [Step 4](step-4-everyday-commands.md) adds them.
 
 ## Where to look

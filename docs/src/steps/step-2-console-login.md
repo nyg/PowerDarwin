@@ -147,7 +147,7 @@ CFOpenDirectory needs DirectoryService, which is built in [Step 3](step-3-networ
 
 `passwd` changes a password through DirectoryService, which then keeps the account's password as a shadow hash in `/var/db/shadow/hash` and leaves `********` where the `crypt()` hash was. `pam_unix` cannot check that; `pam_securityserver` can, as it asks securityd, which asks DirectoryService. So `pam.d/login`, `pam.d/sshd` and `pam.d/su` list it first again, as Apple ships them ([D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)), and `pam_unix` stays behind it for an account that still has a `crypt()` hash, such as root's after the first boot.
 
-The same header comes back twice in [Step 3](step-3-network-and-ssh.md): bootp's DHCP server, `bootpd`, is left out for it ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and the missing `pam_securityserver` makes SSH logins look like expired accounts ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
+The same header comes back twice in [Step 3](step-3-network-and-ssh.md): bootp's DHCP server, `bootpd`, was left out for it until OpenDirectory was built ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and the missing `pam_securityserver` makes SSH logins look like expired accounts ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
 
 ### A pointer passed where its target was meant (D46)
 

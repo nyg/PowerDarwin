@@ -193,7 +193,7 @@ build network_cmds
 build libresolv
 build tcp_wrappers
 prepare D64 D67 D70
-build bootp
+build -loadonly bootp
 build -headers CFOpenDirectory
 build -loadonly LDAPFramework
 build -headers DSPasswordServerFramework
@@ -300,3 +300,4 @@ build CFOpenDirectory
 build OpenDirectory
 build system_cmds
 build pam_modules
+build bootp
