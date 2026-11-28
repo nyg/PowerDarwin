@@ -462,7 +462,7 @@ Each term in a sentence or two, with the chapter that explains it.
 
 **`pam_launchd`**: the PAM session module that makes a login's namespace a launchd session of the user, a `StandardIO` session for root's logins. See [Step 6](../steps/step-6-securityd.md).
 
-**`pam_securityserver`**: the PAM module that checks a password through Security's authorization API, which securityd answers by asking DirectoryService; the only module that checks a shadow hash. See [Step 2](../steps/step-2-console-login.md).
+**`pam_securityserver`**: the PAM module that checks a password through Security's authorization API, which securityd answers by asking DirectoryService, the only module that checks a shadow hash; for sshd it also refuses disabled accounts and the shell `/usr/bin/false`. See [Step 2](../steps/step-2-console-login.md).
 
 **`pam_unix`**: the PAM module that compares a password with the account's `crypt()` hash, which Libinfo reads from DirectoryService or `/etc/master.passwd`. See [Step 2](../steps/step-2-console-login.md).
 
