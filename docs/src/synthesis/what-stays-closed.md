@@ -29,7 +29,7 @@ block-beta
     space p3["afplay:<br/>openplay, ours"] p4["WindowServer, Finder:<br/>none"]
     space p5["Sharing pane:<br/>smb.conf, ours"] p6["dsymutil:<br/>a stub, ours"]
     f["Frameworks"] f1["full CoreFoundation:<br/>CF-Lite, backports"] f2["Foundation, Cocoa:<br/>features left out"]
-    space f3["OpenDirectory:<br/>passwd, chpass, PAM module,<br/>bootpd left out"] f4["CoreAudio:<br/>openplay, ours"]
+    space f3["CFBridgingPriv.h:<br/>a stand-in, ours"] f4["CoreAudio:<br/>openplay, ours"]
     space f5["Symbolication:<br/>dtrace probes compiled out"] f6["Carbon, ByteRangeLocking:<br/>Python's Mac modules,<br/>Samba's locks left out"]
     l["System library"] l1["sandbox, quarantine: stubs, ours"]:2
     k["Kernel"] k1["xnu: all open"]:2
@@ -67,9 +67,8 @@ block-beta
 
 | Component | What it does on Leopard | Cost on the image | Stand-in |
 |---|---|---|---|
-| The full CoreFoundation | the whole of CF, of which CF-Lite is the open part | no `CFNotificationCenter` between processes: no SystemStarter ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)), no AppleRAID updates by kextd ([D28](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d28)), no change notices from Samba's preference sync ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109)); no private bridging header for CFOpenDirectory; managed preferences always off | CF-Lite with Apple's later fixes ([D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54), [D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56), [D62](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d62)); a thread in place of `CFFileDescriptor` ([D79](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d79)) |
-| Foundation, Cocoa | the Objective-C libraries of Mac OS X's programs | `arch`, USB Prober, Kerberos' login agent and ticket viewer and DirectoryService's Objective-C plug-in library are not built | a build helper rewritten on CF ([D55](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d55)) |
-| OpenDirectory, with CFOpenDirectory | changes accounts and passwords, checks password policies | no `passwd` or `chpass`, no `pam_securityserver`, no `bootpd` | `pam_unix` checks passwords; root's hash is written by `install-image`, by `first-boot` at the first boot, or, in a test image, by `make-test-image` ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), [D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)) |
+| The full CoreFoundation | the whole of CF, of which CF-Lite is the open part | no `CFNotificationCenter` between processes: no SystemStarter ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)), no AppleRAID updates by kextd ([D28](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d28)), no change notices from Samba's preference sync ([D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109)); no private bridging header, which CFOpenDirectory includes; managed preferences always off | CF-Lite with Apple's later fixes ([D54](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d54), [D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56), [D62](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d62)); a thread in place of `CFFileDescriptor` ([D79](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d79)); for CFOpenDirectory, a bridging header in which every object is a CF object ([D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126)) |
+| Foundation, Cocoa | the Objective-C libraries of Mac OS X's programs | `arch`, USB Prober, Kerberos' login agent and ticket viewer, DirectoryService's Objective-C plug-in library and OpenDirectory's Objective-C classes are not built; `OpenDirectory.framework` holds its C interface only ([D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127)) | a build helper rewritten on CF ([D55](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d55)) |
 | Symbolication, which `libdtrace.dylib` needs, and dtrace's tools on Foundation | tracing | no tracing: the dtrace probes of Libc, DirectoryService, Perl, Python and Ruby compile to nothing | empty probe macros ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12), [D75](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d75), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103)), and a `dtrace` in the build environment that writes them ([D97](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d97)) |
 | The sandbox library | applies sandbox profiles | no sandbox; `update` logs its `sandbox_init` failure | a stub that always fails ([D13](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d13)) |
 | The quarantine library | marks files that came from the network | no quarantine marks, so `tar` marks no file it extracts | stubs ([D8](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d8), [D15](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d15), [D122](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d122)) |
@@ -123,16 +122,15 @@ On the iMac G5, the image is a Unix system with no graphical system: it boots, m
 - Wi-Fi and Bluetooth, and FireWire's audio and video streams;
 - sleep, and graphics acceleration;
 - discs with only a UDF volume;
-- `passwd`, password policies and a DHCP server, through OpenDirectory;
 - crash reports, the sandbox and the firewall;
 - DTrace, Python's Mac modules, `.dSYM` bundles, and file sharing switched on from a preference pane;
 - on a PMU Mac, sleep, the ADB keyboard, the battery and the lid, through ApplePMU.
 
-Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI: OpenDirectory from a later open CoreFoundation, and a UDF file system from FreeBSD's. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
+Some of these could come back as open parts, on the model of OpenSMU, OpenOnyx, OpenPMU, OpenRadeonPM and OpenFWOHCI, such as a UDF file system from FreeBSD's. [What's next](../steps/whats-next.md) says what each would take. The graphical system is not part of Darwin at all ([What Darwin is](../background/what-darwin-is.md)).
 
 ## Where to look
 
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): every driver of the iMac G5, open and closed.
-- [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md): the `closed-replacement` and `closed-dependency` rows, and the `deferred` rows around OpenDirectory.
+- [DEVIATIONS.md](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md): the `closed-replacement` and `closed-dependency` rows.
 - [README.md](https://github.com/nyg/PowerDarwin/blob/master/README.md): rule 5, and "Hardware", whose machine pages in `hardware/` list the drivers with no published source.
 - [What Darwin is](../background/what-darwin-is.md), for the layers; [The rules](../method/rules.md), for rule 5; [Kinds of deviation](kinds-of-deviation.md), for the causes behind the rows; [What's next](../steps/whats-next.md), for what could be opened.

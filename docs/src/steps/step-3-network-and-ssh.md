@@ -127,7 +127,7 @@ Root's account has no expiry date. The cause is in Apple's `pam.d/sshd`, whose a
 account    required       pam_securityserver.so
 ```
 
-and `pam_securityserver` is the module that [Step 2](step-2-console-login.md) could not build, for want of CFOpenDirectory ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42)). Linux-PAM keeps a module it cannot load as a "faulty module" with no function, and its dispatcher returns `PAM_MODULE_UNKNOWN` for it; in the auth phase that did not matter, as the line was `sufficient` and pam_unix followed. Here the line is `required`, and alone. OpenSSH's PAM code then turns any failed account check into `PAM_ACCT_EXPIRED`, in `auth-pam.c`:
+and `pam_securityserver` is the module that pam_modules' first build leaves out, as CFOpenDirectory comes later in the build order ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42)). Linux-PAM keeps a module it cannot load as a "faulty module" with no function, and its dispatcher returns `PAM_MODULE_UNKNOWN` for it; in the auth phase that did not matter, as the line was `sufficient` and pam_unix followed. Here the line is `required`, and alone. OpenSSH's PAM code then turns any failed account check into `PAM_ACCT_EXPIRED`, in `auth-pam.c`:
 
 ```c
 if (!do_pam_account()) {
@@ -136,7 +136,7 @@ if (!do_pam_account()) {
 
 and `pam_strerror` spells that "User account has expired". The console was not affected, because Apple's `pam.d/login` uses `pam_permit` for its account phase.
 
-[D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)'s [patch](https://github.com/nyg/PowerDarwin/blob/master/patches/pam-32.1/0002-sshd-account-without-pam-securityserver.patch) makes the account phase `pam_unix`, which checks the account's and the password's expiry dates. What `pam_securityserver` checks besides, password-server policies, disabled accounts and the login shell, is not checked. The row's kind is `deferred`, as is D66's: both wait for CFOpenDirectory.
+[D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)'s [patch](https://github.com/nyg/PowerDarwin/blob/master/patches/pam-32.1/0002-sshd-account-without-pam-securityserver.patch) makes the account phase `pam_unix`, which checks the account's and the password's expiry dates. What `pam_securityserver` checks besides, password-server policies, disabled accounts and the login shell, is not checked. The row's kind is `deferred`, as is D66's: both wait for builds that come after OpenDirectory's ([What's next](whats-next.md#opendirectory)).
 
 ### Every other deviation of this part
 

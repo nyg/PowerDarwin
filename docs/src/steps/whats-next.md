@@ -43,7 +43,7 @@ QEMU's OHCI USB model stops about 90 seconds after boot under our drivers, so US
 
 ### OpenDirectory
 
-Several pieces wait for OpenDirectory, Leopard's interface to directory services: `passwd` ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), `pam_securityserver` ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)) and `bootpd`, the DHCP server ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)). Its C part includes a private header of Apple's CoreFoundation that CF-Lite lacks, and its Objective-C part needs the closed Foundation. It would take the missing declarations from a later open CoreFoundation, as other gaps in CF-Lite were filled ([D56](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d56)), and a way around the Objective-C part for the pieces that use it.
+OpenDirectory, Leopard's interface to directory services, is built without its Objective-C part. Its C part, CFOpenDirectory, includes a private header of Apple's closed CoreFoundation for the calls it would hand to Foundation's objects; a stand-in gives those calls the forms that CF-Lite itself gives them without Objective-C ([D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126)), and the framework leaves out its Objective-C classes, which need the closed Foundation ([D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127)). With it, `passwd` and `chpass` are built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), and so is `pam_securityserver`, through which logins check the shadow hash that `passwd` makes ([D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)). Two pieces still wait: sshd's account phase, which uses `pam_unix` in place of `pam_securityserver` ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)), and `bootpd`, the DHCP server ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)). The Objective-C classes would need an open Foundation.
 
 ### What Step 10 leaves
 
@@ -70,7 +70,7 @@ None of Step 10's rows is `deferred`: what it turned off waits for closed code, 
 
 ### Deferred features
 
-A `deferred` deviation turns a feature off until the open project it needs is built. [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72) leaves out Cyrus SASL's MySQL plug-in, which needs MySQL's client library; the 9L30 build list has MySQL 45, so building it would bring the plug-in back.
+A `deferred` deviation turns a feature off until the open project it needs is built. [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42) and [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44) turn `pam_securityserver`, `passwd` and `chpass` off only in the first builds of pam_modules and system_cmds, which come before OpenDirectory's in the build order; both are built again after it. [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72) leaves out Cyrus SASL's MySQL plug-in, which needs MySQL's client library; the 9L30 build list has MySQL 45, so building it would bring the plug-in back.
 
 ### Darwin 10 for PowerPC
 
@@ -80,9 +80,9 @@ Mac OS X 10.6 dropped PowerPC, though Darwin 10's kernel source still has it. Ot
 
 ### An image others can boot
 
-The image is now made the way a release would publish it: `make-test-image --release=<name>` leaves root without a password, uses UTC and `time.apple.com` instead of the build machine's time zone and NTP server, and puts the licence texts and the notices of every project built into `/usr/share/doc/PowerDarwin`. At its first boot, the console asks for root's password, and the image makes its SSH host keys before it turns SSH on, which stands in for `passwd` there ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)). Every project is built in UTC, under the host name `powerdarwin.invalid` and the login name `root`, so that the programs that record who built them and where name no machine or user ([D125](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d125)). `make-release` checks such an image for passwords, keys and anything of the build machine, and writes the release's files: one raw image, for QEMU and for `install-image`, the source of every binary on it, and checksums; `publish-release` uploads them ([Making the image](../method/making-the-image.md#releases)).
+The image is now made the way a release would publish it: `make-test-image --release=<name>` leaves root without a password, uses UTC and `time.apple.com` instead of the build machine's time zone and NTP server, and puts the licence texts and the notices of every project built into `/usr/share/doc/PowerDarwin`. At its first boot, the console asks for root's password, and the image makes its SSH host keys before it turns SSH on ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)); `passwd` changes the password afterwards. Every project is built in UTC, under the host name `powerdarwin.invalid` and the login name `root`, so that the programs that record who built them and where name no machine or user ([D125](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d125)). `make-release` checks such an image for passwords, keys and anything of the build machine, and writes the release's files: one raw image, for QEMU and for `install-image`, the source of every binary on it, and checksums; `publish-release` uploads them ([Making the image](../method/making-the-image.md#releases)).
 
-What remains after the first release: Step 14, after which the same raw image can be written to a USB key; a way to change root's password after the first boot, which `passwd` gives on Leopard and which needs OpenDirectory (above); and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
+What remains after the first release: Step 14, after which the same raw image can be written to a USB key; and a lawyer's reading of what the licences ask, which the project's own reading leaves open on a few points.
 
 ## A map of the open items
 
@@ -97,7 +97,7 @@ mindmap
       other PowerPC Macs
       QEMU's OHCI
     Userland
-      OpenDirectory
+      sshd's account checks, bootpd
       ReportCrash, loginwindow, CoreAudio
       MySQL for SASL
       od, bc, sudo and more
@@ -108,12 +108,10 @@ mindmap
       image for others
 ```
 
-Some items help others: OpenDirectory would bring back `passwd`, with which root's password could be changed after the first boot.
-
 ## Where to look
 
 - README.md: "Features", which ends with what does not work yet, among it the commands still missing.
-- DEVIATIONS.md: the `deferred` rows [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72), [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80) and [D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84), the `closed-*` rows, among them [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), Step 10's [D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112) and [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
+- DEVIATIONS.md: the `deferred` rows [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42), [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44), [D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66), [D72](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d72) and [D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80), the `closed-*` rows, among them [D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126) and [D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127) for OpenDirectory, [D40](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d40), [D81](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d81), [D85](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d85), [D94](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d94) and [D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95), Step 10's [D102](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d102), [D103](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d103), [D108](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d108), [D109](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d109), [D111](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d111), [D112](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d112) and [D113](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d113), and [D39](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d39), a `bug` row, for AppleMacRISC4PE's register values.
 - [hardware/powermac12-1.md](https://github.com/nyg/PowerDarwin/blob/master/hardware/powermac12-1.md): the closed drivers of the iMac G5.
 - [RESOURCES.md](https://github.com/nyg/PowerDarwin/blob/master/RESOURCES.md): FreeBSD's `fwohci.c`, macos-powerpc's darwinbuild, the Snow Leopard kernel for PowerPC.
 - In IOFireWireFamily-349.4.0: `IOFireWireFamily.kmodproj/IOFireWireLink.h`.

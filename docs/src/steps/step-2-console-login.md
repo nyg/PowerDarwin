@@ -4,7 +4,7 @@
 
 - What launchd does at a multi-user boot, and how a LaunchDaemon plist describes a job.
 - How a console login works on Darwin: getty, login, PAM and its modules, Libinfo and `/etc/master.passwd`.
-- Why the image has no `passwd` command, and how the test password gets onto it instead.
+- Why this step has no `passwd` command, how the test password gets onto the image instead, and how `passwd` comes back once OpenDirectory is built.
 - How OpenDirectory, Leopard's new directory interface, pulls closed code into anything that uses it.
 - A bug in Libinfo that crashed `id -G`, why `reboot` first hung, then stopped at `MACH Reboot`, and why the console stopped taking keys after half an hour.
 
@@ -126,10 +126,26 @@ CFOpenDirectory.c:39:43: error: CoreFoundation/CFBridgingPriv.h: No such file or
 
 `CFBridgingPriv.h` is a private header of Apple's closed CoreFoundation, about passing objects between CoreFoundation and Objective-C. The open CF-Lite does not have it, so CFOpenDirectory cannot be built, and darwinbuild's archived binary Roots of CFOpenDirectory and OpenDirectory hold only the outer framework. One closed header thus closes off everything that uses OpenDirectory.
 
-The fixes leave those parts out, and make up for them where they can:
+The fixes leave those parts out of this step's builds, and make up for them where they can:
 
-- [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42): pam_modules no longer builds `pam_securityserver`. Apple's `pam.d/login` lists it as `sufficient` before `pam_unix`, so when it is missing PAM goes on to pam_unix, which checks the password in `/etc/master.passwd`. Linux-PAM keeps a module it cannot load as a "faulty module" whose calls fail, so the phase still works.
-- [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44): system_cmds no longer builds `passwd` and `chpass`; make-test-image sets root's password instead, as above.
+- [D42](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d42): pam_modules builds `pam_securityserver` only when CFOpenDirectory is in the build environment, and here it is not. Apple's `pam.d/login` lists the module as `sufficient` before `pam_unix`, so when it is missing PAM goes on to pam_unix, which checks the password in `/etc/master.passwd`. Linux-PAM keeps a module it cannot load as a "faulty module" whose calls fail, so the phase still works.
+- [D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44): system_cmds builds `passwd` and `chpass` only when CFOpenDirectory is in the build environment; until then make-test-image sets root's password instead, as above.
+
+### OpenDirectory after all (D126 to D128)
+
+CFOpenDirectory needs little of the closed header. CFOpenDirectory.c uses four of its macros, `CF_IS_OBJC`, `CF_OBJC_CALL`, `CF_OBJC_VOIDCALL` and `CF_OBJC_FUNCDISPATCH`, which test whether an object is one of Foundation's and hand the call to it, and one function, `_CFRuntimeBridgeClasses`, which ties each of its five types, such as `ODSessionRef`, to an Objective-C class. CF-Lite's own private `CFInternal.h` gives the same macros, under numbered names, the forms they take in a CoreFoundation without Objective-C: `CF_IS_OBJC` is false, and the others do nothing; and CF-476.19 exports `_CFRuntimeBridgeClasses` as a function that does nothing. No open CoreFoundation, later ones included, holds `CFBridgingPriv.h` itself, so the project writes one with those forms, under the names CFOpenDirectory uses, into the build environment ([D126](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d126)). With no Foundation on the image, every object is a CF object, as the stand-in assumes. CFOpenDirectory then compiles; it exports the same 74 symbols as Apple's, and imports the same but five, which only those macros used: the Objective-C runtime's `objc_msgSend` and `sel_registerName`, CoreFoundation's class tables `__CFRuntimeObjCClassTable` and `__CFRuntimeClassTableSize`, and its garbage-collection flag `kCFUseCollectableAllocator`.
+
+The outer framework is one Objective-C file, `NSOpenDirectory.m`, the classes `ODSession`, `ODNode`, `ODRecord`, `ODQuery` and `ODContext` on top of CFOpenDirectory, and it stops on Foundation:
+
+```text
+NSOpenDirectory.h:34:34: error: Foundation/Foundation.h: No such file or directory
+```
+
+But Apple's `passwd`, `chpass`, `pam_securityserver` and `bootpd` link `OpenDirectory.framework` only for the C functions it re-exports from CFOpenDirectory, and import none of its classes. So the framework is built without that file, its header and Foundation ([D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127)): it keeps its C headers and re-exports CFOpenDirectory, as Apple's does, and has no code of its own. Both are built for `ppc` alone, since CFOpenDirectory links DirectoryService, which the build list builds for `ppc` alone ([D128](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d128)).
+
+CFOpenDirectory needs DirectoryService, which is built in [Step 3](step-3-network-and-ssh.md), long after system_cmds and pam_modules, which most projects need. So `manifest/build-order` builds CFOpenDirectory and OpenDirectory at its end, then system_cmds and pam_modules a second time, and those second builds, with `passwd`, `chpass` and `pam_securityserver`, are the ones on the image. Each of the three imports exactly the symbols that Apple's does.
+
+`passwd` changes a password through DirectoryService, which then keeps the account's password as a shadow hash in `/var/db/shadow/hash` and leaves `********` where the `crypt()` hash was. `pam_unix` cannot check that; `pam_securityserver` can, as it asks securityd, which asks DirectoryService. So `pam.d/login`, `pam.d/sshd` and `pam.d/su` list it first again, as Apple ships them ([D84](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d84)), and `pam_unix` stays behind it for an account that still has a `crypt()` hash, such as root's after the first boot.
 
 The same header comes back twice in [Step 3](step-3-network-and-ssh.md): bootp's DHCP server, `bootpd`, is left out for it ([D66](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d66)), and the missing `pam_securityserver` makes SSH logins look like expired accounts ([D80](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d80)).
 
@@ -230,9 +246,13 @@ On the iMac, the third boot test on it restored the same image onto `Darwin9` an
 
 For D116, IOGraphics was built again with its patch, and `make-test-image` and `install-image` put it on the iMac. Left alone after boot, with no key pressed, the wrangler was at `CurrentPowerState=4` after 19 minutes and again after 45, where without the patch it would have been at 3 and then at 1, and `system.log` held only the two lines that [Step 8](step-8-clean-boot.md) accepts.
 
+For D126 to D128, CFOpenDirectory and OpenDirectory were built at the end of the build order, then system_cmds and pam_modules again, and an image made with `make-test-image --release` was started in QEMU on 28 November 2026. Its first boot asked for root's password, and SSH took it. `passwd`, run over SSH, asked twice for a new one, and DirectoryService then held it as a shadow hash: root's record had `;ShadowHash;` as its `authentication_authority` and `********` as its `passwd`, and `/var/db/shadow/hash` a file named after root's GUID. The old password was refused on the console and over SSH, and so were the new one's first 8 characters; the new one was accepted, on the console and over SSH, before and after a restart, which asked for nothing. `chsh -s /bin/bash root` changed root's shell in the local directory, the next SSH login started bash, and `chsh -s /bin/sh root` put it back. Of the image's 28,665 files, `check-image` found only those `make-test-image` writes outside the Roots.
+
+On the iMac G5, an image of the same builds was installed with `install-image`, which set root's password. `passwd`, run over SSH, changed it; then, before and after a restart, the old password and the new one's first 8 characters were refused over SSH and by `login`, run in an SSH terminal, and the new one was accepted, while securityd logged `checkpw() succeeded` and `Succeeded authorizing right system.login.tty` for each login. Inside an SSH session `login` then stops at its session phase, as `pam_launchd` makes a new session only from getty; the iMac's own console was not tried.
+
 ## What is still missing
 
-- There is still no way to change a password on the running system: no `passwd`, no `chpass`, no `pam_securityserver`, all for want of CFOpenDirectory.
+- This step's image has no way to change a password: `passwd`, `chpass` and `pam_securityserver` come once OpenDirectory is built, at the end of the build order (above).
 - The login has no security session of its own until [Step 6](step-6-securityd.md) ([D45](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d45)).
 - `reboot` and `halt` end at `MACH Reboot` and `CPU halted` until [Step 5](step-5-clock-and-power.md) on the iMac, and still do in QEMU.
 - Logins work only on the console. The network, DirectoryService and SSH come in [Step 3](step-3-network-and-ssh.md).

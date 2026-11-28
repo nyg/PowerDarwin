@@ -1,0 +1,36 @@
+PowerDarwin D127, 2026-11-28: changes to OpenDirectory 39, under the licence of the files changed.
+--- a/OpenDirectory.xcodeproj/project.pbxproj
++++ b/OpenDirectory.xcodeproj/project.pbxproj
+@@ -245,7 +245,6 @@
+ 			isa = PBXHeadersBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				6BD59AC7090C9F6300784250 /* NSOpenDirectory.h in Headers */,
+ 				6BD6D05F0B7647B3006342BE /* OpenDirectory.h in Headers */,
+ 				6BD6D0600B7647B3006342BE /* OpenDirectoryPriv.h in Headers */,
+ 				6B517C8B0B9C9FB600B87A18 /* OpenDirectoryConsts.h in Headers */,
+@@ -413,7 +412,6 @@
+ 			isa = PBXSourcesBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				6BD59F85090DA32100784250 /* NSOpenDirectory.m in Sources */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+@@ -785,7 +783,6 @@
+ 				DSTROOT = "/tmp/$(PROJECT_NAME).dst";
+ 				DYLIB_COMPATIBILITY_VERSION = 1;
+ 				DYLIB_CURRENT_VERSION = 1;
+-				EXPORTED_SYMBOLS_FILE = OpenDirectory.exp;
+ 				FRAMEWORK_SEARCH_PATHS = (
+ 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+ 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+@@ -813,8 +810,6 @@
+ 				);
+ 				OTHER_LDFLAGS = (
+ 					"$(inherited)",
+-					"-framework",
+-					Foundation,
+ 					"-sub_umbrella",
+ 					CFOpenDirectory,
+ 					"-framework",

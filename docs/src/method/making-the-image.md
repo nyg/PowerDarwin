@@ -98,7 +98,7 @@ Twenty-three files on the image, and those of the folder `/usr/share/doc/PowerDa
 |---|---|---|---|
 | `/Library/Preferences/SystemConfiguration/com.apple.Boot.plist` | writes it, naming `mach_kernel` with empty kernel flags | BootX reads it to find the kernel and its arguments | Step 1 |
 | `/System/Library/Extensions.mkext` | makes it with our kextcache (below) | the driver cache BootX loads with the kernel | Step 1 |
-| `/etc/master.passwd` | in a test image only, writes the test password's hash into root's entry | without `passwd` ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), nothing else can set it | Step 2 |
+| `/etc/master.passwd` | in a test image only, writes the test password's hash into root's entry | a test image boots with a password the tests know | Step 2 |
 | `/System/Library/LaunchDaemons/com.apple.getty.plist` | copies it from system_cmds' source, and adds `Program`, `/usr/libexec/first-boot`, which launchd then runs with getty's arguments | launchd's job for getty on the console; Apple installs it only on embedded systems, and Leopard's console login, loginwindow, is closed | Step 2 |
 | `/var/db/dslocal/nodes/Default/users/root.plist` | in a test image only, writes the same hash into root's record | DirectoryService's local directory, which checks SSH logins | Step 3 |
 | `/usr/libexec/first-boot` | installs it from the repo's `overlay/usr/libexec/first-boot` | at the first boot, it sets root's password, makes the SSH host keys, then turns SSH on (below); until then OpenSSH's `ssh.plist` stays `Disabled`, as Apple installs it ([D124](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d124)) | Releases |
@@ -117,7 +117,7 @@ It also gives the volume's root folder to root and the group admin, writable by 
 
 ### Root's password
 
-Since `passwd` is not built ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)), the image itself has no command that sets root's password. A test image takes it from the build machine: the script reads a DES hash, the old Unix form that `/etc/master.passwd` and DirectoryService both accept, from `root-password.hash` in the build folder, made there with `openssl passwd -crypt -stdin`, and writes it into root's entry in both. The file is outside the repo, and so is the password: anyone rebuilding the image makes their own. A release image ignores the file, and so does a build folder without it: root's entry keeps the `*` the `files` project gives it, which no password matches, until `install-image` (below) or the first boot sets one.
+A test image takes root's password from the build machine: the script reads a DES hash, the old Unix form that `/etc/master.passwd` and DirectoryService both accept, from `root-password.hash` in the build folder, made there with `openssl passwd -crypt -stdin`, and writes it into root's entry in both. The file is outside the repo, and so is the password: anyone rebuilding the image makes their own. A release image ignores the file, and so does a build folder without it: root's entry keeps the `*` the `files` project gives it, which no password matches, until `install-image` (below) or the first boot sets one. Once the image runs, `passwd` changes it, through OpenDirectory and DirectoryService, as on Leopard ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)).
 
 ### The first boot
 

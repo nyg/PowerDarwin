@@ -23,7 +23,7 @@ The rules below give the details.
 
 ## Features
 
-- Boots to a `login:` prompt on the console, or to a single-user shell with `-v -s`, and takes SSH logins over Ethernet.
+- Boots to a `login:` prompt on the console, or to a single-user shell with `-v -s`, and takes SSH logins over Ethernet; `passwd` changes passwords.
 - Everyday Unix commands, among them `grep`, `ps`, `less`, `vi`, `nano`, `awk`, `diff`, `patch`, `man`, `tar`, `gzip`, `bzip2`, `zip`, `file`, `lsof`, `top`, `screen`, `curl`, `rsync`, `nc`, `telnet`, `dig` and `crontab`, with syslogd writing `/var/log/system.log`, ntpd keeping the clock and cron running jobs.
 - Its own compilers, built from source, which build and link C and C++ programs, with Perl, Python, Ruby and Samba.
 - Mounts internal partitions, USB disks and CDs as they appear, and `bless` sets the startup disk.
@@ -69,7 +69,7 @@ Each [release](https://github.com/nyg/PowerDarwin/releases) has the image, `Powe
 
 ### In QEMU
 
-With QEMU's `qemu-system-ppc` and a clone of this repo, run `scripts/boot-qemu PowerDarwin-<name>.img -v`. At the first boot, the console asks for root's password, of which only the first 8 characters count, then turns SSH on. The guest's SSH port is port 2222 of `127.0.0.1`:
+With QEMU's `qemu-system-ppc` and a clone of this repo, run `scripts/boot-qemu PowerDarwin-<name>.img -v`. At the first boot, the console asks for root's password, of which only the first 8 characters count, then turns SSH on; `passwd` changes it later, with every character counting. The guest's SSH port is port 2222 of `127.0.0.1`:
 
 ```sh
 ssh -p 2222 -o HostKeyAlgorithms=+ssh-rsa -o KexAlgorithms=+diffie-hellman-group14-sha1 root@127.0.0.1

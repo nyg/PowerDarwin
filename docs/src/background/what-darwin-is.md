@@ -31,8 +31,8 @@ flowchart TB
     end
     subgraph FW[Frameworks]
         direction LR
-        F1["CF-Lite, IOKit, Security, SystemConfiguration, DiskArbitration"]
-        F2["Foundation, AppKit, Carbon, full CoreFoundation, OpenDirectory, CoreAudio (closed)"]
+        F1["CF-Lite, IOKit, Security, SystemConfiguration, DiskArbitration, OpenDirectory's C part"]
+        F2["Foundation, AppKit, Carbon, full CoreFoundation, CoreAudio (closed)"]
     end
     subgraph LIB[System library]
         direction LR
@@ -126,17 +126,17 @@ Apple publishes only part of Mac OS X. What it keeps closed, it ships as binarie
 
 ### The graphical system and its frameworks
 
-None of Mac OS X's graphical system is in Darwin: not WindowServer, which draws the screen; not Quartz, its drawing engine; not Aqua, its look; not Cocoa (Foundation and AppKit), Carbon, or the applications built on them, from the Finder to loginwindow, the graphical login. Nor are CoreAudio, through which Leopard plays sound, or OpenDirectory, the framework through which Leopard changes accounts. The full CoreFoundation, too, is closed: CF-Lite lacks, for example, `CFNotificationCenter`, which sends notifications between processes.
+None of Mac OS X's graphical system is in Darwin: not WindowServer, which draws the screen; not Quartz, its drawing engine; not Aqua, its look; not Cocoa (Foundation and AppKit), Carbon, or the applications built on them, from the Finder to loginwindow, the graphical login. Nor is CoreAudio, through which Leopard plays sound. The full CoreFoundation, too, is closed: CF-Lite lacks, for example, `CFNotificationCenter`, which sends notifications between processes.
 
 So the image has no graphical login, and its console login is getty's `login:` prompt instead of loginwindow ([Step 2](../steps/step-2-console-login.md)). It plays and records sound through its own small command, `openplay`, since CoreAudio and Leopard's `afplay` are closed ([D95](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d95)).
 
 ### Pieces of open projects
 
-Some open projects call into closed code: a framework that is not published, a tool that is, but on top of Foundation. Where they do, the project turns the feature off or works around it, and records it. DEVIATIONS.md has 26 such rows, of the kind `closed-dependency`: a feature turned off because it needs closed Apple code. A few examples:
+Some open projects call into closed code: a framework that is not published, a tool that is, but on top of Foundation. Where they do, the project turns the feature off or works around it, and records it. DEVIATIONS.md has 25 such rows, of the kind `closed-dependency`: a feature turned off because it needs closed Apple code. A few examples:
 
 - Libc's dtrace probes need dtrace's tools, which need Foundation and the closed Symbolication framework ([D12](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d12)).
 - launchd's SystemStarter, which runs the old start-up items, posts notifications through `CFNotificationCenter`, so it is not built ([D21](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d21)).
-- `passwd` and `chpass` change accounts through OpenDirectory, so they are not built either ([D44](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d44)).
+- OpenDirectory's Objective-C classes need Foundation, so its framework is built with its C interface only, which is all that `passwd`, `chpass` and the other programs that use it need ([D127](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d127)).
 - IOKitUser was published with 24 empty files where the closed HID event system would be ([D22](https://github.com/nyg/PowerDarwin/blob/master/DEVIATIONS.md#d22)).
 
 ### Drivers

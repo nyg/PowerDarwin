@@ -295,3 +295,8 @@ build rsync
 build zip
 build screen
 build nano
+prepare D126
+build CFOpenDirectory
+build OpenDirectory
+build system_cmds
+build pam_modules
