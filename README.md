@@ -24,14 +24,14 @@ The rules below give the details.
 ## Features
 
 - Boots to a `login:` prompt on the console, or to a single-user shell with `-v -s`, and takes SSH logins over Ethernet.
-- Everyday Unix commands, among them `grep`, `ps`, `less`, `vi`, `awk`, `tar`, `gzip`, `file`, `lsof`, `top` and `curl`, with syslogd writing `/var/log/system.log` and ntpd keeping the clock.
+- Everyday Unix commands, among them `grep`, `ps`, `less`, `vi`, `nano`, `awk`, `diff`, `patch`, `man`, `tar`, `gzip`, `bzip2`, `zip`, `file`, `lsof`, `top`, `screen`, `curl`, `rsync`, `nc`, `telnet`, `dig` and `crontab`, with syslogd writing `/var/log/system.log`, ntpd keeping the clock and cron running jobs.
 - Its own compilers, built from source, which build and link C and C++ programs, with Perl, Python, Ruby and Samba.
 - Mounts internal partitions, USB disks and CDs as they appear, and `bless` sets the startup disk.
 - Reads the clock from the hardware at boot, restarts and powers off, through open drivers for the iMac G5's SMU and QEMU's PMU.
 - On the iMac G5: plays sound through the built-in audio, drives the fans from the temperature sensors as quietly as Leopard, and keeps the GPU and the north bridge cooler at idle than Leopard does.
 - Boots cleanly: the network comes up without a 60-second wait, the clock is set at boot, and `/var/log/system.log` shows no errors.
 
-Not yet: Wi-Fi, graphics acceleration, sleep, FireWire devices (an open driver brings the bus up), booting from a USB key, and commands such as `cmp`, `diff` and `man`.
+Not yet: Wi-Fi, graphics acceleration, sleep, FireWire devices (an open driver brings the bus up), booting from a USB key, and some of Leopard's commands, such as `od`, `bc`, `sudo` and `zsh`.
 
 ## Credits
 
