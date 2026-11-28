@@ -282,3 +282,16 @@ build file
 build lsof
 build top
 build curl
+build gnudiff
+build patch_cmds
+build groff
+build man
+build netcat
+build libtelnet
+build remote_cmds
+build cron
+build bind9
+build rsync
+build zip
+build screen
+build nano
